@@ -20,5 +20,3 @@ jobs:
       run: |
         cd ./src/AutoConstructor.Generator
         dotnet build --configuration Release /nologo
-    - name: Push to GitHub package registry
-      run: dotnet nuget push .\artifacts\*.nupkg --source https://nuget.pkg.github.com/k94ll13nn3/index.json --api-key ${{ secrets.GITHUB_TOKEN }} --skip-duplicate --no-symbols true
