@@ -161,7 +161,7 @@ namespace {symbol.ContainingNamespace.ToDisplayString()}
 
                 if (type.TypeKind == TypeKind.Class || type.OriginalDefinition.SpecialType == SpecialType.System_Nullable_T)
                 {
-                    initializer = $"{initializer} ?? throw new ArgumentNullException(nameof({parameterName}));";
+                    initializer = $"{initializer} ?? throw new ArgumentNullException(nameof({parameterName}))";
                 }
 
                 return (type: typeDisplay, parameterName, fieldName: fieldSymbol!.Name, initializer);
