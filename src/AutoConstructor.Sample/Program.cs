@@ -23,7 +23,13 @@ namespace AutoConstructor.Sample
         private readonly DateTime? _date2;
 
         [AutoConstructorInject("guid.ToString()", "guid", typeof(Guid))]
-        private readonly string _fileName;
+        private readonly string _guidString;
+
+        [AutoConstructorInject("guid.ToString()", "guid", typeof(Guid))]
+        private readonly string _guidStringShared;
+
+        [AutoConstructorInject("name.ToString()", "name", typeof(string))]
+        private readonly string _nameShared;
 
         private readonly int _number;
 
@@ -36,7 +42,9 @@ namespace AutoConstructor.Sample
             Console.WriteLine(_uri);
             Console.WriteLine(_date);
             Console.WriteLine(_date2);
-            Console.WriteLine(_fileName);
+            Console.WriteLine(_guidString);
+            Console.WriteLine(_guidStringShared);
+            Console.WriteLine(_nameShared);
             Console.WriteLine(_number);
             Console.WriteLine(_length);
         }
