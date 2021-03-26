@@ -26,4 +26,4 @@ do not have the same type. It takes three parameters:
 When using `AutoConstructorInjectAttribute`, the parameter name can be shared across multiple fields,
 and even use a parameter from another field not annotated with `AutoConstructorInjectAttribute`, but type must match.
 
-Check [src\AutoConstructor.Sample\Program.cs](src\AutoConstructor.Sample\Program.cs) for additional examples.
+Check [src/AutoConstructor.Sample/Program.cs](src/AutoConstructor.Sample/Program.cs) for additional examples.
