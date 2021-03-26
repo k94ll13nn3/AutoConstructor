@@ -4,7 +4,6 @@
     <OutputType>Exe</OutputType>
     <TargetFramework>net5.0</TargetFramework>
     <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
-    <Nullable>disable</Nullable>
   </PropertyGroup>
 
   <ItemGroup>

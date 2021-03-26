@@ -6,7 +6,7 @@ namespace AutoConstructor.Sample
     {
         private static void Main()
         {
-            var test = new Test2("test", DateTime.Now, Guid.NewGuid(), 89, "valm");
+            var test = new Test2("test", DateTime.Now, Guid.NewGuid(), 89, "valm", new Data { Key = "key" });
             test.Dump();
         }
     }
@@ -36,6 +36,8 @@ namespace AutoConstructor.Sample
         [AutoConstructorInject("val.Length", "val", typeof(string))]
         private readonly int _length;
 
+        private readonly Data _data;
+
         public void Dump()
         {
             Console.WriteLine(_name);
@@ -47,6 +49,12 @@ namespace AutoConstructor.Sample
             Console.WriteLine(_nameShared);
             Console.WriteLine(_number);
             Console.WriteLine(_length);
+            Console.WriteLine(_data.Key);
         }
+    }
+
+    internal class Data
+    {
+        public string Key { get; set; } = "";
     }
 }
