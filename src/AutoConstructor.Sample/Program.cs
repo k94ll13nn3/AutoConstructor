@@ -25,10 +25,10 @@ namespace AutoConstructor.Sample
         [AutoConstructorInject("guid.ToString()", "guid", typeof(Guid))]
         private readonly string _guidString;
 
-        [AutoConstructorInject("guid.ToString()", "guid", typeof(Guid))]
-        private readonly string _guidStringShared;
+        [AutoConstructorInject("guid.ToString().Length", "guid", typeof(Guid))]
+        private readonly int _guidLength;
 
-        [AutoConstructorInject("name.ToString()", "name", typeof(string))]
+        [AutoConstructorInject("name.ToUpper()", "name", typeof(string))]
         private readonly string _nameShared;
 
         private readonly int _number;
@@ -45,7 +45,7 @@ namespace AutoConstructor.Sample
             Console.WriteLine(_date);
             Console.WriteLine(_date2);
             Console.WriteLine(_guidString);
-            Console.WriteLine(_guidStringShared);
+            Console.WriteLine(_guidLength);
             Console.WriteLine(_nameShared);
             Console.WriteLine(_number);
             Console.WriteLine(_length);
