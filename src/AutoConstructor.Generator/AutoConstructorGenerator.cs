@@ -136,7 +136,7 @@ namespace {symbol.ContainingNamespace.ToDisplayString()}
                 return attributeData is not null;
             }
 
-            FieldInfo GetFieldInfo(IFieldSymbol fieldSymbol)
+            (string Type, string ParameterName, string FieldName, string Initializer) GetFieldInfo(IFieldSymbol fieldSymbol)
             {
                 ITypeSymbol type = fieldSymbol!.Type;
                 string typeDisplay = type.ToDisplayString();

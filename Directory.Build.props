@@ -9,15 +9,15 @@
 
   <!-- https://github.com/dotnet/roslyn/issues/37876#issuecomment-738042719 -->
   <PropertyGroup>
-    <NoWarn>$(NoWarn);CA1014</NoWarn>
+    <NoWarn>$(NoWarn);CA1014;AD0001</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Roslynator.Analyzers" Version="3.1.0">
+    <PackageReference Include="Roslynator.Analyzers" Version="3.2.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="SonarAnalyzer.CSharp" Version="8.20.0.28934">
+    <PackageReference Include="SonarAnalyzer.CSharp" Version="8.24.0.32949">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
     </PackageReference>
