@@ -1,6 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
+    <Authors>k94ll13nn3</Authors>
     <TargetFramework>netstandard2.0</TargetFramework> <!-- Cannot use 2.1, see https://github.com/dotnet/roslyn/issues/47087 -->
     <PackageId>AutoConstructor</PackageId>
     <RepositoryUrl>https://github.com/k94ll13nn3/AutoConstructor</RepositoryUrl>
