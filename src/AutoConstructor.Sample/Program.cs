@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace AutoConstructor.Sample
 {
@@ -6,7 +7,7 @@ namespace AutoConstructor.Sample
     {
         private static void Main()
         {
-            var test = new Test2("test", DateTime.Now, Guid.NewGuid(), 89, "valm", new Data { Key = "key" });
+            var test = new Test2("test", DateTime.Now, Guid.NewGuid(), 89, "valm", new Data { Key = "key" }, new Data<DateTime> { Items = { DateTime.Now } });
             test.Dump();
         }
     }
@@ -15,8 +16,11 @@ namespace AutoConstructor.Sample
     internal partial class Test2
     {
         private readonly string _name;
+
+        // Won't be injected
         private readonly Uri _uri = new("/non-modified", UriKind.Relative);
 
+        // Won't be injected
         [AutoConstructorIgnore]
         private readonly DateTime _date;
 
@@ -38,6 +42,11 @@ namespace AutoConstructor.Sample
 
         private readonly Data _data;
 
+        private readonly Data<DateTime> _items;
+
+        // Won't be injected
+        private int? _toto;
+
         public void Dump()
         {
             Console.WriteLine(_name);
@@ -50,11 +59,18 @@ namespace AutoConstructor.Sample
             Console.WriteLine(_number);
             Console.WriteLine(_length);
             Console.WriteLine(_data.Key);
+            Console.WriteLine(_items.Items.Count);
+            Console.WriteLine(_toto is null);
         }
     }
 
     internal class Data
     {
         public string Key { get; set; } = "";
+    }
+
+    internal class Data<T> : Data
+    {
+        public IList<T> Items { get; init; } = new List<T>();
     }
 }
