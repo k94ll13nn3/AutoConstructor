@@ -84,7 +84,7 @@ public sealed class {InjectAttributeFullName} : Attribute
                     {
                         var diagnostic = new DiagnosticDescriptor(
                             "ACONS01",
-                            "Couldn't generate consctructor",
+                            "Couldn't generate constructor",
                             $"Type decorated with {AttributeName} must be also declared partial",
                             "AutoConstructor",
                             DiagnosticSeverity.Error,
