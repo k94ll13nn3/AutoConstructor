@@ -12,13 +12,6 @@ namespace AutoConstructor.Sample
         }
     }
 
-    // This code will generate an error because the partial is missing
-    //[AutoConstructor]
-    //internal class Test
-    //{
-
-    //}
-
     [AutoConstructor]
     internal partial class Test2
     {

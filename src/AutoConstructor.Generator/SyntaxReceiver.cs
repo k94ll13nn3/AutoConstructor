@@ -11,7 +11,7 @@ namespace AutoConstructor.Generator
     /// </summary>
     internal class SyntaxReceiver : ISyntaxReceiver
     {
-        public List<(ClassDeclarationSyntax candidateClass, bool isPartial)> CandidateClasses { get; } = new List<(ClassDeclarationSyntax, bool)>();
+        public List<ClassDeclarationSyntax> CandidateClasses { get; } = new List<ClassDeclarationSyntax>();
 
         /// <summary>
         /// Called for every syntax node in the compilation, we can inspect the nodes and save any information useful for generation.
@@ -23,11 +23,12 @@ namespace AutoConstructor.Generator
             // - with the "partial" keyword
             // - with the wanted attribute
             if (syntaxNode is ClassDeclarationSyntax classDeclarationSyntax
+                && classDeclarationSyntax.Modifiers.Any(SyntaxKind.PartialKeyword)
                 && classDeclarationSyntax.AttributeLists.Any(a =>
                     a.Attributes.Any(b =>
                         b.Name.ToString() == AutoConstructorGenerator.AttributeName || b.Name.ToString() == AutoConstructorGenerator.AttributeFullName)))
             {
-                CandidateClasses.Add((classDeclarationSyntax, classDeclarationSyntax.Modifiers.Any(SyntaxKind.PartialKeyword)));
+                CandidateClasses.Add(classDeclarationSyntax);
             }
         }
     }

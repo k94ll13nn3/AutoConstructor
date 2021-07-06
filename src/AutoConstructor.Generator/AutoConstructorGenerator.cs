@@ -73,26 +73,13 @@ public sealed class {InjectAttributeFullName} : Attribute
                 .AddSyntaxTrees(CSharpSyntaxTree.ParseText(SourceText.From(IgnoreAttributeText, Encoding.UTF8), options))
                 .AddSyntaxTrees(CSharpSyntaxTree.ParseText(SourceText.From(InjectAttributeText, Encoding.UTF8), options));
 
-            foreach ((ClassDeclarationSyntax candidateClass, bool isPartial) in receiver.CandidateClasses)
+            foreach (ClassDeclarationSyntax candidateClass in receiver.CandidateClasses)
             {
                 SemanticModel model = compilation.GetSemanticModel(candidateClass.SyntaxTree);
                 INamedTypeSymbol? symbol = model.GetDeclaredSymbol(candidateClass);
 
                 if (symbol is not null)
                 {
-                    if (!isPartial)
-                    {
-                        var diagnostic = new DiagnosticDescriptor(
-                            "ACONS01",
-                            "Couldn't generate constructor",
-                            $"Type decorated with {AttributeName} must be also declared partial",
-                            "AutoConstructor",
-                            DiagnosticSeverity.Error,
-                            true);
-                        context.ReportDiagnostic(Diagnostic.Create(diagnostic, symbol.Locations[0], symbol.Name, symbol.ContainingNamespace.ToString()));
-                        continue;
-                    }
-
                     string namespaceName = symbol.ContainingNamespace.ToDisplayString();
                     string source = GenerateAutoConstructor(symbol, compilation);
                     context.AddSource($"{namespaceName}.{symbol.Name}.g.cs", SourceText.From(source, Encoding.UTF8));
