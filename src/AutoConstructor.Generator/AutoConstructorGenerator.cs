@@ -91,7 +91,10 @@ public sealed class {InjectAttributeFullName} : Attribute
                         filename = $"{symbol.ContainingNamespace.ToDisplayString()}.{filename}";
                     }
                     string source = GenerateAutoConstructor(symbol, compilation);
-                    context.AddSource(filename, SourceText.From(source, Encoding.UTF8));
+                    if (!string.IsNullOrWhiteSpace(source))
+                    {
+                        context.AddSource(filename, SourceText.From(source, Encoding.UTF8));
+                    }
                 }
             }
         }
@@ -111,6 +114,11 @@ public sealed class {InjectAttributeFullName} : Attribute
                 .Where(x => x.CanBeReferencedByName && !x.IsStatic && x.IsReadOnly && !IsInitialized(x) && !HasIgnoreAttribute(x))
                 .Select(GetFieldInfo)
                 .ToList();
+
+            if (fields.Count == 0)
+            {
+                return string.Empty;
+            }
 
             var constructorParameters = fields.GroupBy(x => x.ParameterName).Select(x => x.First()).ToList();
 
