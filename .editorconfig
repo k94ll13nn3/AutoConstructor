@@ -172,7 +172,6 @@ csharp_space_between_square_brackets = false
 
 dotnet_diagnostic.RCS1197.severity = none
 
-
 [tests/**/*.cs]
 dotnet_diagnostic.CA2007.severity = none
 dotnet_diagnostic.RCS1090.severity = none
