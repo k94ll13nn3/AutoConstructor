@@ -177,3 +177,4 @@ dotnet_diagnostic.CA2007.severity = none
 dotnet_diagnostic.RCS1090.severity = none
 dotnet_diagnostic.IDE1006.severity = none
 dotnet_diagnostic.CA1707.severity = none
+dotnet_diagnostic.CA1000.severity = none

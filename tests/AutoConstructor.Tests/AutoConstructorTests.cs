@@ -1,13 +1,17 @@
 ﻿using System.Text;
 using System.Threading.Tasks;
 using AutoConstructor.Generator;
+using Microsoft.CodeAnalysis.Testing;
 using Microsoft.CodeAnalysis.Text;
 using Xunit;
-using VerifyCS = AutoConstructor.Tests.Verifiers.CSharpSourceGeneratorVerifier<AutoConstructor.Generator.AutoConstructorGenerator>;
+using VerifyCodeFix = AutoConstructor.Tests.Verifiers.CSharpCodeFixVerifier<
+    AutoConstructor.Generator.AutoConstructorAnalyzer,
+    AutoConstructor.Generator.AutoConstructorCodeFixProvider>;
+using VerifySourceGenerator = AutoConstructor.Tests.Verifiers.CSharpSourceGeneratorVerifier<AutoConstructor.Generator.AutoConstructorGenerator>;
 
 namespace AutoConstructor.Tests
 {
-    public class AutoConstructorGeneratorTests
+    public class AutoConstructorTests
     {
         [Fact]
         public async Task Run_WithAttributeAndPartial_ShouldGenerateClass()
@@ -33,7 +37,7 @@ namespace Test
     }
 }
 ";
-            await new VerifyCS.Test
+            await new VerifySourceGenerator.Test
             {
                 TestState =
                 {
@@ -62,7 +66,7 @@ namespace Test
     }
 }";
 
-            await new VerifyCS.Test
+            await new VerifySourceGenerator.Test
             {
                 TestState =
                 {
@@ -96,7 +100,7 @@ partial class Test
 }
 ";
 
-            await new VerifyCS.Test
+            await new VerifySourceGenerator.Test
             {
                 TestState =
                 {
@@ -110,6 +114,60 @@ partial class Test
                     }
                 }
             }.RunAsync();
+        }
+
+        [Fact]
+        public async Task Analyzer_ClassWithoutPartial_ShouldReportDiagnostic()
+        {
+            const string test = @"
+namespace Test
+{
+    [AutoConstructor]
+    internal class {|#0:Test|}
+    {
+        private readonly int _t;
+    }
+}";
+
+            // The two CS0246 are because the attribute is not known because the generator is not running.
+            DiagnosticResult[] expected = new[] {
+                VerifyCodeFix.Diagnostic("ACONS01").WithLocation(0),
+                DiagnosticResult.CompilerError("CS0246").WithSpan(4, 6, 4, 21).WithArguments("AutoConstructor"),
+                DiagnosticResult.CompilerError("CS0246").WithSpan(4, 6, 4, 21).WithArguments("AutoConstructorAttribute"),
+            };
+            await VerifyCodeFix.VerifyAnalyzerAsync(test, expected);
+        }
+
+        [Fact]
+        public async Task CodeFix_ClassWithoutPartial_ShouldFixCode()
+        {
+            const string test = @"
+namespace Test
+{
+    [AutoConstructor]
+    internal class {|#0:Test|}
+    {
+        private readonly int _t;
+    }
+}";
+
+            const string fixtest = @"
+namespace Test
+{
+    [AutoConstructor]
+    internal partial class Test
+    {
+        private readonly int _t;
+    }
+}";
+
+            // The two CS0246 are because the attribute is not known because the generator is not running.
+            DiagnosticResult[] expected = new[] {
+                VerifyCodeFix.Diagnostic("ACONS01").WithLocation(0),
+                DiagnosticResult.CompilerError("CS0246").WithSpan(4, 6, 4, 21).WithArguments("AutoConstructor"),
+                DiagnosticResult.CompilerError("CS0246").WithSpan(4, 6, 4, 21).WithArguments("AutoConstructorAttribute"),
+            };
+            await VerifyCodeFix.VerifyCodeFixAsync(test, expected, fixtest);
         }
     }
 }

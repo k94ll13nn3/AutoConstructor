@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Immutable;
-using Microsoft.CodeAnalysis;
+﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Testing;
 using Microsoft.CodeAnalysis.Testing.Verifiers;
@@ -17,19 +15,12 @@ namespace AutoConstructor.Tests.Verifiers
             protected override CompilationOptions CreateCompilationOptions()
             {
                 CompilationOptions compilationOptions = base.CreateCompilationOptions();
-                return compilationOptions.WithSpecificDiagnosticOptions(compilationOptions.SpecificDiagnosticOptions.SetItems(GetNullableWarningsFromCompiler()));
+                return compilationOptions.WithSpecificDiagnosticOptions(compilationOptions.SpecificDiagnosticOptions.SetItems(CSharpVerifierHelper.NullableWarnings));
             }
 
             protected override ParseOptions CreateParseOptions()
             {
                 return ((CSharpParseOptions)base.CreateParseOptions()).WithLanguageVersion(LanguageVersion);
-            }
-
-            private static ImmutableDictionary<string, ReportDiagnostic> GetNullableWarningsFromCompiler()
-            {
-                string[] args = { "/warnaserror:nullable" };
-                CSharpCommandLineArguments commandLineArguments = CSharpCommandLineParser.Default.Parse(args, Environment.CurrentDirectory, Environment.CurrentDirectory);
-                return commandLineArguments.CompilationOptions.SpecificDiagnosticOptions;
             }
         }
     }
