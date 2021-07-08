@@ -12,7 +12,7 @@ For any class where the generator will be used:
 - Mark the class as `partial`
 - Use `AutoConstructorAttribute` on the class
 
-By default, all `private readonly` without initialization will be used.
+By default, all `private readonly` without initialization will be used. The will be injected with the same name without any leading `_`.
 
 Fields marked with `AutoConstructorIgnoreAttribute` will be ignored.
 
@@ -26,4 +26,40 @@ do not have the same type. It takes three parameters:
 When using `AutoConstructorInjectAttribute`, the parameter name can be shared across multiple fields,
 and even use a parameter from another field not annotated with `AutoConstructorInjectAttribute`, but type must match.
 
-Check [src/AutoConstructor.Sample/Program.cs](src/AutoConstructor.Sample/Program.cs) for additional examples.
+## Sample
+
+``` csharp
+[AutoConstructor]
+partial class Test
+{
+    private readonly string _name;
+
+    // Won't be injected
+    private readonly Uri _uri = new("/non-modified", UriKind.Relative);
+
+    // Won't be injected
+    [AutoConstructorIgnore]
+    private readonly DateTime _date;
+
+    // Won't be injected
+    private int? _toto;
+
+    // Support for nullables
+    private readonly DateTime? _date2;
+
+    // Support for generics
+    private readonly Data<DateTime> _items;
+
+    // Inject with custom initializer
+    [AutoConstructorInject("guid.ToString()", "guid", typeof(Guid))]
+    private readonly string _guidString;
+
+    // Use existing parameter defined with AutoConstructorInject
+    [AutoConstructorInject("guid.ToString().Length", "guid", typeof(Guid))]
+    private readonly int _guidLength;
+
+    // Use existing parameter from a basic injection
+    [AutoConstructorInject("name.ToUpper()", "name", typeof(string))]
+    private readonly string _nameShared;
+}
+```
