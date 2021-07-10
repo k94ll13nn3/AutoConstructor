@@ -5,8 +5,8 @@ using Microsoft.CodeAnalysis.Testing;
 using Microsoft.CodeAnalysis.Text;
 using Xunit;
 using VerifyCodeFix = AutoConstructor.Tests.Verifiers.CSharpCodeFixVerifier<
-    AutoConstructor.Generator.AutoConstructorAnalyzer,
-    AutoConstructor.Generator.AutoConstructorCodeFixProvider>;
+    AutoConstructor.Generator.ClassWithoutPartialAnalyzer,
+    AutoConstructor.Generator.ClassWithoutPartialCodeFixProvider>;
 using VerifySourceGenerator = AutoConstructor.Tests.Verifiers.CSharpSourceGeneratorVerifier<AutoConstructor.Generator.AutoConstructorGenerator>;
 
 namespace AutoConstructor.Tests

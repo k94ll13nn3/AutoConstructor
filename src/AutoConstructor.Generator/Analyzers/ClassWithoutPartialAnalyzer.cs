@@ -9,14 +9,14 @@ using Microsoft.CodeAnalysis.Diagnostics;
 namespace AutoConstructor.Generator
 {
     [DiagnosticAnalyzer(LanguageNames.CSharp)]
-    public class AutoConstructorAnalyzer : DiagnosticAnalyzer
+    public class ClassWithoutPartialAnalyzer : DiagnosticAnalyzer
     {
         public const string DiagnosticId = "ACONS01";
 
         private static readonly DiagnosticDescriptor Rule = new(
             DiagnosticId,
-            "Couldn't generate consctructo",
-            $"Type decorated with {AutoConstructorGenerator.AttributeName} must be also declared partial",
+            "Couldn't generate consctructor",
+            $"Type decorated with {AutoConstructorGenerator.AttributeFullName} must be also declared partial",
             "Usage",
             DiagnosticSeverity.Error,
             true);

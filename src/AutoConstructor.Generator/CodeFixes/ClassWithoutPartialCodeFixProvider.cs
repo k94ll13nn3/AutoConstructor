@@ -13,10 +13,10 @@ using Microsoft.CodeAnalysis.Text;
 
 namespace AutoConstructor.Generator
 {
-    [ExportCodeFixProvider(LanguageNames.CSharp, Name = nameof(AutoConstructorCodeFixProvider)), Shared]
-    public class AutoConstructorCodeFixProvider : CodeFixProvider
+    [ExportCodeFixProvider(LanguageNames.CSharp, Name = nameof(ClassWithoutPartialCodeFixProvider)), Shared]
+    public class ClassWithoutPartialCodeFixProvider : CodeFixProvider
     {
-        public sealed override ImmutableArray<string> FixableDiagnosticIds => ImmutableArray.Create(AutoConstructorAnalyzer.DiagnosticId);
+        public sealed override ImmutableArray<string> FixableDiagnosticIds => ImmutableArray.Create(ClassWithoutPartialAnalyzer.DiagnosticId);
 
         public sealed override FixAllProvider GetFixAllProvider()
         {

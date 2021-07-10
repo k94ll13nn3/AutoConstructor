@@ -5,3 +5,4 @@
 Rule ID | Category | Severity | Notes
 --------|----------|----------|-------
 ACONS01 | Usage | Error | AutoConstructorAnalyzer
+ACONS02 | Usage | Warning | ClassWithoutFieldsToInjectAnalyzer
