@@ -28,6 +28,8 @@ and even use a parameter from another field not annotated with `AutoConstructorI
 
 ## Sample
 
+The following code
+
 ``` csharp
 [AutoConstructor]
 partial class Test
@@ -35,20 +37,20 @@ partial class Test
     private readonly string _name;
 
     // Won't be injected
-    private readonly Uri _uri = new("/non-modified", UriKind.Relative);
+    private readonly Uri _uri = new Uri("/non-modified", UriKind.Relative);
 
     // Won't be injected
     [AutoConstructorIgnore]
-    private readonly DateTime _date;
+    private readonly DateTime _dateNotTaken;
 
     // Won't be injected
     private int? _toto;
 
     // Support for nullables
-    private readonly DateTime? _date2;
+    private readonly DateTime? _date;
 
     // Support for generics
-    private readonly Data<DateTime> _items;
+    private readonly List<DateTime> _items;
 
     // Inject with custom initializer
     [AutoConstructorInject("guid.ToString()", "guid", typeof(Guid))]
@@ -61,5 +63,19 @@ partial class Test
     // Use existing parameter from a basic injection
     [AutoConstructorInject("name.ToUpper()", "name", typeof(string))]
     private readonly string _nameShared;
+}
+```
+
+will generate
+
+```csharp
+public Test(string name, System.DateTime? date, System.Collections.Generic.List<System.DateTime> items, System.Guid guid)
+{
+    this._name = name ?? throw new System.ArgumentNullException(nameof(name));
+    this._date = date ?? throw new System.ArgumentNullException(nameof(date));
+    this._items = items ?? throw new System.ArgumentNullException(nameof(items));
+    this._guidString = guid.ToString() ?? throw new System.ArgumentNullException(nameof(guid));
+    this._guidLength = guid.ToString().Length;
+    this._nameShared = name.ToUpper() ?? throw new System.ArgumentNullException(nameof(name));
 }
 ```

@@ -4,9 +4,12 @@ using AutoConstructor.Generator;
 using Microsoft.CodeAnalysis.Testing;
 using Microsoft.CodeAnalysis.Text;
 using Xunit;
-using VerifyCodeFix = AutoConstructor.Tests.Verifiers.CSharpCodeFixVerifier<
+using VerifyClassWithoutPartial = AutoConstructor.Tests.Verifiers.CSharpCodeFixVerifier<
     AutoConstructor.Generator.ClassWithoutPartialAnalyzer,
     AutoConstructor.Generator.ClassWithoutPartialCodeFixProvider>;
+using VerifyClassWithoutFieldsToInject = AutoConstructor.Tests.Verifiers.CSharpCodeFixVerifier<
+    AutoConstructor.Generator.ClassWithoutFieldsToInjectAnalyzer,
+    AutoConstructor.Generator.ClassWithoutFieldsToInjectCodeFixProvider>;
 using VerifySourceGenerator = AutoConstructor.Tests.Verifiers.CSharpSourceGeneratorVerifier<AutoConstructor.Generator.AutoConstructorGenerator>;
 
 namespace AutoConstructor.Tests
@@ -44,9 +47,9 @@ namespace Test
                     Sources = { code },
                     GeneratedSources =
                     {
-                        (typeof(AutoConstructorGenerator), "AutoConstructorAttribute.cs", SourceText.From(AutoConstructorGenerator.AttributeText, Encoding.UTF8)),
-                        (typeof(AutoConstructorGenerator), "AutoConstructorIgnoreAttribute.cs", SourceText.From(AutoConstructorGenerator.IgnoreAttributeText, Encoding.UTF8)),
-                        (typeof(AutoConstructorGenerator), "AutoConstructorInjectAttribute.cs", SourceText.From(AutoConstructorGenerator.InjectAttributeText, Encoding.UTF8)),
+                        (typeof(AutoConstructorGenerator), "AutoConstructorAttribute.cs", SourceText.From(Source.AttributeText, Encoding.UTF8)),
+                        (typeof(AutoConstructorGenerator), "AutoConstructorIgnoreAttribute.cs", SourceText.From(Source.IgnoreAttributeText, Encoding.UTF8)),
+                        (typeof(AutoConstructorGenerator), "AutoConstructorInjectAttribute.cs", SourceText.From(Source.InjectAttributeText, Encoding.UTF8)),
                         (typeof(AutoConstructorGenerator), "Test.Test.g.cs", SourceText.From(generated, Encoding.UTF8)),
                     }
                 }
@@ -71,9 +74,9 @@ namespace Test
                     Sources = { code },
                     GeneratedSources =
                     {
-                        (typeof(AutoConstructorGenerator), "AutoConstructorAttribute.cs", SourceText.From(AutoConstructorGenerator.AttributeText, Encoding.UTF8)),
-                        (typeof(AutoConstructorGenerator), "AutoConstructorIgnoreAttribute.cs", SourceText.From(AutoConstructorGenerator.IgnoreAttributeText, Encoding.UTF8)),
-                        (typeof(AutoConstructorGenerator), "AutoConstructorInjectAttribute.cs", SourceText.From(AutoConstructorGenerator.InjectAttributeText, Encoding.UTF8)),
+                        (typeof(AutoConstructorGenerator), "AutoConstructorAttribute.cs", SourceText.From(Source.AttributeText, Encoding.UTF8)),
+                        (typeof(AutoConstructorGenerator), "AutoConstructorIgnoreAttribute.cs", SourceText.From(Source.IgnoreAttributeText, Encoding.UTF8)),
+                        (typeof(AutoConstructorGenerator), "AutoConstructorInjectAttribute.cs", SourceText.From(Source.InjectAttributeText, Encoding.UTF8)),
                     }
                 }
             }.RunAsync();
@@ -99,9 +102,9 @@ namespace Test
                     Sources = { code },
                     GeneratedSources =
                     {
-                        (typeof(AutoConstructorGenerator), "AutoConstructorAttribute.cs", SourceText.From(AutoConstructorGenerator.AttributeText, Encoding.UTF8)),
-                        (typeof(AutoConstructorGenerator), "AutoConstructorIgnoreAttribute.cs", SourceText.From(AutoConstructorGenerator.IgnoreAttributeText, Encoding.UTF8)),
-                        (typeof(AutoConstructorGenerator), "AutoConstructorInjectAttribute.cs", SourceText.From(AutoConstructorGenerator.InjectAttributeText, Encoding.UTF8)),
+                        (typeof(AutoConstructorGenerator), "AutoConstructorAttribute.cs", SourceText.From(Source.AttributeText, Encoding.UTF8)),
+                        (typeof(AutoConstructorGenerator), "AutoConstructorIgnoreAttribute.cs", SourceText.From(Source.IgnoreAttributeText, Encoding.UTF8)),
+                        (typeof(AutoConstructorGenerator), "AutoConstructorInjectAttribute.cs", SourceText.From(Source.InjectAttributeText, Encoding.UTF8)),
                     }
                 }
             }.RunAsync();
@@ -133,9 +136,9 @@ partial class Test
                     Sources = { code },
                     GeneratedSources =
                     {
-                        (typeof(AutoConstructorGenerator), "AutoConstructorAttribute.cs", SourceText.From(AutoConstructorGenerator.AttributeText, Encoding.UTF8)),
-                        (typeof(AutoConstructorGenerator), "AutoConstructorIgnoreAttribute.cs", SourceText.From(AutoConstructorGenerator.IgnoreAttributeText, Encoding.UTF8)),
-                        (typeof(AutoConstructorGenerator), "AutoConstructorInjectAttribute.cs", SourceText.From(AutoConstructorGenerator.InjectAttributeText, Encoding.UTF8)),
+                        (typeof(AutoConstructorGenerator), "AutoConstructorAttribute.cs", SourceText.From(Source.AttributeText, Encoding.UTF8)),
+                        (typeof(AutoConstructorGenerator), "AutoConstructorIgnoreAttribute.cs", SourceText.From(Source.IgnoreAttributeText, Encoding.UTF8)),
+                        (typeof(AutoConstructorGenerator), "AutoConstructorInjectAttribute.cs", SourceText.From(Source.InjectAttributeText, Encoding.UTF8)),
                         (typeof(AutoConstructorGenerator), "Test.g.cs", SourceText.From(generated, Encoding.UTF8)),
                     }
                 }
@@ -157,11 +160,11 @@ namespace Test
 
             // The two CS0246 are because the attribute is not known because the generator is not running.
             DiagnosticResult[] expected = new[] {
-                VerifyCodeFix.Diagnostic("ACONS01").WithLocation(0),
+                VerifyClassWithoutPartial.Diagnostic("ACONS01").WithLocation(0),
                 DiagnosticResult.CompilerError("CS0246").WithSpan(4, 6, 4, 21).WithArguments("AutoConstructor"),
                 DiagnosticResult.CompilerError("CS0246").WithSpan(4, 6, 4, 21).WithArguments("AutoConstructorAttribute"),
             };
-            await VerifyCodeFix.VerifyAnalyzerAsync(test, expected);
+            await VerifyClassWithoutPartial.VerifyAnalyzerAsync(test, expected);
         }
 
         [Fact]
@@ -189,11 +192,60 @@ namespace Test
 
             // The two CS0246 are because the attribute is not known because the generator is not running.
             DiagnosticResult[] expected = new[] {
-                VerifyCodeFix.Diagnostic("ACONS01").WithLocation(0),
+                VerifyClassWithoutPartial.Diagnostic("ACONS01").WithLocation(0),
                 DiagnosticResult.CompilerError("CS0246").WithSpan(4, 6, 4, 21).WithArguments("AutoConstructor"),
                 DiagnosticResult.CompilerError("CS0246").WithSpan(4, 6, 4, 21).WithArguments("AutoConstructorAttribute"),
             };
-            await VerifyCodeFix.VerifyCodeFixAsync(test, expected, fixtest);
+            await VerifyClassWithoutPartial.VerifyCodeFixAsync(test, expected, fixtest);
+        }
+
+        [Fact]
+        public async Task Analyzer_ClassWithoutFieldsToInject_ShouldReportDiagnostic()
+        {
+            const string test = @"
+namespace Test
+{
+    [{|#0:AutoConstructor|}]
+    internal partial class Test
+    {
+    }
+}";
+
+            // The two CS0246 are because the attribute is not known because the generator is not running.
+            DiagnosticResult[] expected = new[] {
+                VerifyClassWithoutFieldsToInject.Diagnostic("ACONS02").WithLocation(0),
+                DiagnosticResult.CompilerError("CS0246").WithSpan(4, 6, 4, 21).WithArguments("AutoConstructor"),
+                DiagnosticResult.CompilerError("CS0246").WithSpan(4, 6, 4, 21).WithArguments("AutoConstructorAttribute"),
+            };
+            await VerifyClassWithoutFieldsToInject.VerifyAnalyzerAsync(test, expected);
+        }
+
+        [Fact]
+        public async Task Analyzer_ClassWithoutFieldsToInject_ShouldFixCode()
+        {
+            const string test = @"
+namespace Test
+{
+    [{|#0:AutoConstructor|}]
+    internal partial class Test
+    {
+    }
+}";
+            const string fixtest = @"
+namespace Test
+{
+    internal partial class Test
+    {
+    }
+}";
+
+            // The two CS0246 are because the attribute is not known because the generator is not running.
+            DiagnosticResult[] expected = new[] {
+                VerifyClassWithoutFieldsToInject.Diagnostic("ACONS02").WithLocation(0),
+                DiagnosticResult.CompilerError("CS0246").WithSpan(4, 6, 4, 21).WithArguments("AutoConstructor"),
+                DiagnosticResult.CompilerError("CS0246").WithSpan(4, 6, 4, 21).WithArguments("AutoConstructorAttribute"),
+            };
+            await VerifyClassWithoutFieldsToInject.VerifyCodeFixAsync(test, expected, fixtest);
         }
     }
 }

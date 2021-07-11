@@ -26,7 +26,7 @@ namespace AutoConstructor.Generator
                 && classDeclarationSyntax.Modifiers.Any(SyntaxKind.PartialKeyword)
                 && classDeclarationSyntax.AttributeLists.Any(a =>
                     a.Attributes.Any(b =>
-                        b.Name.ToString() == AutoConstructorGenerator.AttributeName || b.Name.ToString() == AutoConstructorGenerator.AttributeFullName)))
+                        b.Name.ToString() == Source.AttributeName || b.Name.ToString() == Source.AttributeFullName)))
             {
                 CandidateClasses.Add(classDeclarationSyntax);
             }

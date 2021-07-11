@@ -16,12 +16,15 @@ namespace AutoConstructor.Generator
         private static readonly DiagnosticDescriptor Rule = new(
             DiagnosticId,
             "Couldn't generate consctructor",
-            $"Type decorated with {AutoConstructorGenerator.AttributeFullName} must be also declared partial",
+            $"Type decorated with {Source.AttributeFullName} must be also declared partial",
             "Usage",
             DiagnosticSeverity.Error,
-            true);
+            true,
+            null,
+            "https://github.com/k94ll13nn3/AutoConstructor/tree/main/src/AutoConstructor.Generator/Analyzers/ClassWithoutPartialAnalyzer.cs",
+            WellKnownDiagnosticTags.Build);
 
-        public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get { return ImmutableArray.Create(Rule); } }
+        public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => ImmutableArray.Create(Rule);
 
         public override void Initialize(AnalysisContext context)
         {
@@ -38,7 +41,7 @@ namespace AutoConstructor.Generator
             if (context.Node is ClassDeclarationSyntax classDeclarationSyntax
                 && classDeclarationSyntax.AttributeLists.Any(a =>
                     a.Attributes.Any(b =>
-                        b.Name.ToString() == AutoConstructorGenerator.AttributeName || b.Name.ToString() == AutoConstructorGenerator.AttributeFullName))
+                        b.Name.ToString() == Source.AttributeName || b.Name.ToString() == Source.AttributeFullName))
                 && !classDeclarationSyntax.Modifiers.Any(SyntaxKind.PartialKeyword))
             {
                 var diagnostic = Diagnostic.Create(Rule, classDeclarationSyntax.Identifier.GetLocation());

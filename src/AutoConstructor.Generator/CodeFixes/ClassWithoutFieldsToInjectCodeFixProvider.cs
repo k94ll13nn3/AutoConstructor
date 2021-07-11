@@ -34,9 +34,9 @@ namespace AutoConstructor.Generator
             {
                 context.RegisterCodeFix(
                     CodeAction.Create(
-                        title: $"Remove {AutoConstructorGenerator.AttributeFullName}",
+                        title: $"Remove {Source.AttributeFullName}",
                         createChangedDocument: c => RemoveAttributeAsync(context.Document, declaration, c),
-                        equivalenceKey: $"Remove {AutoConstructorGenerator.AttributeFullName}"),
+                        equivalenceKey: $"Remove {Source.AttributeFullName}"),
                     diagnostic);
             }
         }

@@ -2,7 +2,6 @@
 using System.Collections.Immutable;
 using System.Linq;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
 
 namespace AutoConstructor.Generator
@@ -14,13 +13,16 @@ namespace AutoConstructor.Generator
 
         private static readonly DiagnosticDescriptor Rule = new(
             DiagnosticId,
-            $"Remove {AutoConstructorGenerator.AttributeFullName}",
-            $"{AutoConstructorGenerator.AttributeFullName} is not needed on class without fields to inject",
+            $"Remove {Source.AttributeFullName}",
+            $"{Source.AttributeFullName} is not needed on class without fields to inject",
             "Usage",
-            DiagnosticSeverity.Warning,
-            true);
+            DiagnosticSeverity.Hidden,
+            true,
+            null,
+            "https://github.com/k94ll13nn3/AutoConstructor/tree/main/src/AutoConstructor.Generator/Analyzers/ClassWithoutFieldsToInjectAnalyzer.cs",
+            WellKnownDiagnosticTags.Unnecessary);
 
-        public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get { return ImmutableArray.Create(Rule); } }
+        public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => ImmutableArray.Create(Rule);
 
         public override void Initialize(AnalysisContext context)
         {
@@ -36,10 +38,10 @@ namespace AutoConstructor.Generator
         {
             var symbol = (INamedTypeSymbol)context.Symbol;
 
-            if (HasAttribute(symbol) is AttributeData attr)
+            if (symbol.GetAttribute(Source.AttributeFullName, context.Compilation) is AttributeData attr)
             {
                 var fields = symbol.GetMembers().OfType<IFieldSymbol>()
-                    .Where(x => x.CanBeReferencedByName && !x.IsStatic && x.IsReadOnly && !IsInitialized(x) && !HasIgnoreAttribute(x))
+                    .Where(x => x.CanBeReferencedByName && !x.IsStatic && x.IsReadOnly && !x.IsInitialized() && !x.HasAttribute(Source.IgnoreAttributeFullName, context.Compilation))
                     .ToList();
 
                 if (fields.Count == 0)
@@ -48,28 +50,10 @@ namespace AutoConstructor.Generator
                     if (propertyTypeIdentifier is not null)
                     {
                         var location = Location.Create(propertyTypeIdentifier.SyntaxTree, propertyTypeIdentifier.Span);
-                        var diagnostic = Diagnostic.Create(Rule, location, symbol.Name);
+                        var diagnostic = Diagnostic.Create(Rule, location);
                         context.ReportDiagnostic(diagnostic);
                     }
                 }
-            }
-
-            AttributeData? HasAttribute(ISymbol symbol)
-            {
-                INamedTypeSymbol? ignoreAttributeSymbol = context.Compilation.GetTypeByMetadataName(AutoConstructorGenerator.AttributeFullName);
-                return symbol?.GetAttributes().FirstOrDefault(ad => ad.AttributeClass?.Equals(ignoreAttributeSymbol, SymbolEqualityComparer.Default) == true);
-            }
-
-            static bool IsInitialized(IFieldSymbol symbol)
-            {
-                return (symbol.DeclaringSyntaxReferences.FirstOrDefault()?.GetSyntax() as VariableDeclaratorSyntax)?.Initializer != null;
-            }
-
-            bool HasIgnoreAttribute(IFieldSymbol symbol)
-            {
-                INamedTypeSymbol? ignoreAttributeSymbol = context.Compilation.GetTypeByMetadataName(AutoConstructorGenerator.IgnoreAttributeFullName);
-                AttributeData? attributeData = symbol?.GetAttributes().FirstOrDefault(ad => ad.AttributeClass?.Equals(ignoreAttributeSymbol, SymbolEqualityComparer.Default) == true);
-                return attributeData is not null;
             }
         }
     }
