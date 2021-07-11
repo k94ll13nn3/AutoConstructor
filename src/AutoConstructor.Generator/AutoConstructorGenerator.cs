@@ -17,10 +17,13 @@ namespace AutoConstructor.Generator
                 return;
             }
 
+            // Add attributes to context to be generated.
             context.AddSource(Source.AttributeFullName, SourceText.From(Source.AttributeText, Encoding.UTF8));
             context.AddSource(Source.IgnoreAttributeFullName, SourceText.From(Source.IgnoreAttributeText, Encoding.UTF8));
             context.AddSource(Source.InjectAttributeFullName, SourceText.From(Source.InjectAttributeText, Encoding.UTF8));
-            CSharpParseOptions? options = (context.Compilation as CSharpCompilation)?.SyntaxTrees[0].Options as CSharpParseOptions;
+
+            // Add attributes to context to be able to be read with GetTypeByMetadataName on the compilation or to get constructor arguments.
+            CSharpParseOptions? options = context.ParseOptions as CSharpParseOptions;
             Compilation compilation = context.Compilation
                 .AddSyntaxTrees(CSharpSyntaxTree.ParseText(SourceText.From(Source.AttributeText, Encoding.UTF8), options))
                 .AddSyntaxTrees(CSharpSyntaxTree.ParseText(SourceText.From(Source.IgnoreAttributeText, Encoding.UTF8), options))
@@ -43,7 +46,7 @@ namespace AutoConstructor.Generator
                     {
                         filename = $"{symbol.ContainingNamespace.ToDisplayString()}.{filename}";
                     }
-                    string source = GenerateAutoConstructor(symbol, compilation);
+                    string source = GenerateAutoConstructor(symbol);
                     if (!string.IsNullOrWhiteSpace(source))
                     {
                         context.AddSource(filename, SourceText.From(source, Encoding.UTF8));
@@ -58,10 +61,10 @@ namespace AutoConstructor.Generator
             context.RegisterForSyntaxNotifications(() => new SyntaxReceiver());
         }
 
-        private static string GenerateAutoConstructor(INamedTypeSymbol symbol, Compilation compilation)
+        private static string GenerateAutoConstructor(INamedTypeSymbol symbol)
         {
             var fields = symbol.GetMembers().OfType<IFieldSymbol>()
-                .Where(x => x.CanBeReferencedByName && !x.IsStatic && x.IsReadOnly && !x.IsInitialized() && !x.HasAttribute(Source.IgnoreAttributeFullName, compilation))
+                .Where(x => x.CanBeReferencedByName && !x.IsStatic && x.IsReadOnly && !x.IsInitialized() && !x.HasAttribute(Source.IgnoreAttributeFullName))
                 .Select(GetFieldInfo)
                 .ToList();
 
@@ -108,14 +111,14 @@ namespace {symbol.ContainingNamespace.ToDisplayString()}
 
             return source.ToString();
 
-            (string Type, string ParameterName, string FieldName, string Initializer) GetFieldInfo(IFieldSymbol fieldSymbol)
+            static (string Type, string ParameterName, string FieldName, string Initializer) GetFieldInfo(IFieldSymbol fieldSymbol)
             {
                 ITypeSymbol type = fieldSymbol!.Type;
                 string typeDisplay = type.ToDisplayString();
                 string parameterName = fieldSymbol.Name.TrimStart('_');
                 string initializer = parameterName;
 
-                AttributeData? attributeData = fieldSymbol.GetAttribute(Source.InjectAttributeFullName, compilation);
+                AttributeData? attributeData = fieldSymbol.GetAttribute(Source.InjectAttributeFullName);
                 if (attributeData is not null)
                 {
                     initializer = attributeData.ConstructorArguments[0].Value?.ToString() ?? "";

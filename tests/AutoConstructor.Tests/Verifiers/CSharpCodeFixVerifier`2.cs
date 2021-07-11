@@ -13,19 +13,9 @@ namespace AutoConstructor.Tests.Verifiers
         where TAnalyzer : DiagnosticAnalyzer, new()
         where TCodeFix : CodeFixProvider, new()
     {
-        public static DiagnosticResult Diagnostic()
-        {
-            return CSharpCodeFixVerifier<TAnalyzer, TCodeFix, XUnitVerifier>.Diagnostic();
-        }
-
         public static DiagnosticResult Diagnostic(string diagnosticId)
         {
             return CSharpCodeFixVerifier<TAnalyzer, TCodeFix, XUnitVerifier>.Diagnostic(diagnosticId);
-        }
-
-        public static DiagnosticResult Diagnostic(DiagnosticDescriptor descriptor)
-        {
-            return CSharpCodeFixVerifier<TAnalyzer, TCodeFix, XUnitVerifier>.Diagnostic(descriptor);
         }
 
         public static async Task VerifyAnalyzerAsync(string source, params DiagnosticResult[] expected)
@@ -33,20 +23,11 @@ namespace AutoConstructor.Tests.Verifiers
             var test = new Test
             {
                 TestCode = source,
+                CompilerDiagnostics = CompilerDiagnostics.None,
             };
 
             test.ExpectedDiagnostics.AddRange(expected);
             await test.RunAsync(CancellationToken.None);
-        }
-
-        public static async Task VerifyCodeFixAsync(string source, string fixedSource)
-        {
-            await VerifyCodeFixAsync(source, DiagnosticResult.EmptyDiagnosticResults, fixedSource);
-        }
-
-        public static async Task VerifyCodeFixAsync(string source, DiagnosticResult expected, string fixedSource)
-        {
-            await VerifyCodeFixAsync(source, new[] { expected }, fixedSource);
         }
 
         public static async Task VerifyCodeFixAsync(string source, DiagnosticResult[] expected, string fixedSource)
@@ -55,6 +36,7 @@ namespace AutoConstructor.Tests.Verifiers
             {
                 TestCode = source,
                 FixedCode = fixedSource,
+                CompilerDiagnostics = CompilerDiagnostics.None,
             };
 
             test.ExpectedDiagnostics.AddRange(expected);
