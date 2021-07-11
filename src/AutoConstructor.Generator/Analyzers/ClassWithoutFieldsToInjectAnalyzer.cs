@@ -14,9 +14,9 @@ namespace AutoConstructor.Generator
         private static readonly DiagnosticDescriptor Rule = new(
             DiagnosticId,
             $"Remove {Source.AttributeFullName}",
-            $"{Source.AttributeFullName} is not needed on class without fields to inject",
+            $"{Source.AttributeFullName} has no effect on a class without fields to inject",
             "Usage",
-            DiagnosticSeverity.Hidden,
+            DiagnosticSeverity.Warning,
             true,
             null,
             "https://github.com/k94ll13nn3/AutoConstructor/tree/main/src/AutoConstructor.Generator/Analyzers/ClassWithoutFieldsToInjectAnalyzer.cs",
