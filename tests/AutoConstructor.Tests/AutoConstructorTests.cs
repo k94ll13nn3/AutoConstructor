@@ -286,6 +286,10 @@ namespace Test
             const string test = @"
 namespace Test
 {
+    class TT
+    {
+    }
+
     [{|#0:AutoConstructor|}]
     internal partial class Test
     {
@@ -294,6 +298,10 @@ namespace Test
             const string fixtest = @"
 namespace Test
 {
+    class TT
+    {
+    }
+
     internal partial class Test
     {
     }

@@ -46,7 +46,7 @@ namespace AutoConstructor.Generator
             SyntaxNode? oldRoot = await document.GetSyntaxRootAsync(cancellationToken).ConfigureAwait(false);
             if (oldRoot is not null)
             {
-                SyntaxNode? newRoot = oldRoot.RemoveNode(attr, SyntaxRemoveOptions.KeepNoTrivia);
+                SyntaxNode? newRoot = oldRoot.RemoveNode(attr, SyntaxRemoveOptions.KeepEndOfLine);
                 if (newRoot is not null)
                 {
                     return document.WithSyntaxRoot(newRoot);
