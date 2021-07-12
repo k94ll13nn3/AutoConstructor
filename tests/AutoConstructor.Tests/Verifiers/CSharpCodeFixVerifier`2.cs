@@ -23,7 +23,6 @@ namespace AutoConstructor.Tests.Verifiers
             var test = new Test
             {
                 TestCode = source,
-                CompilerDiagnostics = CompilerDiagnostics.None,
             };
 
             test.ExpectedDiagnostics.AddRange(expected);
@@ -36,7 +35,6 @@ namespace AutoConstructor.Tests.Verifiers
             {
                 TestCode = source,
                 FixedCode = fixedSource,
-                CompilerDiagnostics = CompilerDiagnostics.None,
             };
 
             test.ExpectedDiagnostics.AddRange(expected);
@@ -47,6 +45,7 @@ namespace AutoConstructor.Tests.Verifiers
         {
             public Test()
             {
+                CompilerDiagnostics = CompilerDiagnostics.None;
                 SolutionTransforms.Add((solution, projectId) =>
                 {
                     CompilationOptions? compilationOptions = solution.GetProject(projectId)?.CompilationOptions;
