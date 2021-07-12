@@ -10,24 +10,26 @@ namespace AutoConstructor.Generator
     [Generator]
     public class AutoConstructorGenerator : ISourceGenerator
     {
+        public void Initialize(GeneratorInitializationContext context)
+        {
+            // Register the attribute source
+            context.RegisterForPostInitialization((i) =>
+            {
+                i.AddSource(Source.AttributeFullName, SourceText.From(Source.AttributeText, Encoding.UTF8));
+                i.AddSource(Source.IgnoreAttributeFullName, SourceText.From(Source.IgnoreAttributeText, Encoding.UTF8));
+                i.AddSource(Source.InjectAttributeFullName, SourceText.From(Source.InjectAttributeText, Encoding.UTF8));
+            });
+
+            // Register a syntax receiver that will be created for each generation pass.
+            context.RegisterForSyntaxNotifications(() => new SyntaxReceiver());
+        }
+
         public void Execute(GeneratorExecutionContext context)
         {
             if (context.SyntaxReceiver is not SyntaxReceiver receiver)
             {
                 return;
             }
-
-            // Add attributes to context to be generated.
-            context.AddSource(Source.AttributeFullName, SourceText.From(Source.AttributeText, Encoding.UTF8));
-            context.AddSource(Source.IgnoreAttributeFullName, SourceText.From(Source.IgnoreAttributeText, Encoding.UTF8));
-            context.AddSource(Source.InjectAttributeFullName, SourceText.From(Source.InjectAttributeText, Encoding.UTF8));
-
-            // Add attributes to context to be able to be read with GetTypeByMetadataName on the compilation or to get constructor arguments.
-            CSharpParseOptions? options = context.ParseOptions as CSharpParseOptions;
-            Compilation compilation = context.Compilation
-                .AddSyntaxTrees(CSharpSyntaxTree.ParseText(SourceText.From(Source.AttributeText, Encoding.UTF8), options))
-                .AddSyntaxTrees(CSharpSyntaxTree.ParseText(SourceText.From(Source.IgnoreAttributeText, Encoding.UTF8), options))
-                .AddSyntaxTrees(CSharpSyntaxTree.ParseText(SourceText.From(Source.InjectAttributeText, Encoding.UTF8), options));
 
             foreach (ClassDeclarationSyntax candidateClass in receiver.CandidateClasses)
             {
@@ -36,7 +38,7 @@ namespace AutoConstructor.Generator
                     break;
                 }
 
-                SemanticModel model = compilation.GetSemanticModel(candidateClass.SyntaxTree);
+                SemanticModel model = context.Compilation.GetSemanticModel(candidateClass.SyntaxTree);
                 INamedTypeSymbol? symbol = model.GetDeclaredSymbol(candidateClass);
 
                 if (symbol is not null)
@@ -53,12 +55,6 @@ namespace AutoConstructor.Generator
                     }
                 }
             }
-        }
-
-        public void Initialize(GeneratorInitializationContext context)
-        {
-            // Register a syntax receiver that will be created for each generation pass.
-            context.RegisterForSyntaxNotifications(() => new SyntaxReceiver());
         }
 
         private static string GenerateAutoConstructor(INamedTypeSymbol symbol)
