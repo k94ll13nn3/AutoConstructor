@@ -14,14 +14,19 @@ namespace AutoConstructor.Generator
             return (symbol.DeclaringSyntaxReferences.FirstOrDefault()?.GetSyntax() as VariableDeclaratorSyntax)?.Initializer != null;
         }
 
-        public static bool HasAttribute(this ISymbol symbol, string attributeName)
+        public static bool HasAttribute(this ISymbol symbol, string attributeName, Compilation compilation)
         {
-            return symbol.GetAttribute(attributeName) is not null;
+            _ = compilation ?? throw new ArgumentNullException(nameof(compilation));
+
+            return symbol.GetAttribute(attributeName, compilation) is not null;
         }
 
-        public static AttributeData? GetAttribute(this ISymbol symbol, string attributeName)
+        public static AttributeData? GetAttribute(this ISymbol symbol, string attributeName, Compilation compilation)
         {
-            return symbol?.GetAttributes().FirstOrDefault(ad => ad.AttributeClass?.Name.Replace("Attribute", "") == attributeName.Replace("Attribute", ""));
+            _ = compilation ?? throw new ArgumentNullException(nameof(compilation));
+
+            INamedTypeSymbol? attributeSymbol = compilation.GetTypeByMetadataName(attributeName);
+            return symbol?.GetAttributes().FirstOrDefault(ad => ad.AttributeClass?.Equals(attributeSymbol, SymbolEqualityComparer.Default) == true);
         }
     }
 }

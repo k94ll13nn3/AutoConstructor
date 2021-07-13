@@ -48,7 +48,7 @@ namespace AutoConstructor.Generator
                     {
                         filename = $"{symbol.ContainingNamespace.ToDisplayString()}.{filename}";
                     }
-                    string source = GenerateAutoConstructor(symbol);
+                    string source = GenerateAutoConstructor(symbol, context.Compilation);
                     if (!string.IsNullOrWhiteSpace(source))
                     {
                         context.AddSource(filename, SourceText.From(source, Encoding.UTF8));
@@ -57,10 +57,10 @@ namespace AutoConstructor.Generator
             }
         }
 
-        private static string GenerateAutoConstructor(INamedTypeSymbol symbol)
+        private static string GenerateAutoConstructor(INamedTypeSymbol symbol, Compilation compilation)
         {
             var fields = symbol.GetMembers().OfType<IFieldSymbol>()
-                .Where(x => x.CanBeReferencedByName && !x.IsStatic && x.IsReadOnly && !x.IsInitialized() && !x.HasAttribute(Source.IgnoreAttributeFullName))
+                .Where(x => x.CanBeReferencedByName && !x.IsStatic && x.IsReadOnly && !x.IsInitialized() && !x.HasAttribute(Source.IgnoreAttributeFullName, compilation))
                 .Select(GetFieldInfo)
                 .ToList();
 
@@ -107,14 +107,14 @@ namespace {symbol.ContainingNamespace.ToDisplayString()}
 
             return source.ToString();
 
-            static (string Type, string ParameterName, string FieldName, string Initializer) GetFieldInfo(IFieldSymbol fieldSymbol)
+            (string Type, string ParameterName, string FieldName, string Initializer) GetFieldInfo(IFieldSymbol fieldSymbol)
             {
                 ITypeSymbol type = fieldSymbol!.Type;
                 string typeDisplay = type.ToDisplayString();
                 string parameterName = fieldSymbol.Name.TrimStart('_');
                 string initializer = parameterName;
 
-                AttributeData? attributeData = fieldSymbol.GetAttribute(Source.InjectAttributeFullName);
+                AttributeData? attributeData = fieldSymbol.GetAttribute(Source.InjectAttributeFullName, compilation);
                 if (attributeData is not null)
                 {
                     initializer = attributeData.ConstructorArguments[0].Value?.ToString() ?? "";

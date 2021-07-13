@@ -1,5 +1,6 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
+using AutoConstructor.Generator;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CodeFixes;
 using Microsoft.CodeAnalysis.CSharp.Testing;
@@ -22,7 +23,7 @@ namespace AutoConstructor.Tests.Verifiers
         {
             var test = new Test
             {
-                TestCode = source,
+                TestCode = AppendBaseCode(source),
             };
 
             test.ExpectedDiagnostics.AddRange(expected);
@@ -33,19 +34,28 @@ namespace AutoConstructor.Tests.Verifiers
         {
             var test = new Test
             {
-                TestCode = source,
-                FixedCode = fixedSource,
+                TestCode = AppendBaseCode(source),
+                FixedCode = AppendBaseCode(fixedSource),
             };
 
             test.ExpectedDiagnostics.AddRange(expected);
             await test.RunAsync(CancellationToken.None);
         }
 
+        private static string AppendBaseCode(string value)
+        {
+            // Appends the attributes from the generator to the code to be compiled.
+            string valueWithCode = value;
+            valueWithCode += $"{Source.AttributeText}\n";
+            valueWithCode += $"{Source.IgnoreAttributeText}\n";
+            valueWithCode += $"{Source.InjectAttributeText}\n";
+            return valueWithCode;
+        }
+
         internal class Test : CSharpCodeFixTest<TAnalyzer, TCodeFix, XUnitVerifier>
         {
             public Test()
             {
-                CompilerDiagnostics = CompilerDiagnostics.None;
                 SolutionTransforms.Add((solution, projectId) =>
                 {
                     CompilationOptions? compilationOptions = solution.GetProject(projectId)?.CompilationOptions;
