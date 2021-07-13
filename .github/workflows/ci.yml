@@ -16,7 +16,7 @@ jobs:
         fetch-depth: 0 # for minver
     - name: Setup .NET Core
       uses: actions/setup-dotnet@v1
-    - name: Execute build
+    - name: Execute build and run tests
       run: |
-        cd ./src/AutoConstructor.Generator
         dotnet build --configuration Release /nologo
+        dotnet test --configuration Release
