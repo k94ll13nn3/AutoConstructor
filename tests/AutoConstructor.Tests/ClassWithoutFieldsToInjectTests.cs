@@ -59,5 +59,39 @@ namespace Test
             };
             await VerifyClassWithoutFieldsToInject.VerifyCodeFixAsync(test, expected, fixtest);
         }
+
+        [Fact]
+        public async Task Analyzer_ClassWithoutFieldsToInjectWithMultipleAttributes_ShouldFixCode()
+        {
+            const string test = @"
+namespace Test
+{
+    class TT
+    {
+    }
+
+    [{|#0:AutoConstructor|}, System.Serializable]
+    internal partial class Test
+    {
+    }
+}";
+            const string fixtest = @"
+namespace Test
+{
+    class TT
+    {
+    }
+
+    [System.Serializable]
+    internal partial class Test
+    {
+    }
+}";
+
+            DiagnosticResult[] expected = new[] {
+                VerifyClassWithoutFieldsToInject.Diagnostic("ACONS02").WithLocation(0),
+            };
+            await VerifyClassWithoutFieldsToInject.VerifyCodeFixAsync(test, expected, fixtest);
+        }
     }
 }

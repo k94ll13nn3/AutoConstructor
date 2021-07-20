@@ -54,7 +54,7 @@ namespace AutoConstructor.Generator
                 return document.WithSyntaxRoot(newRoot);
             }
 
-            throw new InvalidOperationException("Cannot get syntax root.");
+            throw new InvalidOperationException("Cannot fix code.");
         }
     }
 }

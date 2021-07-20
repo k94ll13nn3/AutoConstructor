@@ -29,31 +29,49 @@ namespace AutoConstructor.Generator
             Diagnostic? diagnostic = context.Diagnostics[0];
             TextSpan diagnosticSpan = diagnostic.Location.SourceSpan;
 
-            AttributeListSyntax? declaration = root?.FindToken(diagnosticSpan.Start).Parent?.AncestorsAndSelf().OfType<AttributeListSyntax>().First();
-            if (declaration is not null)
+            AttributeListSyntax? declarationList = root?.FindToken(diagnosticSpan.Start).Parent?.AncestorsAndSelf().OfType<AttributeListSyntax>().First();
+            AttributeSyntax? declaration = root?.FindToken(diagnosticSpan.Start).Parent?.AncestorsAndSelf().OfType<AttributeSyntax>().First();
+            if (declarationList is not null)
             {
                 context.RegisterCodeFix(
                     CodeAction.Create(
                         title: $"Remove {Source.AttributeFullName}",
-                        createChangedDocument: c => RemoveAttributeAsync(context.Document, declaration, c),
+                        createChangedDocument: c => RemoveAttributeAsync(context.Document, declarationList, declaration, c),
                         equivalenceKey: $"Remove {Source.AttributeFullName}"),
                     diagnostic);
             }
         }
 
-        private static async Task<Document> RemoveAttributeAsync(Document document, AttributeListSyntax attr, CancellationToken cancellationToken)
+        private static async Task<Document> RemoveAttributeAsync(Document document, AttributeListSyntax attributeList, AttributeSyntax? attribute, CancellationToken cancellationToken)
         {
             SyntaxNode? oldRoot = await document.GetSyntaxRootAsync(cancellationToken).ConfigureAwait(false);
             if (oldRoot is not null)
             {
-                SyntaxNode? newRoot = oldRoot.RemoveNode(attr, SyntaxRemoveOptions.KeepEndOfLine);
-                if (newRoot is not null)
+                if (attributeList.Attributes.Count > 1 && attribute is not null)
                 {
-                    return document.WithSyntaxRoot(newRoot);
+                    // Multiples attributes on the line.
+                    AttributeListSyntax? newSyntax = attributeList.RemoveNode(attribute, SyntaxRemoveOptions.KeepNoTrivia);
+                    if (newSyntax is not null)
+                    {
+                        SyntaxNode? newRoot = oldRoot.ReplaceNode(attributeList, newSyntax);
+                        if (newRoot is not null)
+                        {
+                            return document.WithSyntaxRoot(newRoot);
+                        }
+                    }
+                }
+                else
+                {
+                    // One attribute.
+                    SyntaxNode? newRoot = oldRoot.RemoveNode(attributeList, SyntaxRemoveOptions.KeepEndOfLine);
+                    if (newRoot is not null)
+                    {
+                        return document.WithSyntaxRoot(newRoot);
+                    }
                 }
             }
 
-            throw new InvalidOperationException("Cannot get syntax root.");
+            throw new InvalidOperationException("Cannot fix code.");
         }
     }
 }

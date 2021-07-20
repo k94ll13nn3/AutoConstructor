@@ -7,7 +7,7 @@ using VerifyClassWithoutPartial = AutoConstructor.Tests.Verifiers.CSharpCodeFixV
 
 namespace AutoConstructor.Tests
 {
-    public class VerifyClassWithoutPartialTests
+    public class ClassWithoutPartialTests
     {
         [Fact]
         public async Task Analyzer_ClassWithoutPartial_ShouldReportDiagnostic()
