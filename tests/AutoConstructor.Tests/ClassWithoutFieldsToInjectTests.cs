@@ -27,10 +27,8 @@ namespace Test
             await VerifyClassWithoutFieldsToInject.VerifyAnalyzerAsync(test, expected);
         }
 
-        [Fact]
-        public async Task Analyzer_ClassWithoutFieldsToInject_ShouldFixCode()
-        {
-            const string test = @"
+        [Theory]
+        [InlineData(@"
 namespace Test
 {
     class TT
@@ -41,8 +39,7 @@ namespace Test
     internal partial class Test
     {
     }
-}";
-            const string fixtest = @"
+}", @"
 namespace Test
 {
     class TT
@@ -52,42 +49,38 @@ namespace Test
     internal partial class Test
     {
     }
-}";
-
-            DiagnosticResult[] expected = new[] {
-                VerifyClassWithoutFieldsToInject.Diagnostic("ACONS02").WithLocation(0),
-            };
-            await VerifyClassWithoutFieldsToInject.VerifyCodeFixAsync(test, expected, fixtest);
-        }
-
-        [Fact]
-        public async Task Analyzer_ClassWithoutFieldsToInjectWithMultipleAttributes_ShouldFixCode()
-        {
-            const string test = @"
+}")]
+        [InlineData(@"
 namespace Test
 {
-    class TT
+    [{|#0:AutoConstructor|}]
+    internal partial class Test
     {
     }
-
+}", @"
+namespace Test
+{
+    internal partial class Test
+    {
+    }
+}")]
+        [InlineData(@"
+namespace Test
+{
     [{|#0:AutoConstructor|}, System.Serializable]
     internal partial class Test
     {
     }
-}";
-            const string fixtest = @"
+}", @"
 namespace Test
 {
-    class TT
-    {
-    }
-
     [System.Serializable]
     internal partial class Test
     {
     }
-}";
-
+}")]
+        public async Task Analyzer_ClassWithoutFieldsToInject_ShouldFixCode(string test, string fixtest)
+        {
             DiagnosticResult[] expected = new[] {
                 VerifyClassWithoutFieldsToInject.Diagnostic("ACONS02").WithLocation(0),
             };

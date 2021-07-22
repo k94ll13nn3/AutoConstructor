@@ -63,7 +63,7 @@ namespace AutoConstructor.Generator
                 else
                 {
                     // One attribute.
-                    SyntaxNode? newRoot = oldRoot.RemoveNode(attributeList, SyntaxRemoveOptions.KeepEndOfLine);
+                    SyntaxNode? newRoot = oldRoot.RemoveNode(attributeList, SyntaxRemoveOptions.AddElasticMarker);
                     if (newRoot is not null)
                     {
                         return document.WithSyntaxRoot(newRoot);
