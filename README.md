@@ -3,7 +3,7 @@
 C# source generator that generates a constructor from readonly fields in a class.
 
 - Visual Studio 16.9+ is needed
-- .NET SDK 5.0.200+ is needed
+- .NET SDK 5.0.300+ is needed
 
 ## How to use
 
