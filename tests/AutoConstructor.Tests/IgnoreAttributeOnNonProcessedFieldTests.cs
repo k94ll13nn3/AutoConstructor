@@ -3,7 +3,7 @@ using Microsoft.CodeAnalysis.Testing;
 using Xunit;
 using VerifyIgnoreAttributeOnNonProcessedField = AutoConstructor.Tests.Verifiers.CSharpCodeFixVerifier<
     AutoConstructor.Generator.IgnoreAttributeOnNonProcessedFieldAnalyzer,
-    AutoConstructor.Generator.IgnoreAttributeOnNonProcessedFieldCodeFixProvider>;
+    AutoConstructor.Generator.RemoveAttributeCodeFixProvider>;
 
 namespace AutoConstructor.Tests
 {

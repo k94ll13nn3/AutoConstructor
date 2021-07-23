@@ -3,7 +3,7 @@ using Microsoft.CodeAnalysis.Testing;
 using Xunit;
 using VerifyClassWithoutFieldsToInject = AutoConstructor.Tests.Verifiers.CSharpCodeFixVerifier<
     AutoConstructor.Generator.ClassWithoutFieldsToInjectAnalyzer,
-    AutoConstructor.Generator.ClassWithoutFieldsToInjectCodeFixProvider>;
+    AutoConstructor.Generator.RemoveAttributeCodeFixProvider>;
 
 namespace AutoConstructor.Tests
 {
