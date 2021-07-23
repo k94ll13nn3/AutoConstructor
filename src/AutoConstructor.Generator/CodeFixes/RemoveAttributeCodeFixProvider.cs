@@ -18,7 +18,8 @@ namespace AutoConstructor.Generator
     {
         public sealed override ImmutableArray<string> FixableDiagnosticIds => ImmutableArray.Create(
             ClassWithoutFieldsToInjectAnalyzer.DiagnosticId,
-            IgnoreAttributeOnNonProcessedFieldAnalyzer.DiagnosticId);
+            IgnoreAttributeOnNonProcessedFieldAnalyzer.DiagnosticId,
+            InjectAttributeOnIgnoredFieldAnalyzer.DiagnosticId);
 
         public sealed override FixAllProvider GetFixAllProvider()
         {
@@ -36,6 +37,7 @@ namespace AutoConstructor.Generator
             {
                 ClassWithoutFieldsToInjectAnalyzer.DiagnosticId => Source.AttributeName,
                 IgnoreAttributeOnNonProcessedFieldAnalyzer.DiagnosticId => Source.IgnoreAttributeName,
+                InjectAttributeOnIgnoredFieldAnalyzer.DiagnosticId => Source.InjectAttributeName,
                 _ => throw new InvalidOperationException("Invalid diagnostic."),
             };
 

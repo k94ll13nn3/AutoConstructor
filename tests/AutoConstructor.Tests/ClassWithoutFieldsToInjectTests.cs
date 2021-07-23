@@ -1,4 +1,5 @@
 ﻿using System.Threading.Tasks;
+using AutoConstructor.Generator;
 using Microsoft.CodeAnalysis.Testing;
 using Xunit;
 using VerifyClassWithoutFieldsToInject = AutoConstructor.Tests.Verifiers.CSharpCodeFixVerifier<
@@ -22,7 +23,7 @@ namespace Test
 }";
 
             DiagnosticResult[] expected = new[] {
-                VerifyClassWithoutFieldsToInject.Diagnostic("ACONS02").WithLocation(0),
+                VerifyClassWithoutFieldsToInject.Diagnostic(ClassWithoutFieldsToInjectAnalyzer.DiagnosticId).WithLocation(0),
             };
             await VerifyClassWithoutFieldsToInject.VerifyAnalyzerAsync(test, expected);
         }
@@ -31,10 +32,6 @@ namespace Test
         [InlineData(@"
 namespace Test
 {
-    class TT
-    {
-    }
-
     [{|#0:AutoConstructor|}]
     internal partial class Test
     {
@@ -42,39 +39,6 @@ namespace Test
 }", @"
 namespace Test
 {
-    class TT
-    {
-    }
-
-    internal partial class Test
-    {
-    }
-}")]
-        [InlineData(@"
-namespace Test
-{
-    [{|#0:AutoConstructor|}]
-    internal partial class Test
-    {
-    }
-}", @"
-namespace Test
-{
-    internal partial class Test
-    {
-    }
-}")]
-        [InlineData(@"
-namespace Test
-{
-    [{|#0:AutoConstructor|}, System.Serializable]
-    internal partial class Test
-    {
-    }
-}", @"
-namespace Test
-{
-    [System.Serializable]
     internal partial class Test
     {
     }
@@ -82,7 +46,7 @@ namespace Test
         public async Task Analyzer_ClassWithoutFieldsToInject_ShouldFixCode(string test, string fixtest)
         {
             DiagnosticResult[] expected = new[] {
-                VerifyClassWithoutFieldsToInject.Diagnostic("ACONS02").WithLocation(0),
+                VerifyClassWithoutFieldsToInject.Diagnostic(ClassWithoutFieldsToInjectAnalyzer.DiagnosticId).WithLocation(0),
             };
             await VerifyClassWithoutFieldsToInject.VerifyCodeFixAsync(test, expected, fixtest);
         }
