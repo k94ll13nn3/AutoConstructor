@@ -19,7 +19,8 @@ namespace AutoConstructor.Generator
         public sealed override ImmutableArray<string> FixableDiagnosticIds => ImmutableArray.Create(
             ClassWithoutFieldsToInjectAnalyzer.DiagnosticId,
             IgnoreAttributeOnNonProcessedFieldAnalyzer.DiagnosticId,
-            InjectAttributeOnIgnoredFieldAnalyzer.DiagnosticId);
+            InjectAttributeOnIgnoredFieldAnalyzer.DiagnosticId,
+            IgnoreOrInjectAttributeOnClassWithoutAttributeAnalyzer.DiagnosticId);
 
         public sealed override FixAllProvider GetFixAllProvider()
         {
@@ -33,11 +34,12 @@ namespace AutoConstructor.Generator
             Diagnostic? diagnostic = context.Diagnostics[0];
             TextSpan diagnosticSpan = diagnostic.Location.SourceSpan;
 
-            string attributeName = diagnostic.Id switch
+            string[] attributesToRemove = diagnostic.Id switch
             {
-                ClassWithoutFieldsToInjectAnalyzer.DiagnosticId => Source.AttributeName,
-                IgnoreAttributeOnNonProcessedFieldAnalyzer.DiagnosticId => Source.IgnoreAttributeName,
-                InjectAttributeOnIgnoredFieldAnalyzer.DiagnosticId => Source.InjectAttributeName,
+                ClassWithoutFieldsToInjectAnalyzer.DiagnosticId => new[] { Source.AttributeName },
+                IgnoreAttributeOnNonProcessedFieldAnalyzer.DiagnosticId => new[] { Source.IgnoreAttributeName },
+                InjectAttributeOnIgnoredFieldAnalyzer.DiagnosticId => new[] { Source.InjectAttributeName },
+                IgnoreOrInjectAttributeOnClassWithoutAttributeAnalyzer.DiagnosticId => new[] { Source.IgnoreAttributeName, Source.InjectAttributeName },
                 _ => throw new InvalidOperationException("Invalid diagnostic."),
             };
 
@@ -46,19 +48,24 @@ namespace AutoConstructor.Generator
             {
                 context.RegisterCodeFix(
                     CodeAction.Create(
-                        title: $"Remove {attributeName}Attribute",
-                        createChangedDocument: c => RemoveAttributeAsync(context.Document, node, attributeName, c),
-                        equivalenceKey: $"Remove {attributeName}Attribute"),
+                        title: $"Remove {string.Join("/", attributesToRemove.Select(c => $"{c}Attribute"))}",
+                        createChangedDocument: c => RemoveAttributesAsync(context.Document, node, attributesToRemove, c),
+                        equivalenceKey: $"Remove {string.Join("/", attributesToRemove.Select(c => $"{c}Attribute"))}"),
                     diagnostic);
             }
         }
 
-        private static async Task<Document> RemoveAttributeAsync(Document document, MemberDeclarationSyntax declaration, string attributeName, CancellationToken cancellationToken)
+        private static async Task<Document> RemoveAttributesAsync(Document document, MemberDeclarationSyntax declaration, string[] attributesToRemove, CancellationToken cancellationToken)
         {
             SyntaxNode? oldRoot = await document.GetSyntaxRootAsync(cancellationToken).ConfigureAwait(false);
             if (oldRoot is not null)
             {
-                SyntaxNode newDeclaration = RemoveAttributeFromSyntax(declaration, attributeName);
+                MemberDeclarationSyntax newDeclaration = declaration;
+                foreach (string attribute in attributesToRemove)
+                {
+                    newDeclaration = RemoveAttributeFromSyntax(newDeclaration, attribute);
+                }
+
                 SyntaxNode? newRoot = oldRoot.ReplaceNode(declaration, newDeclaration);
                 if (newRoot is not null)
                 {
@@ -69,7 +76,7 @@ namespace AutoConstructor.Generator
             throw new InvalidOperationException("Cannot fix code.");
         }
 
-        private static SyntaxNode RemoveAttributeFromSyntax(MemberDeclarationSyntax node, string attributeName)
+        private static MemberDeclarationSyntax RemoveAttributeFromSyntax(MemberDeclarationSyntax node, string attributeName)
         {
             var newAttributes = new SyntaxList<AttributeListSyntax>();
             foreach (AttributeListSyntax attributeList in node.AttributeLists)
