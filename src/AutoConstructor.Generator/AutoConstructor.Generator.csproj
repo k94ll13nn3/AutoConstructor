@@ -1,15 +1,36 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <Authors>k94ll13nn3</Authors>
+    <NeutralLanguage>en-US</NeutralLanguage>
+    <Copyright>Copyright © k94ll13nn3</Copyright>
+    <Description>Source generator for automatic constructor generation.</Description>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
     <TargetFramework>netstandard2.0</TargetFramework> <!-- Cannot use 2.1, see https://github.com/dotnet/roslyn/issues/47087 -->
-    <PackageId>AutoConstructor</PackageId>
-    <RepositoryUrl>https://github.com/k94ll13nn3/AutoConstructor</RepositoryUrl>
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild> <!-- Generates a package at build -->
     <IncludeBuildOutput>false</IncludeBuildOutput> <!-- Do not include the generator as a lib dependency -->
-    <PackageOutputPath>..\..\artifacts\</PackageOutputPath>
     <NoWarn>$(NoWarn);NU5128</NoWarn> <!-- see https://github.com/nuget/home/issues/8583 -->
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <PackageTags>source generator;constructor</PackageTags>
+    <PackageIcon>logo_64x64.png</PackageIcon>
+    <PackageId>AutoConstructor</PackageId>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageIcon>logo_128x128.png</PackageIcon>
+    <PackageProjectUrl>https://github.com/k94ll13nn3/AutoConstructor</PackageProjectUrl>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageOutputPath>..\..\artifacts\</PackageOutputPath>
+    <RepositoryType>git</RepositoryType>
+    <RepositoryUrl>https://github.com/k94ll13nn3/AutoConstructor</RepositoryUrl>
   </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)' == 'Release'">
+    <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
+    <DeterministicSourcePaths>true</DeterministicSourcePaths>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\..\logo_128x128.png" Pack="true" PackagePath="" Visible="false" />
+    <None Include="..\..\README.md" Pack="true" PackagePath="" Visible="false" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="3.10.0" PrivateAssets="all" />
@@ -28,5 +49,4 @@
       <_Parameter1>AutoConstructor.Tests</_Parameter1>
     </AssemblyAttribute>
   </ItemGroup>
-
 </Project>
