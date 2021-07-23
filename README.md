@@ -1,6 +1,17 @@
 # AutoConstructor
 
+[![NuGet](https://img.shields.io/nuget/v/AutoConstructor.svg)](https://www.nuget.org/packages/AutoConstructor/)
+[![GitHub release](https://img.shields.io/github/release/k94ll13nn3/AutoConstructor.svg)](https://github.com/k94ll13nn3/AutoConstructor/releases/latest)
+[![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/k94ll13nn3/AutoConstructor/main/LICENSE)
+![ci.yml](https://github.com/k94ll13nn3/AutoConstructor/workflows/.github/workflows/ci.yml/badge.svg)
+
 C# source generator that generates a constructor from readonly fields in a class.
+
+## Installation
+
+- Grab the latest package on [NuGet](https://www.nuget.org/packages/AutoConstructor/).
+
+## Requirements
 
 - Visual Studio 16.9+ is needed
 - .NET SDK 5.0.300+ is needed
