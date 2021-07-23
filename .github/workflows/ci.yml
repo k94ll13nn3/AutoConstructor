@@ -20,3 +20,8 @@ jobs:
       run: |
         dotnet build --configuration Release /nologo
         dotnet test --configuration Release
+    - name: Upload artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: AutoConstructor
+        path: artifacts/*
