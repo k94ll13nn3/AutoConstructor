@@ -18,7 +18,7 @@ namespace AutoConstructor.Generator
             "Couldn't generate consctructor",
             $"Type decorated with {Source.AttributeFullName} must be also declared partial",
             "Usage",
-            DiagnosticSeverity.Error,
+            DiagnosticSeverity.Warning,
             true,
             null,
             "https://github.com/k94ll13nn3/AutoConstructor/tree/main/src/AutoConstructor.Generator/Analyzers/ClassWithoutPartialAnalyzer.cs",
