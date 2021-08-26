@@ -1,19 +1,18 @@
-﻿using System.Threading.Tasks;
-using AutoConstructor.Generator;
+﻿using AutoConstructor.Generator;
 using Microsoft.CodeAnalysis.Testing;
 using Xunit;
 using VerifyInjectAttributeOnIgnoredField = AutoConstructor.Tests.Verifiers.CSharpCodeFixVerifier<
     AutoConstructor.Generator.InjectAttributeOnIgnoredFieldAnalyzer,
     AutoConstructor.Generator.RemoveAttributeCodeFixProvider>;
 
-namespace AutoConstructor.Tests
+namespace AutoConstructor.Tests;
+
+public class InjectAttributeOnIgnoredFieldTests
 {
-    public class InjectAttributeOnIgnoredFieldTests
+    [Fact]
+    public async Task Analyzer_InjectAttributeOnIgnoredField_ShouldReportDiagnostic()
     {
-        [Fact]
-        public async Task Analyzer_InjectAttributeOnIgnoredField_ShouldReportDiagnostic()
-        {
-            const string test = @"
+        const string test = @"
 namespace Test
 {
     [AutoConstructor]
@@ -24,14 +23,14 @@ namespace Test
     }
 }";
 
-            DiagnosticResult[] expected = new[] {
+        DiagnosticResult[] expected = new[] {
                 VerifyInjectAttributeOnIgnoredField.Diagnostic(InjectAttributeOnIgnoredFieldAnalyzer.DiagnosticId).WithLocation(0),
             };
-            await VerifyInjectAttributeOnIgnoredField.VerifyAnalyzerAsync(test, expected);
-        }
+        await VerifyInjectAttributeOnIgnoredField.VerifyAnalyzerAsync(test, expected);
+    }
 
-        [Theory]
-        [InlineData(@"
+    [Theory]
+    [InlineData(@"
 namespace Test
 {
     [AutoConstructor]
@@ -49,12 +48,11 @@ namespace Test
         private readonly int _t = 1;
     }
 }")]
-        public async Task Analyzer_InjectAttributeOnIgnoredField_ShouldFixCode(string test, string fixtest)
-        {
-            DiagnosticResult[] expected = new[] {
+    public async Task Analyzer_InjectAttributeOnIgnoredField_ShouldFixCode(string test, string fixtest)
+    {
+        DiagnosticResult[] expected = new[] {
                 VerifyInjectAttributeOnIgnoredField.Diagnostic(InjectAttributeOnIgnoredFieldAnalyzer.DiagnosticId).WithLocation(0),
             };
-            await VerifyInjectAttributeOnIgnoredField.VerifyCodeFixAsync(test, expected, fixtest);
-        }
+        await VerifyInjectAttributeOnIgnoredField.VerifyCodeFixAsync(test, expected, fixtest);
     }
 }

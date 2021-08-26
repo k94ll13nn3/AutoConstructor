@@ -1,19 +1,18 @@
-﻿using System.Threading.Tasks;
-using AutoConstructor.Generator;
+﻿using AutoConstructor.Generator;
 using Microsoft.CodeAnalysis.Testing;
 using Xunit;
 using VerifyClassWithoutFieldsToInject = AutoConstructor.Tests.Verifiers.CSharpCodeFixVerifier<
     AutoConstructor.Generator.ClassWithoutFieldsToInjectAnalyzer,
     AutoConstructor.Generator.RemoveAttributeCodeFixProvider>;
 
-namespace AutoConstructor.Tests
+namespace AutoConstructor.Tests;
+
+public class ClassWithoutFieldsToInjectTests
 {
-    public class ClassWithoutFieldsToInjectTests
+    [Fact]
+    public async Task Analyzer_ClassWithoutFieldsToInject_ShouldReportDiagnostic()
     {
-        [Fact]
-        public async Task Analyzer_ClassWithoutFieldsToInject_ShouldReportDiagnostic()
-        {
-            const string test = @"
+        const string test = @"
 namespace Test
 {
     [{|#0:AutoConstructor|}]
@@ -22,14 +21,14 @@ namespace Test
     }
 }";
 
-            DiagnosticResult[] expected = new[] {
+        DiagnosticResult[] expected = new[] {
                 VerifyClassWithoutFieldsToInject.Diagnostic(ClassWithoutFieldsToInjectAnalyzer.DiagnosticId).WithLocation(0),
             };
-            await VerifyClassWithoutFieldsToInject.VerifyAnalyzerAsync(test, expected);
-        }
+        await VerifyClassWithoutFieldsToInject.VerifyAnalyzerAsync(test, expected);
+    }
 
-        [Theory]
-        [InlineData(@"
+    [Theory]
+    [InlineData(@"
 namespace Test
 {
     [{|#0:AutoConstructor|}]
@@ -43,12 +42,11 @@ namespace Test
     {
     }
 }")]
-        public async Task Analyzer_ClassWithoutFieldsToInject_ShouldFixCode(string test, string fixtest)
-        {
-            DiagnosticResult[] expected = new[] {
+    public async Task Analyzer_ClassWithoutFieldsToInject_ShouldFixCode(string test, string fixtest)
+    {
+        DiagnosticResult[] expected = new[] {
                 VerifyClassWithoutFieldsToInject.Diagnostic(ClassWithoutFieldsToInjectAnalyzer.DiagnosticId).WithLocation(0),
             };
-            await VerifyClassWithoutFieldsToInject.VerifyCodeFixAsync(test, expected, fixtest);
-        }
+        await VerifyClassWithoutFieldsToInject.VerifyCodeFixAsync(test, expected, fixtest);
     }
 }

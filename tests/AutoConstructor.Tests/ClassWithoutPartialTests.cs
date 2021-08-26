@@ -1,19 +1,18 @@
-﻿using System.Threading.Tasks;
-using AutoConstructor.Generator;
+﻿using AutoConstructor.Generator;
 using Microsoft.CodeAnalysis.Testing;
 using Xunit;
 using VerifyClassWithoutPartial = AutoConstructor.Tests.Verifiers.CSharpCodeFixVerifier<
     AutoConstructor.Generator.ClassWithoutPartialAnalyzer,
     AutoConstructor.Generator.ClassWithoutPartialCodeFixProvider>;
 
-namespace AutoConstructor.Tests
+namespace AutoConstructor.Tests;
+
+public class ClassWithoutPartialTests
 {
-    public class ClassWithoutPartialTests
+    [Fact]
+    public async Task Analyzer_ClassWithoutPartial_ShouldReportDiagnostic()
     {
-        [Fact]
-        public async Task Analyzer_ClassWithoutPartial_ShouldReportDiagnostic()
-        {
-            const string test = @"
+        const string test = @"
 namespace Test
 {
     [AutoConstructor]
@@ -23,16 +22,16 @@ namespace Test
     }
 }";
 
-            DiagnosticResult[] expected = new[] {
+        DiagnosticResult[] expected = new[] {
                 VerifyClassWithoutPartial.Diagnostic(ClassWithoutPartialAnalyzer.DiagnosticId).WithLocation(0),
             };
-            await VerifyClassWithoutPartial.VerifyAnalyzerAsync(test, expected);
-        }
+        await VerifyClassWithoutPartial.VerifyAnalyzerAsync(test, expected);
+    }
 
-        [Fact]
-        public async Task CodeFix_ClassWithoutPartial_ShouldFixCode()
-        {
-            const string test = @"
+    [Fact]
+    public async Task CodeFix_ClassWithoutPartial_ShouldFixCode()
+    {
+        const string test = @"
 namespace Test
 {
     [AutoConstructor]
@@ -42,7 +41,7 @@ namespace Test
     }
 }";
 
-            const string fixtest = @"
+        const string fixtest = @"
 namespace Test
 {
     [AutoConstructor]
@@ -52,10 +51,9 @@ namespace Test
     }
 }";
 
-            DiagnosticResult[] expected = new[] {
+        DiagnosticResult[] expected = new[] {
                 VerifyClassWithoutPartial.Diagnostic(ClassWithoutPartialAnalyzer.DiagnosticId).WithLocation(0),
             };
-            await VerifyClassWithoutPartial.VerifyCodeFixAsync(test, expected, fixtest);
-        }
+        await VerifyClassWithoutPartial.VerifyCodeFixAsync(test, expected, fixtest);
     }
 }

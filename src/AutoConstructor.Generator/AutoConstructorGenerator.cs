@@ -5,133 +5,132 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
 
-namespace AutoConstructor.Generator
+namespace AutoConstructor.Generator;
+
+[Generator]
+public class AutoConstructorGenerator : ISourceGenerator
 {
-    [Generator]
-    public class AutoConstructorGenerator : ISourceGenerator
+    public void Initialize(GeneratorInitializationContext context)
     {
-        public void Initialize(GeneratorInitializationContext context)
+        // Register the attribute source
+        context.RegisterForPostInitialization((i) =>
         {
-            // Register the attribute source
-            context.RegisterForPostInitialization((i) =>
-            {
-                i.AddSource(Source.AttributeFullName, SourceText.From(Source.AttributeText, Encoding.UTF8));
-                i.AddSource(Source.IgnoreAttributeFullName, SourceText.From(Source.IgnoreAttributeText, Encoding.UTF8));
-                i.AddSource(Source.InjectAttributeFullName, SourceText.From(Source.InjectAttributeText, Encoding.UTF8));
-            });
+            i.AddSource(Source.AttributeFullName, SourceText.From(Source.AttributeText, Encoding.UTF8));
+            i.AddSource(Source.IgnoreAttributeFullName, SourceText.From(Source.IgnoreAttributeText, Encoding.UTF8));
+            i.AddSource(Source.InjectAttributeFullName, SourceText.From(Source.InjectAttributeText, Encoding.UTF8));
+        });
 
-            // Register a syntax receiver that will be created for each generation pass.
-            context.RegisterForSyntaxNotifications(() => new SyntaxReceiver());
+        // Register a syntax receiver that will be created for each generation pass.
+        context.RegisterForSyntaxNotifications(() => new SyntaxReceiver());
+    }
+
+    public void Execute(GeneratorExecutionContext context)
+    {
+        if (context.SyntaxReceiver is not SyntaxReceiver receiver)
+        {
+            return;
         }
 
-        public void Execute(GeneratorExecutionContext context)
+        foreach (ClassDeclarationSyntax candidateClass in receiver.CandidateClasses)
         {
-            if (context.SyntaxReceiver is not SyntaxReceiver receiver)
+            if (context.CancellationToken.IsCancellationRequested)
             {
-                return;
+                break;
             }
 
-            foreach (ClassDeclarationSyntax candidateClass in receiver.CandidateClasses)
+            SemanticModel model = context.Compilation.GetSemanticModel(candidateClass.SyntaxTree);
+            INamedTypeSymbol? symbol = model.GetDeclaredSymbol(candidateClass);
+
+            if (symbol is not null)
             {
-                if (context.CancellationToken.IsCancellationRequested)
+                string filename = $"{symbol.Name}.g.cs";
+                if (!symbol.ContainingNamespace.IsGlobalNamespace)
                 {
-                    break;
+                    filename = $"{symbol.ContainingNamespace.ToDisplayString()}.{filename}";
                 }
-
-                SemanticModel model = context.Compilation.GetSemanticModel(candidateClass.SyntaxTree);
-                INamedTypeSymbol? symbol = model.GetDeclaredSymbol(candidateClass);
-
-                if (symbol is not null)
+                string source = GenerateAutoConstructor(symbol, context.Compilation);
+                if (!string.IsNullOrWhiteSpace(source))
                 {
-                    string filename = $"{symbol.Name}.g.cs";
-                    if (!symbol.ContainingNamespace.IsGlobalNamespace)
-                    {
-                        filename = $"{symbol.ContainingNamespace.ToDisplayString()}.{filename}";
-                    }
-                    string source = GenerateAutoConstructor(symbol, context.Compilation);
-                    if (!string.IsNullOrWhiteSpace(source))
-                    {
-                        context.AddSource(filename, SourceText.From(source, Encoding.UTF8));
-                    }
+                    context.AddSource(filename, SourceText.From(source, Encoding.UTF8));
                 }
             }
         }
+    }
 
-        private static string GenerateAutoConstructor(INamedTypeSymbol symbol, Compilation compilation)
+    private static string GenerateAutoConstructor(INamedTypeSymbol symbol, Compilation compilation)
+    {
+        var fields = symbol.GetMembers().OfType<IFieldSymbol>()
+            .Where(x => x.CanBeReferencedByName && !x.IsStatic && x.IsReadOnly && !x.IsInitialized() && !x.HasAttribute(Source.IgnoreAttributeFullName, compilation))
+            .Select(GetFieldInfo)
+            .ToList();
+
+        if (fields.Count == 0)
         {
-            var fields = symbol.GetMembers().OfType<IFieldSymbol>()
-                .Where(x => x.CanBeReferencedByName && !x.IsStatic && x.IsReadOnly && !x.IsInitialized() && !x.HasAttribute(Source.IgnoreAttributeFullName, compilation))
-                .Select(GetFieldInfo)
-                .ToList();
+            return string.Empty;
+        }
 
-            if (fields.Count == 0)
-            {
-                return string.Empty;
-            }
+        var constructorParameters = fields.GroupBy(x => x.ParameterName).Select(x => x.First()).ToList();
 
-            var constructorParameters = fields.GroupBy(x => x.ParameterName).Select(x => x.First()).ToList();
+        // Split the initialization in two because CodeMaid thinks it is an auto-generated file.
+        var source = new StringBuilder("// <auto-");
+        source.Append("generated />");
 
-            // Split the initialization in two because CodeMaid thinks it is an auto-generated file.
-            var source = new StringBuilder("// <auto-");
-            source.Append("generated />");
-
-            string tabulation = "    ";
-            if (symbol.ContainingNamespace.IsGlobalNamespace)
-            {
-                tabulation = string.Empty;
-            }
-            else
-            {
-                source.Append($@"
+        string tabulation = "    ";
+        if (symbol.ContainingNamespace.IsGlobalNamespace)
+        {
+            tabulation = string.Empty;
+        }
+        else
+        {
+            source.Append($@"
 namespace {symbol.ContainingNamespace.ToDisplayString()}
 {{");
-            }
+        }
 
-            source.Append($@"
+        source.Append($@"
 {tabulation}partial class {symbol.Name}
 {tabulation}{{
 {tabulation}    public {symbol.Name}({string.Join(", ", constructorParameters.Select(it => $"{it.Type} {it.ParameterName}"))})
 {tabulation}    {{");
 
-            foreach ((string type, string parameterName, string fieldName, string initializer) in fields)
-            {
-                source.Append($@"
-{tabulation}        this.{fieldName} = {initializer};");
-            }
+        foreach ((string type, string parameterName, string fieldName, string initializer) in fields)
+        {
             source.Append($@"
+{tabulation}        this.{fieldName} = {initializer};");
+        }
+        source.Append($@"
 {tabulation}    }}
 {tabulation}}}
 ");
-            if (!symbol.ContainingNamespace.IsGlobalNamespace)
-            {
-                source.Append(@"}
+        if (!symbol.ContainingNamespace.IsGlobalNamespace)
+        {
+            source.Append(@"}
 ");
-            }
+        }
 
-            return source.ToString();
+        return source.ToString();
 
-            (string Type, string ParameterName, string FieldName, string Initializer) GetFieldInfo(IFieldSymbol fieldSymbol)
+        (string Type, string ParameterName, string FieldName, string Initializer) GetFieldInfo(IFieldSymbol fieldSymbol)
+        {
+            ITypeSymbol type = fieldSymbol!.Type;
+            string typeDisplay = type.ToDisplayString();
+            string parameterName = fieldSymbol.Name.TrimStart('_');
+            string initializer = parameterName;
+
+            AttributeData? attributeData = fieldSymbol.GetAttribute(Source.InjectAttributeFullName, compilation);
+            if (attributeData is not null)
             {
-                ITypeSymbol type = fieldSymbol!.Type;
-                string typeDisplay = type.ToDisplayString();
-                string parameterName = fieldSymbol.Name.TrimStart('_');
-                string initializer = parameterName;
-
-                AttributeData? attributeData = fieldSymbol.GetAttribute(Source.InjectAttributeFullName, compilation);
-                if (attributeData is not null)
-                {
-                    initializer = attributeData.ConstructorArguments[0].Value?.ToString() ?? "";
-                    parameterName = attributeData.ConstructorArguments[1].Value?.ToString() ?? "";
-                    typeDisplay = attributeData.ConstructorArguments[2].Value?.ToString() ?? "";
-                }
-
-                if (type.TypeKind == TypeKind.Class || type.OriginalDefinition.SpecialType == SpecialType.System_Nullable_T)
-                {
-                    initializer = $"{initializer} ?? throw new System.ArgumentNullException(nameof({parameterName}))";
-                }
-
-                return new(typeDisplay, parameterName, fieldSymbol!.Name, initializer);
+                initializer = attributeData.ConstructorArguments[0].Value?.ToString() ?? "";
+                parameterName = attributeData.ConstructorArguments[1].Value?.ToString() ?? "";
+                typeDisplay = attributeData.ConstructorArguments[2].Value?.ToString() ?? "";
             }
+
+            if (type.TypeKind == TypeKind.Class || type.OriginalDefinition.SpecialType == SpecialType.System_Nullable_T)
+            {
+                initializer = $"{initializer} ?? throw new System.ArgumentNullException(nameof({parameterName}))";
+            }
+
+            return new(typeDisplay, parameterName, fieldSymbol!.Name, initializer);
         }
     }
 }
