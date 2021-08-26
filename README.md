@@ -37,6 +37,15 @@ do not have the same type. It takes three parameters:
 When using `AutoConstructorInjectAttribute`, the parameter name can be shared across multiple fields,
 and even use a parameter from another field not annotated with `AutoConstructorInjectAttribute`, but type must match.
 
+## Configuration
+
+By default, null ckecks with `ArgumentNullException` will be generated when needed.
+To disable this behavior, set `AutoConstructor_DisableNullChecking` to `false` in the project file:
+
+``` xml
+<AutoConstructor_DisableNullChecking>true</AutoConstructor_DisableNullChecking>
+```
+
 ## Sample
 
 The following code

@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -31,6 +32,12 @@ public class AutoConstructorGenerator : ISourceGenerator
             return;
         }
 
+        bool emitNullChecks = true;
+        if (context.AnalyzerConfigOptions.GlobalOptions.TryGetValue("build_property.AutoConstructor_DisableNullChecking", out string? disableNullCheckingSwitch))
+        {
+            emitNullChecks = !disableNullCheckingSwitch.Equals("true", StringComparison.OrdinalIgnoreCase);
+        }
+
         foreach (ClassDeclarationSyntax candidateClass in receiver.CandidateClasses)
         {
             if (context.CancellationToken.IsCancellationRequested)
@@ -48,7 +55,7 @@ public class AutoConstructorGenerator : ISourceGenerator
                 {
                     filename = $"{symbol.ContainingNamespace.ToDisplayString()}.{filename}";
                 }
-                string source = GenerateAutoConstructor(symbol, context.Compilation);
+                string source = GenerateAutoConstructor(symbol, context.Compilation, emitNullChecks);
                 if (!string.IsNullOrWhiteSpace(source))
                 {
                     context.AddSource(filename, SourceText.From(source, Encoding.UTF8));
@@ -57,7 +64,7 @@ public class AutoConstructorGenerator : ISourceGenerator
         }
     }
 
-    private static string GenerateAutoConstructor(INamedTypeSymbol symbol, Compilation compilation)
+    private static string GenerateAutoConstructor(INamedTypeSymbol symbol, Compilation compilation, bool emitNullChecks)
     {
         var fields = symbol.GetMembers().OfType<IFieldSymbol>()
             .Where(x => x.CanBeReferencedByName && !x.IsStatic && x.IsReadOnly && !x.IsInitialized() && !x.HasAttribute(Source.IgnoreAttributeFullName, compilation))
@@ -125,7 +132,7 @@ namespace {symbol.ContainingNamespace.ToDisplayString()}
                 typeDisplay = attributeData.ConstructorArguments[2].Value?.ToString() ?? "";
             }
 
-            if (type.TypeKind == TypeKind.Class || type.OriginalDefinition.SpecialType == SpecialType.System_Nullable_T)
+            if ((type.TypeKind == TypeKind.Class || type.OriginalDefinition.SpecialType == SpecialType.System_Nullable_T) && emitNullChecks)
             {
                 initializer = $"{initializer} ?? throw new System.ArgumentNullException(nameof({parameterName}))";
             }
