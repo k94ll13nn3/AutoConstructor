@@ -39,7 +39,7 @@ and even use a parameter from another field not annotated with `AutoConstructorI
 
 ## Configuration
 
-By default, null ckecks with `ArgumentNullException` will be generated when needed.
+By default, null checks with `ArgumentNullException` will be generated when needed.
 To disable this behavior, set `AutoConstructor_DisableNullChecking` to `false` in the project file:
 
 ``` xml
