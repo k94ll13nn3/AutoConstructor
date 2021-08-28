@@ -102,10 +102,22 @@ public Test(string name, System.DateTime? date, System.Collections.Generic.List<
 
 ## Diagnostics
 
-Rule ID | Category | Severity | Notes
---------|----------|----------|-------
-ACONS01 | Usage | Warning | ClassWithoutPartialAnalyzer, [Documentation](https://github.com/k94ll13nn3/AutoConstructor/tree/main/src/AutoConstructor.Generator/Analyzers/ClassWithoutPartialAnalyzer.cs)
-ACONS02 | Usage | Warning | ClassWithoutFieldsToInjectAnalyzer, [Documentation](https://github.com/k94ll13nn3/AutoConstructor/tree/main/src/AutoConstructor.Generator/Analyzers/ClassWithoutFieldsToInjectAnalyzer.cs)
-ACONS03 | Usage | Info | IgnoreAttributeOnNonProcessedFieldAnalyzer, [Documentation](https://github.com/k94ll13nn3/AutoConstructor/tree/main/src/AutoConstructor.Generator/Analyzers/IgnoreAttributeOnNonProcessedFieldAnalyzer.cs)
-ACONS04 | Usage | Warning | InjectAttributeOnIgnoredFieldAnalyzer, [Documentation](https://github.com/k94ll13nn3/AutoConstructor/tree/main/src/AutoConstructor.Generator/Analyzers/IgnoreAttributeOnNonProcessedFieldAnalyzer.cs)
-ACONS05 | Usage | Warning | IgnoreOrInjectAttributeOnClassWithoutAttributeAnalyzer, [Documentation](https://github.com/k94ll13nn3/AutoConstructor/tree/main/src/AutoConstructor.Generator/Analyzers/InjectAttributeOnIgnoredFieldAnalyzer.cs)
+### ACONS01
+
+The `AutoConstructor` attribute is used on a class that is not partial.
+
+### ACONS02
+
+The `AutoConstructor` attribute is used on a class without fiels to inject.
+
+### ACONS03
+
+The `AutoConstructorIgnore` attribute is used on a field that won't already be processed.
+
+### ACONS04
+
+The `AutoConstructorInject` attribute is used on a field that won't already be processed.
+
+### ACONS05
+
+The `AutoConstructorIgnore` or `AutoConstructorInject` are used on a class without the `AutoConstructor` attribute.
