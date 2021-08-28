@@ -15,7 +15,7 @@ namespace AutoConstructor.Generator
 
         private static readonly DiagnosticDescriptor Rule = new(
             DiagnosticId,
-            "Couldn't generate consctructor",
+            "Couldn't generate constructor",
             $"Type decorated with {Source.AttributeFullName} must be also declared partial",
             "Usage",
             DiagnosticSeverity.Warning,
