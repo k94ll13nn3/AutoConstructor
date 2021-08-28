@@ -323,7 +323,7 @@ namespace Test
                         (typeof(AutoConstructorGenerator), "AutoConstructorIgnoreAttribute.cs", SourceText.From(Source.IgnoreAttributeText, Encoding.UTF8)),
                         (typeof(AutoConstructorGenerator), "AutoConstructorInjectAttribute.cs", SourceText.From(Source.InjectAttributeText, Encoding.UTF8)),
                     },
-                    ExpectedDiagnostics = { new DiagnosticResult(AutoConstructorGenerator.DiagnosticId, DiagnosticSeverity.Error).WithNoLocation() },
+                    ExpectedDiagnostics = { new DiagnosticResult(AutoConstructorGenerator.DiagnosticId, DiagnosticSeverity.Error).WithSpan(4, 5, 10, 6) },
                 }
         }.RunAsync();
     }

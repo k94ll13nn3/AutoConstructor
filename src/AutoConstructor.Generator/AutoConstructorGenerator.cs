@@ -62,7 +62,7 @@ public class AutoConstructorGenerator : ISourceGenerator
                 {
                     filename = $"{symbol.ContainingNamespace.ToDisplayString()}.{filename}";
                 }
-                string source = GenerateAutoConstructor(symbol, context.Compilation, context);
+                string source = GenerateAutoConstructor(symbol, context.Compilation, context, candidateClass);
                 if (!string.IsNullOrWhiteSpace(source))
                 {
                     context.AddSource(filename, SourceText.From(source, Encoding.UTF8));
@@ -71,7 +71,7 @@ public class AutoConstructorGenerator : ISourceGenerator
         }
     }
 
-    private static string GenerateAutoConstructor(INamedTypeSymbol symbol, Compilation compilation, GeneratorExecutionContext context)
+    private static string GenerateAutoConstructor(INamedTypeSymbol symbol, Compilation compilation, GeneratorExecutionContext context, ClassDeclarationSyntax classDeclaration)
     {
         bool emitNullChecks = true;
         if (context.AnalyzerConfigOptions.GlobalOptions.TryGetValue("build_property.AutoConstructor_DisableNullChecking", out string? disableNullCheckingSwitch))
@@ -91,7 +91,7 @@ public class AutoConstructorGenerator : ISourceGenerator
 
         if (fields.GroupBy(x => x.ParameterName).Any(g => g.Select(c => c.Type).Distinct().Count() > 1))
         {
-            context.ReportDiagnostic(Diagnostic.Create(Rule, Location.None));
+            context.ReportDiagnostic(Diagnostic.Create(Rule, classDeclaration.GetLocation()));
             return string.Empty;
         }
 
