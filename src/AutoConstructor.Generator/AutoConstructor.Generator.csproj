@@ -34,6 +34,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Include="AutoConstructor.props" Pack="true" PackagePath="build\" />
     <None Include="..\..\logo_128x128.png" Pack="true" PackagePath="" Visible="false" />
     <None Include="..\..\README.md" Pack="true" PackagePath="" Visible="false" />
   </ItemGroup>

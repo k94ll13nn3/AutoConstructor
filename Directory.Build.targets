@@ -1,7 +1,0 @@
-<Project>
-
-  <ItemGroup>
-    <_PackageFiles Include="*.props" PackagePath="build/" />
-  </ItemGroup>
-
-</Project>
