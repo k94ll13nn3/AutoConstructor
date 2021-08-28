@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Microsoft.CodeAnalysis;
@@ -11,17 +12,17 @@ namespace AutoConstructor.Generator;
 [Generator]
 public class AutoConstructorGenerator : ISourceGenerator
 {
-    public const string DiagnosticId = "ACONS06";
+    public const string MistmatchTypesDiagnosticId = "ACONS06";
 
     private static readonly DiagnosticDescriptor Rule = new(
-        DiagnosticId,
+        MistmatchTypesDiagnosticId,
         "Couldn't generate constructor",
         "One or more parameter have mismatching types",
         "Usage",
         DiagnosticSeverity.Error,
         true,
         null,
-        $"https://github.com/k94ll13nn3/AutoConstructor#{DiagnosticId}",
+        $"https://github.com/k94ll13nn3/AutoConstructor#{MistmatchTypesDiagnosticId}",
         WellKnownDiagnosticTags.Build);
 
     public void Initialize(GeneratorInitializationContext context)
@@ -52,9 +53,10 @@ public class AutoConstructorGenerator : ISourceGenerator
                 break;
             }
 
-            SemanticModel model = context.Compilation.GetSemanticModel(candidateClass.SyntaxTree);
-            INamedTypeSymbol? symbol = model.GetDeclaredSymbol(candidateClass);
-
+            INamedTypeSymbol? symbol = context
+                .Compilation
+                .GetSemanticModel(candidateClass.SyntaxTree)
+                .GetDeclaredSymbol(candidateClass);
             if (symbol is not null)
             {
                 string filename = $"{symbol.Name}.g.cs";
@@ -62,39 +64,41 @@ public class AutoConstructorGenerator : ISourceGenerator
                 {
                     filename = $"{symbol.ContainingNamespace.ToDisplayString()}.{filename}";
                 }
-                string source = GenerateAutoConstructor(symbol, context.Compilation, context, candidateClass);
-                if (!string.IsNullOrWhiteSpace(source))
+
+                bool emitNullChecks = true;
+                if (context.AnalyzerConfigOptions.GlobalOptions.TryGetValue("build_property.AutoConstructor_DisableNullChecking", out string? disableNullCheckingSwitch))
                 {
-                    context.AddSource(filename, SourceText.From(source, Encoding.UTF8));
+                    emitNullChecks = !disableNullCheckingSwitch.Equals("true", StringComparison.OrdinalIgnoreCase);
                 }
+
+                var fields = symbol.GetMembers().OfType<IFieldSymbol>()
+                    .Where(x => x.CanBeReferencedByName
+                        && !x.IsStatic
+                        && x.IsReadOnly
+                        && !x.IsInitialized()
+                        && !x.HasAttribute(Source.IgnoreAttributeFullName, context.Compilation))
+                    .Select(x => GetFieldInfo(x, context.Compilation, emitNullChecks))
+                    .ToList();
+
+                if (fields.Count == 0)
+                {
+                    // No need to report diagnostic, taken care by the analyers.
+                    continue;
+                }
+
+                if (fields.GroupBy(x => x.ParameterName).Any(g => g.Select(c => c.Type).Distinct().Count() > 1))
+                {
+                    context.ReportDiagnostic(Diagnostic.Create(Rule, candidateClass.GetLocation()));
+                    continue;
+                }
+
+                context.AddSource(filename, SourceText.From(GenerateAutoConstructor(symbol, fields), Encoding.UTF8));
             }
         }
     }
 
-    private static string GenerateAutoConstructor(INamedTypeSymbol symbol, Compilation compilation, GeneratorExecutionContext context, ClassDeclarationSyntax classDeclaration)
+    private static string GenerateAutoConstructor(INamedTypeSymbol symbol, IEnumerable<FieldInfo> fields)
     {
-        bool emitNullChecks = true;
-        if (context.AnalyzerConfigOptions.GlobalOptions.TryGetValue("build_property.AutoConstructor_DisableNullChecking", out string? disableNullCheckingSwitch))
-        {
-            emitNullChecks = !disableNullCheckingSwitch.Equals("true", StringComparison.OrdinalIgnoreCase);
-        }
-
-        var fields = symbol.GetMembers().OfType<IFieldSymbol>()
-            .Where(x => x.CanBeReferencedByName && !x.IsStatic && x.IsReadOnly && !x.IsInitialized() && !x.HasAttribute(Source.IgnoreAttributeFullName, compilation))
-            .Select(GetFieldInfo)
-            .ToList();
-
-        if (fields.Count == 0)
-        {
-            return string.Empty;
-        }
-
-        if (fields.GroupBy(x => x.ParameterName).Any(g => g.Select(c => c.Type).Distinct().Count() > 1))
-        {
-            context.ReportDiagnostic(Diagnostic.Create(Rule, classDeclaration.GetLocation()));
-            return string.Empty;
-        }
-
         var constructorParameters = fields.GroupBy(x => x.ParameterName).Select(x => x.First()).ToList();
 
         // Split the initialization in two because CodeMaid thinks it is an auto-generated file.
@@ -119,10 +123,10 @@ namespace {symbol.ContainingNamespace.ToDisplayString()}
 {tabulation}    public {symbol.Name}({string.Join(", ", constructorParameters.Select(it => $"{it.Type} {it.ParameterName}"))})
 {tabulation}    {{");
 
-        foreach ((string type, string parameterName, string fieldName, string initializer) in fields)
+        foreach (FieldInfo field in fields)
         {
             source.Append($@"
-{tabulation}        this.{fieldName} = {initializer};");
+{tabulation}        this.{field.FieldName} = {field.Initializer};");
         }
         source.Append($@"
 {tabulation}    }}
@@ -135,28 +139,28 @@ namespace {symbol.ContainingNamespace.ToDisplayString()}
         }
 
         return source.ToString();
+    }
 
-        (string Type, string ParameterName, string FieldName, string Initializer) GetFieldInfo(IFieldSymbol fieldSymbol)
+    private static FieldInfo GetFieldInfo(IFieldSymbol fieldSymbol, Compilation compilation, bool emitNullChecks)
+    {
+        ITypeSymbol type = fieldSymbol!.Type;
+        string typeDisplay = type.ToDisplayString();
+        string parameterName = fieldSymbol.Name.TrimStart('_');
+        string initializer = parameterName;
+
+        AttributeData? attributeData = fieldSymbol.GetAttribute(Source.InjectAttributeFullName, compilation);
+        if (attributeData is not null)
         {
-            ITypeSymbol type = fieldSymbol!.Type;
-            string typeDisplay = type.ToDisplayString();
-            string parameterName = fieldSymbol.Name.TrimStart('_');
-            string initializer = parameterName;
-
-            AttributeData? attributeData = fieldSymbol.GetAttribute(Source.InjectAttributeFullName, compilation);
-            if (attributeData is not null)
-            {
-                initializer = attributeData.ConstructorArguments[0].Value?.ToString() ?? "";
-                parameterName = attributeData.ConstructorArguments[1].Value?.ToString() ?? "";
-                typeDisplay = attributeData.ConstructorArguments[2].Value?.ToString() ?? "";
-            }
-
-            if ((type.TypeKind == TypeKind.Class || type.OriginalDefinition.SpecialType == SpecialType.System_Nullable_T) && emitNullChecks)
-            {
-                initializer = $"{initializer} ?? throw new System.ArgumentNullException(nameof({parameterName}))";
-            }
-
-            return new(typeDisplay, parameterName, fieldSymbol!.Name, initializer);
+            initializer = attributeData.ConstructorArguments[0].Value?.ToString() ?? "";
+            parameterName = attributeData.ConstructorArguments[1].Value?.ToString() ?? "";
+            typeDisplay = attributeData.ConstructorArguments[2].Value?.ToString() ?? "";
         }
+
+        if ((type.TypeKind == TypeKind.Class || type.OriginalDefinition.SpecialType == SpecialType.System_Nullable_T) && emitNullChecks)
+        {
+            initializer = $"{initializer} ?? throw new System.ArgumentNullException(nameof({parameterName}))";
+        }
+
+        return new(typeDisplay, parameterName, fieldSymbol!.Name, initializer);
     }
 }
