@@ -19,7 +19,7 @@ namespace AutoConstructor.Generator
             DiagnosticSeverity.Warning,
             true,
             null,
-            "https://github.com/k94ll13nn3/AutoConstructor/tree/main/src/AutoConstructor.Generator/Analyzers/InjectAttributeOnIgnoredFieldAnalyzer.cs",
+            $"https://github.com/k94ll13nn3/AutoConstructor#{DiagnosticId}",
             WellKnownDiagnosticTags.Unnecessary);
 
         public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => ImmutableArray.Create(Rule);
