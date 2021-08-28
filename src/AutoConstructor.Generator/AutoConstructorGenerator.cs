@@ -11,6 +11,19 @@ namespace AutoConstructor.Generator;
 [Generator]
 public class AutoConstructorGenerator : ISourceGenerator
 {
+    public const string DiagnosticId = "ACONS06";
+
+    private static readonly DiagnosticDescriptor Rule = new(
+        DiagnosticId,
+        "Couldn't generate constructor",
+        "One or more parameter have mismatching types",
+        "Usage",
+        DiagnosticSeverity.Error,
+        true,
+        null,
+        $"https://github.com/k94ll13nn3/AutoConstructor#{DiagnosticId}",
+        WellKnownDiagnosticTags.Build);
+
     public void Initialize(GeneratorInitializationContext context)
     {
         // Register the attribute source
@@ -32,12 +45,6 @@ public class AutoConstructorGenerator : ISourceGenerator
             return;
         }
 
-        bool emitNullChecks = true;
-        if (context.AnalyzerConfigOptions.GlobalOptions.TryGetValue("build_property.AutoConstructor_DisableNullChecking", out string? disableNullCheckingSwitch))
-        {
-            emitNullChecks = !disableNullCheckingSwitch.Equals("true", StringComparison.OrdinalIgnoreCase);
-        }
-
         foreach (ClassDeclarationSyntax candidateClass in receiver.CandidateClasses)
         {
             if (context.CancellationToken.IsCancellationRequested)
@@ -55,7 +62,7 @@ public class AutoConstructorGenerator : ISourceGenerator
                 {
                     filename = $"{symbol.ContainingNamespace.ToDisplayString()}.{filename}";
                 }
-                string source = GenerateAutoConstructor(symbol, context.Compilation, emitNullChecks);
+                string source = GenerateAutoConstructor(symbol, context.Compilation, context);
                 if (!string.IsNullOrWhiteSpace(source))
                 {
                     context.AddSource(filename, SourceText.From(source, Encoding.UTF8));
@@ -64,8 +71,14 @@ public class AutoConstructorGenerator : ISourceGenerator
         }
     }
 
-    private static string GenerateAutoConstructor(INamedTypeSymbol symbol, Compilation compilation, bool emitNullChecks)
+    private static string GenerateAutoConstructor(INamedTypeSymbol symbol, Compilation compilation, GeneratorExecutionContext context)
     {
+        bool emitNullChecks = true;
+        if (context.AnalyzerConfigOptions.GlobalOptions.TryGetValue("build_property.AutoConstructor_DisableNullChecking", out string? disableNullCheckingSwitch))
+        {
+            emitNullChecks = !disableNullCheckingSwitch.Equals("true", StringComparison.OrdinalIgnoreCase);
+        }
+
         var fields = symbol.GetMembers().OfType<IFieldSymbol>()
             .Where(x => x.CanBeReferencedByName && !x.IsStatic && x.IsReadOnly && !x.IsInitialized() && !x.HasAttribute(Source.IgnoreAttributeFullName, compilation))
             .Select(GetFieldInfo)
@@ -73,6 +86,12 @@ public class AutoConstructorGenerator : ISourceGenerator
 
         if (fields.Count == 0)
         {
+            return string.Empty;
+        }
+
+        if (fields.GroupBy(x => x.ParameterName).Any(g => g.Select(c => c.Type).Distinct().Count() > 1))
+        {
+            context.ReportDiagnostic(Diagnostic.Create(Rule, Location.None));
             return string.Empty;
         }
 

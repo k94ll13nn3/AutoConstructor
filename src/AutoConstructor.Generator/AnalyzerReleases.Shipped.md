@@ -1,6 +1,14 @@
 ﻿; Shipped analyzer releases
 ; https://github.com/dotnet/roslyn-analyzers/blob/master/src/Microsoft.CodeAnalysis.Analyzers/ReleaseTrackingAnalyzers.Help.md
 
+## Release 1.2.0
+
+### New Rules
+
+Rule ID | Category | Severity | Notes
+--------|----------|----------|-------
+ACONS06 | Usage | Error | AutoConstructorGenerator, [Documentation](https://github.com/k94ll13nn3/AutoConstructor#ACONS06)
+
 ## Release 1.0.0
 
 ### New Rules

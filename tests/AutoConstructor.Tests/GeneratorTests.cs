@@ -1,5 +1,7 @@
 ﻿using System.Text;
 using AutoConstructor.Generator;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.Testing;
 using Microsoft.CodeAnalysis.Text;
 using Xunit;
 using VerifySourceGenerator = AutoConstructor.Tests.Verifiers.CSharpSourceGeneratorVerifier<AutoConstructor.Generator.AutoConstructorGenerator>;
@@ -291,6 +293,37 @@ namespace Test
 is_global=true
 build_property.AutoConstructor_DisableNullChecking = {disableNullChecks}
 ") }
+                }
+        }.RunAsync();
+    }
+
+    [Fact]
+    public async Task Run_WithMismatchingTypes_ShouldNotGenerateClass()
+    {
+        const string code = @"
+namespace Test
+{
+    [AutoConstructor]
+    internal partial class Test
+    {
+        [AutoConstructorInject(""guid.ToString()"", ""guid"", typeof(System.Guid))]
+        private readonly string _i;
+        private readonly string _guid;
+    }
+}";
+
+        await new VerifySourceGenerator.Test
+        {
+            TestState =
+                {
+                    Sources = { code },
+                    GeneratedSources =
+                    {
+                        (typeof(AutoConstructorGenerator), "AutoConstructorAttribute.cs", SourceText.From(Source.AttributeText, Encoding.UTF8)),
+                        (typeof(AutoConstructorGenerator), "AutoConstructorIgnoreAttribute.cs", SourceText.From(Source.IgnoreAttributeText, Encoding.UTF8)),
+                        (typeof(AutoConstructorGenerator), "AutoConstructorInjectAttribute.cs", SourceText.From(Source.InjectAttributeText, Encoding.UTF8)),
+                    },
+                    ExpectedDiagnostics = { new DiagnosticResult(AutoConstructorGenerator.DiagnosticId, DiagnosticSeverity.Error).WithNoLocation() },
                 }
         }.RunAsync();
     }

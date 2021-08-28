@@ -121,3 +121,18 @@ The `AutoConstructorInject` attribute is used on a field that won't already be p
 ### ACONS05
 
 The `AutoConstructorIgnore` or `AutoConstructorInject` are used on a class without the `AutoConstructor` attribute.
+
+### ACONS06
+
+A type specified in `AutoConstructorInject` attribute does not match the type of another parameter with the same name.
+
+In the folowing sample, both fields will be injected with `guid` as parameter name, but one of type `string` and the other of type `Guid`,
+preventing the generator from running.
+``` csharp
+public partial class Test
+{
+    [AutoConstructorInject("guid.ToString()", "guid", typeof(Guid))]
+    private readonly string _guid2;
+    private readonly string _guid;
+}
+```
