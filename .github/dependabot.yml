@@ -6,3 +6,7 @@ updates:
     interval: monthly
     time: "04:00"
   open-pull-requests-limit: 10
+  ignore:
+      - dependency-name: "Microsoft.CodeAnalysis"
+      - dependency-name: "Microsoft.CodeAnalysis.CSharp.Workspaces"
+      - dependency-name: "Microsoft.CodeAnalysis.CSharp.Workspaces"
