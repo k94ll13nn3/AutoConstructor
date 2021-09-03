@@ -13,7 +13,7 @@ C# source generator that generates a constructor from readonly fields in a class
 
 ## Requirements
 
-- Visual Studio 16.9+ is needed
+- Visual Studio 16.10+ is needed
 - .NET SDK 5.0.300+ is needed
 
 ## How to use
