@@ -76,4 +76,34 @@ namespace Test
             };
         await VerifyIgnoreOrInjectAttributeOnClassWithoutAttribute.VerifyCodeFixAsync(test, expected, fixtest);
     }
+
+    [Fact]
+    public async Task Analyzer_BothAttributesOnClassWithoutAttribute_ShouldReportDiagnosticAndFixCode()
+    {
+        const string test = @"
+namespace Test
+{
+    internal class Test
+    {
+        [{|#0:AutoConstructorIgnore|}]
+        [{|#1:AutoConstructorInject(""a"", ""a"", typeof(int))|}]
+        private readonly int _t = 1;
+    }
+}";
+
+        const string fixtest = @"
+namespace Test
+{
+    internal class Test
+    {
+        private readonly int _t = 1;
+    }
+}";
+
+        DiagnosticResult[] expected = new[] {
+                VerifyIgnoreOrInjectAttributeOnClassWithoutAttribute.Diagnostic(IgnoreOrInjectAttributeOnClassWithoutAttributeAnalyzer.DiagnosticId).WithLocation(0),
+                VerifyIgnoreOrInjectAttributeOnClassWithoutAttribute.Diagnostic(IgnoreOrInjectAttributeOnClassWithoutAttributeAnalyzer.DiagnosticId).WithLocation(1),
+            };
+        await VerifyIgnoreOrInjectAttributeOnClassWithoutAttribute.VerifyCodeFixAsync(test, expected, fixtest);
+    }
 }

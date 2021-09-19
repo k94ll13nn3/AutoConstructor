@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Immutable;
-using System.Linq;
+﻿using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Diagnostics;
 
@@ -47,15 +45,17 @@ namespace AutoConstructor.Generator
             {
                 foreach (IFieldSymbol field in fields)
                 {
-                    AttributeData? attr = field.GetAttribute(Source.IgnoreAttributeFullName, context.Compilation) ?? field.GetAttribute(Source.InjectAttributeFullName, context.Compilation);
-                    if (attr is not null)
+                    foreach (string attributeName in new[] { Source.IgnoreAttributeFullName, Source.InjectAttributeFullName })
                     {
-                        SyntaxReference? propertyTypeIdentifier = attr.ApplicationSyntaxReference;
-                        if (propertyTypeIdentifier is not null)
+                        if (field.GetAttribute(attributeName, context.Compilation) is AttributeData attr)
                         {
-                            var location = Location.Create(propertyTypeIdentifier.SyntaxTree, propertyTypeIdentifier.Span);
-                            var diagnostic = Diagnostic.Create(Rule, location);
-                            context.ReportDiagnostic(diagnostic);
+                            SyntaxReference? propertyTypeIdentifier = attr.ApplicationSyntaxReference;
+                            if (propertyTypeIdentifier is not null)
+                            {
+                                var location = Location.Create(propertyTypeIdentifier.SyntaxTree, propertyTypeIdentifier.Span);
+                                var diagnostic = Diagnostic.Create(Rule, location);
+                                context.ReportDiagnostic(diagnostic);
+                            }
                         }
                     }
                 }
