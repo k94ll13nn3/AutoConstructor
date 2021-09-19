@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Immutable;
-using System.Linq;
+﻿using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -33,15 +31,15 @@ namespace AutoConstructor.Generator
             context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
             context.EnableConcurrentExecution();
 
-            context.RegisterSyntaxNodeAction(AnalyzeNode, SyntaxKind.ClassDeclaration);
+            context.RegisterSymbolAction(AnalyzeSymbol, SymbolKind.NamedType);
         }
 
-        private static void AnalyzeNode(SyntaxNodeAnalysisContext context)
+        private static void AnalyzeSymbol(SymbolAnalysisContext context)
         {
-            if (context.Node is ClassDeclarationSyntax classDeclarationSyntax
-                && classDeclarationSyntax.AttributeLists.Any(a =>
-                    a.Attributes.Any(b =>
-                        b.Name.ToString() == Source.AttributeName || b.Name.ToString() == Source.AttributeFullName))
+            var symbol = (INamedTypeSymbol)context.Symbol;
+
+            if (symbol.DeclaringSyntaxReferences[0].GetSyntax() is ClassDeclarationSyntax classDeclarationSyntax
+                && symbol.HasAttribute(Source.AttributeFullName, context.Compilation)
                 && !classDeclarationSyntax.Modifiers.Any(SyntaxKind.PartialKeyword))
             {
                 var diagnostic = Diagnostic.Create(Rule, classDeclarationSyntax.Identifier.GetLocation());
