@@ -11,7 +11,6 @@ internal class SyntaxReceiver : ISyntaxContextReceiver
 {
     public List<ClassDeclarationSyntax> CandidateClasses { get; } = new List<ClassDeclarationSyntax>();
 
-
     /// <summary>
     /// Called for every syntax node in the compilation, we can inspect the nodes and save any information useful for generation.
     /// </summary>
