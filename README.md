@@ -108,7 +108,7 @@ The `AutoConstructor` attribute is used on a class that is not partial.
 
 ### ACONS02
 
-The `AutoConstructor` attribute is used on a class without fiels to inject.
+The `AutoConstructor` attribute is used on a class without fields to inject.
 
 ### ACONS03
 
