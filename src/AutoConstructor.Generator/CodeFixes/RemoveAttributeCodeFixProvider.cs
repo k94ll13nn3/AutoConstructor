@@ -1,10 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.Immutable;
+﻿using System.Collections.Immutable;
 using System.Composition;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CodeActions;
 using Microsoft.CodeAnalysis.CodeFixes;
@@ -34,38 +29,25 @@ namespace AutoConstructor.Generator
             Diagnostic? diagnostic = context.Diagnostics[0];
             TextSpan diagnosticSpan = diagnostic.Location.SourceSpan;
 
-            string[] attributesToRemove = diagnostic.Id switch
-            {
-                ClassWithoutFieldsToInjectAnalyzer.DiagnosticId => new[] { Source.AttributeName },
-                IgnoreAttributeOnNonProcessedFieldAnalyzer.DiagnosticId => new[] { Source.IgnoreAttributeName },
-                InjectAttributeOnIgnoredFieldAnalyzer.DiagnosticId => new[] { Source.InjectAttributeName },
-                IgnoreOrInjectAttributeOnClassWithoutAttributeAnalyzer.DiagnosticId => new[] { Source.IgnoreAttributeName, Source.InjectAttributeName },
-                _ => throw new InvalidOperationException("Invalid diagnostic."),
-            };
-
+            string attributeName = root?.FindToken(diagnosticSpan.Start).ToFullString() ?? "unknown";
             MemberDeclarationSyntax? node = root?.FindToken(diagnosticSpan.Start).Parent?.AncestorsAndSelf().OfType<MemberDeclarationSyntax>().First();
             if (node is not null)
             {
                 context.RegisterCodeFix(
                     CodeAction.Create(
-                        title: $"Remove {string.Join("/", attributesToRemove.Select(c => $"{c}Attribute"))}",
-                        createChangedDocument: c => RemoveAttributesAsync(context.Document, node, attributesToRemove, c),
-                        equivalenceKey: $"Remove {string.Join("/", attributesToRemove.Select(c => $"{c}Attribute"))}"),
+                        title: $"Remove {attributeName} attribute",
+                        createChangedDocument: c => RemoveAttributeAsync(context.Document, node, diagnosticSpan, c),
+                        equivalenceKey: $"Remove {attributeName} attribute"),
                     diagnostic);
             }
         }
 
-        private static async Task<Document> RemoveAttributesAsync(Document document, MemberDeclarationSyntax declaration, string[] attributesToRemove, CancellationToken cancellationToken)
+        private static async Task<Document> RemoveAttributeAsync(Document document, MemberDeclarationSyntax declaration, TextSpan location, CancellationToken cancellationToken)
         {
             SyntaxNode? oldRoot = await document.GetSyntaxRootAsync(cancellationToken).ConfigureAwait(false);
             if (oldRoot is not null)
             {
-                MemberDeclarationSyntax newDeclaration = declaration;
-                foreach (string attribute in attributesToRemove)
-                {
-                    newDeclaration = RemoveAttributeFromSyntax(newDeclaration, attribute);
-                }
-
+                MemberDeclarationSyntax newDeclaration = RemoveAttributeFromSyntax(declaration, location);
                 SyntaxNode? newRoot = oldRoot.ReplaceNode(declaration, newDeclaration);
                 if (newRoot is not null)
                 {
@@ -76,7 +58,7 @@ namespace AutoConstructor.Generator
             throw new InvalidOperationException("Cannot fix code.");
         }
 
-        private static MemberDeclarationSyntax RemoveAttributeFromSyntax(MemberDeclarationSyntax node, string attributeName)
+        private static MemberDeclarationSyntax RemoveAttributeFromSyntax(MemberDeclarationSyntax node, TextSpan location)
         {
             var newAttributes = new SyntaxList<AttributeListSyntax>();
             foreach (AttributeListSyntax attributeList in node.AttributeLists)
@@ -84,8 +66,7 @@ namespace AutoConstructor.Generator
                 List<AttributeSyntax> nodesToRemove =
                     attributeList
                     .Attributes
-                    .Where(
-                        attribute => attribute.Name.ToString() == attributeName || attribute.Name.ToString() == $"{attributeName}Attribute")
+                    .Where(attribute => attribute.Span == location)
                     .ToList();
 
                 if (nodesToRemove.Count != attributeList.Attributes.Count)

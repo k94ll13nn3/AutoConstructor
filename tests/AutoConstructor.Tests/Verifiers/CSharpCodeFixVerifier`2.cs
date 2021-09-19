@@ -34,6 +34,7 @@ public static class CSharpCodeFixVerifier<TAnalyzer, TCodeFix>
         {
             TestCode = AppendBaseCode(source),
             FixedCode = AppendBaseCode(fixedSource),
+            NumberOfFixAllIterations = expected.Length,
         };
 
         test.ExpectedDiagnostics.AddRange(expected);
