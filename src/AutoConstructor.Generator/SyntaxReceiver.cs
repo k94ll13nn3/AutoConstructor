@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using Microsoft.CodeAnalysis;
+﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
@@ -9,26 +7,31 @@ namespace AutoConstructor.Generator;
 /// <summary>
 /// Created on demand before each generation pass.
 /// </summary>
-internal class SyntaxReceiver : ISyntaxReceiver
+internal class SyntaxReceiver : ISyntaxContextReceiver
 {
     public List<ClassDeclarationSyntax> CandidateClasses { get; } = new List<ClassDeclarationSyntax>();
+
 
     /// <summary>
     /// Called for every syntax node in the compilation, we can inspect the nodes and save any information useful for generation.
     /// </summary>
-    public void OnVisitSyntaxNode(SyntaxNode syntaxNode)
+    public void OnVisitSyntaxNode(GeneratorSyntaxContext context)
     {
         // Only check:
         // - classes
         // - with the "partial" keyword
         // - with the wanted attribute
-        if (syntaxNode is ClassDeclarationSyntax classDeclarationSyntax
-            && classDeclarationSyntax.Modifiers.Any(SyntaxKind.PartialKeyword)
-            && classDeclarationSyntax.AttributeLists.Any(a =>
-                a.Attributes.Any(b =>
-                    b.Name.ToString() == Source.AttributeName || b.Name.ToString() == Source.AttributeFullName)))
+        if (context.Node is ClassDeclarationSyntax classDeclarationSyntax
+            && classDeclarationSyntax.Modifiers.Any(SyntaxKind.PartialKeyword))
         {
-            CandidateClasses.Add(classDeclarationSyntax);
+            INamedTypeSymbol? symbol = context
+                .SemanticModel
+                .GetDeclaredSymbol(classDeclarationSyntax);
+
+            if (symbol?.HasAttribute(Source.AttributeFullName, context.SemanticModel.Compilation) is true)
+            {
+                CandidateClasses.Add(classDeclarationSyntax);
+            }
         }
     }
 }
