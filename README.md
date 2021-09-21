@@ -28,11 +28,14 @@ By default, all `private readonly` without initialization will be used. The will
 Fields marked with `AutoConstructorIgnoreAttribute` will be ignored.
 
 Use `AutoConstructorInjectAttribute` to customize the behavior, usualy when the injected parameter and the fields
-do not have the same type. It takes three parameters:
+do not have the same type. It has two constructors:
 
-- `Initializer`: a string that will be used to initialize the field (by example `myService.GetData()`)
-- `ParameterName`: the name of the parameter to used in the constructor  (by example `myService`)
-- `InjectedType`: the type of the parameter to used in the constructor  (by example `IMyService`)
+- `AutoConstructorInjectAttribute(string parameterName)`
+  - `parameterName`: the name of the parameter to used in the constructor  (by example `myService`)
+- `AutoConstructorInjectAttribute(string initializer, string parameterName, System.Type injectedType)`
+  - `initializer`: a string that will be used to initialize the field (by example `myService.GetData()`)
+  - `parameterName`: the name of the parameter to used in the constructor  (by example `myService`)
+  - `injectedType`: the type of the parameter to used in the constructor  (by example `IMyService`)
 
 When using `AutoConstructorInjectAttribute`, the parameter name can be shared across multiple fields,
 and even use a parameter from another field not annotated with `AutoConstructorInjectAttribute`, but type must match.
