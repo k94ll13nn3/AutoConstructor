@@ -10,12 +10,24 @@ public static class CSharpSourceGeneratorVerifier<TSourceGenerator>
 {
     internal class Test : CSharpSourceGeneratorTest<TSourceGenerator, XUnitVerifier>
     {
+        public bool EnableNullable { get; set; }
+
         public LanguageVersion LanguageVersion { get; set; }
 
         protected override CompilationOptions CreateCompilationOptions()
         {
-            CompilationOptions compilationOptions = base.CreateCompilationOptions();
-            return compilationOptions.WithSpecificDiagnosticOptions(compilationOptions.SpecificDiagnosticOptions.SetItems(CSharpVerifierHelper.NullableWarnings));
+            if (base.CreateCompilationOptions() is not CSharpCompilationOptions compilationOptions)
+            {
+                throw new InvalidOperationException("Invalid compilation options");
+            }
+
+            if (EnableNullable)
+            {
+                compilationOptions = compilationOptions.WithNullableContextOptions(NullableContextOptions.Enable);
+            }
+
+            return compilationOptions
+                .WithSpecificDiagnosticOptions(compilationOptions.SpecificDiagnosticOptions.SetItems(CSharpVerifierHelper.NullableWarnings));
         }
 
         protected override ParseOptions CreateParseOptions()

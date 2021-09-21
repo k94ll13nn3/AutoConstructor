@@ -2,13 +2,14 @@
 
 public class FieldInfo
 {
-    public FieldInfo(string? type, string parameterName, string fieldName, string initializer, string fallbackType)
+    public FieldInfo(string? type, string parameterName, string fieldName, string initializer, string fallbackType, bool nullable)
     {
         Type = type;
         ParameterName = parameterName;
         FieldName = fieldName;
         Initializer = initializer;
         FallbackType = fallbackType;
+        Nullable = nullable;
     }
 
     public string? Type { get; set; }
@@ -20,4 +21,6 @@ public class FieldInfo
     public string Initializer { get; set; }
 
     public string FallbackType { get; set; }
+
+    public bool Nullable { get; set; }
 }
