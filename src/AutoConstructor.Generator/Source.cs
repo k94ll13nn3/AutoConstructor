@@ -29,12 +29,7 @@ internal sealed class {IgnoreAttributeFullName} : System.Attribute
 [System.AttributeUsage(System.AttributeTargets.Field, Inherited = false, AllowMultiple = false)]
 internal sealed class {InjectAttributeFullName} : System.Attribute
 {{
-    public {InjectAttributeFullName}(string parameterName)
-    {{
-        ParameterName = parameterName;
-    }}
-
-    public {InjectAttributeFullName}(string initializer, string parameterName, System.Type injectedType)
+    public {InjectAttributeFullName}(string initializer = null, string parameterName = null, System.Type injectedType = null)
     {{
         Initializer = initializer;
         ParameterName = parameterName;
