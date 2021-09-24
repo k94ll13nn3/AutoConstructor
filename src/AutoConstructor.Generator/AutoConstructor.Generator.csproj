@@ -9,6 +9,7 @@
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <NoWarn>$(NoWarn);NU5128</NoWarn> <!-- see https://github.com/nuget/home/issues/8583 -->
     <IsRoslynComponent>true</IsRoslynComponent>
+    <EnablePackageValidation>true</EnablePackageValidation>
   </PropertyGroup>
   
   <PropertyGroup>
