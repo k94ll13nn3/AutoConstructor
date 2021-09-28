@@ -5,11 +5,7 @@
     <Nullable>enable</Nullable>
     <AnalysisMode>AllEnabledByDefault</AnalysisMode>
     <ImplicitUsings>enable</ImplicitUsings>
-  </PropertyGroup>
-
-  <!-- https://github.com/dotnet/roslyn/issues/37876#issuecomment-738042719 -->
-  <PropertyGroup>
-    <NoWarn>$(NoWarn);CA1014;AD0001</NoWarn>
+    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
   </PropertyGroup>
 
   <ItemGroup>
