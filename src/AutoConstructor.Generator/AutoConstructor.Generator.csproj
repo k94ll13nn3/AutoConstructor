@@ -17,7 +17,7 @@
     <NeutralLanguage>en-US</NeutralLanguage>
     <Copyright>Copyright © k94ll13nn3</Copyright>
     <Description>Source generator for automatic constructor generation.</Description>
-    <PackageTags>source generator;constructor</PackageTags>
+    <PackageTags>source-generator;constructor</PackageTags>
     <PackageIcon>logo_64x64.png</PackageIcon>
     <PackageId>AutoConstructor</PackageId>
     <PackageReadmeFile>README.md</PackageReadmeFile>
@@ -27,11 +27,6 @@
     <PackageOutputPath>..\..\artifacts\</PackageOutputPath>
     <RepositoryType>git</RepositoryType>
     <RepositoryUrl>https://github.com/k94ll13nn3/AutoConstructor</RepositoryUrl>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)' == 'Release'">
-    <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
-    <DeterministicSourcePaths>true</DeterministicSourcePaths>
   </PropertyGroup>
 
   <ItemGroup>
