@@ -1,9 +1,9 @@
-﻿using AutoConstructor.Generator;
+﻿using AutoConstructor.Generator.Analyzers;
 using Microsoft.CodeAnalysis.Testing;
 using Xunit;
 using VerifyClassWithoutFieldsToInject = AutoConstructor.Tests.Verifiers.CSharpCodeFixVerifier<
-    AutoConstructor.Generator.ClassWithoutFieldsToInjectAnalyzer,
-    AutoConstructor.Generator.RemoveAttributeCodeFixProvider>;
+    AutoConstructor.Generator.Analyzers.ClassWithoutFieldsToInjectAnalyzer,
+    AutoConstructor.Generator.CodeFixes.RemoveAttributeCodeFixProvider>;
 
 namespace AutoConstructor.Tests;
 

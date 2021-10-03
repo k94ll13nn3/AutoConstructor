@@ -1,12 +1,13 @@
-﻿using System.Collections.Immutable;
+using System.Collections.Immutable;
 using System.Composition;
+using AutoConstructor.Generator.Analyzers;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CodeActions;
 using Microsoft.CodeAnalysis.CodeFixes;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
 
-namespace AutoConstructor.Generator;
+namespace AutoConstructor.Generator.CodeFixes;
 
 [ExportCodeFixProvider(LanguageNames.CSharp, Name = nameof(RemoveAttributeCodeFixProvider)), Shared]
 public class RemoveAttributeCodeFixProvider : CodeFixProvider
@@ -80,8 +81,8 @@ public class RemoveAttributeCodeFixProvider : CodeFixProvider
         }
 
         SyntaxTriviaList leadingTrivia = node.GetLeadingTrivia();
-        node = node.WithAttributeLists(newAttributes);
-        node = node.WithLeadingTrivia(leadingTrivia);
-        return node;
+        return node
+            .WithAttributeLists(newAttributes)
+            .WithLeadingTrivia(leadingTrivia);
     }
 }

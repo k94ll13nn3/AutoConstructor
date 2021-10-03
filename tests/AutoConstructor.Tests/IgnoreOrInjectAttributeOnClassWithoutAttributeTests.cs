@@ -1,9 +1,9 @@
-﻿using AutoConstructor.Generator;
+﻿using AutoConstructor.Generator.Analyzers;
 using Microsoft.CodeAnalysis.Testing;
 using Xunit;
 using VerifyIgnoreOrInjectAttributeOnClassWithoutAttribute = AutoConstructor.Tests.Verifiers.CSharpCodeFixVerifier<
-    AutoConstructor.Generator.IgnoreOrInjectAttributeOnClassWithoutAttributeAnalyzer,
-    AutoConstructor.Generator.RemoveAttributeCodeFixProvider>;
+    AutoConstructor.Generator.Analyzers.IgnoreOrInjectAttributeOnClassWithoutAttributeAnalyzer,
+    AutoConstructor.Generator.CodeFixes.RemoveAttributeCodeFixProvider>;
 
 namespace AutoConstructor.Tests;
 

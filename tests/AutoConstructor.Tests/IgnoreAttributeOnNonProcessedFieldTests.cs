@@ -1,9 +1,9 @@
-﻿using AutoConstructor.Generator;
+﻿using AutoConstructor.Generator.Analyzers;
 using Microsoft.CodeAnalysis.Testing;
 using Xunit;
 using VerifyIgnoreAttributeOnNonProcessedField = AutoConstructor.Tests.Verifiers.CSharpCodeFixVerifier<
-    AutoConstructor.Generator.IgnoreAttributeOnNonProcessedFieldAnalyzer,
-    AutoConstructor.Generator.RemoveAttributeCodeFixProvider>;
+    AutoConstructor.Generator.Analyzers.IgnoreAttributeOnNonProcessedFieldAnalyzer,
+    AutoConstructor.Generator.CodeFixes.RemoveAttributeCodeFixProvider>;
 
 namespace AutoConstructor.Tests;
 

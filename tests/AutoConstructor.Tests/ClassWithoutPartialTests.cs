@@ -1,9 +1,9 @@
-﻿using AutoConstructor.Generator;
+﻿using AutoConstructor.Generator.Analyzers;
 using Microsoft.CodeAnalysis.Testing;
 using Xunit;
 using VerifyClassWithoutPartial = AutoConstructor.Tests.Verifiers.CSharpCodeFixVerifier<
-    AutoConstructor.Generator.ClassWithoutPartialAnalyzer,
-    AutoConstructor.Generator.ClassWithoutPartialCodeFixProvider>;
+    AutoConstructor.Generator.Analyzers.ClassWithoutPartialAnalyzer,
+    AutoConstructor.Generator.CodeFixes.ClassWithoutPartialCodeFixProvider>;
 
 namespace AutoConstructor.Tests;
 

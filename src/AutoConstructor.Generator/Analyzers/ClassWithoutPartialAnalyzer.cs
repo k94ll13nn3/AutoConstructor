@@ -4,7 +4,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
 
-namespace AutoConstructor.Generator;
+namespace AutoConstructor.Generator.Analyzers;
 
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public class ClassWithoutPartialAnalyzer : DiagnosticAnalyzer

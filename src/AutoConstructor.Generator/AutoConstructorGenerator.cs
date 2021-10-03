@@ -1,4 +1,4 @@
-﻿using System.Collections.Immutable;
+using System.Collections.Immutable;
 using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -190,13 +190,8 @@ namespace {symbol.ContainingNamespace.ToDisplayString()}
 
     private static string? GetParameterValue(string parameterName, ImmutableArray<IParameterSymbol> parameters, ImmutableArray<TypedConstant> arguments)
     {
-        if (parameters.ToList().FindIndex(c => c.Name == parameterName) is int index and not -1)
-        {
-            return arguments[index].Value?.ToString();
-        }
-        else
-        {
-            return null;
-        }
+        return parameters.ToList().FindIndex(c => c.Name == parameterName) is int index and not -1
+            ? (arguments[index].Value?.ToString())
+            : null;
     }
 }
