@@ -1,14 +1,60 @@
-﻿using Microsoft.CodeAnalysis;
+using AutoConstructor.Generator;
+using System.Text;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Testing;
 using Microsoft.CodeAnalysis.Testing.Verifiers;
+using Microsoft.CodeAnalysis.Text;
+using Microsoft.CodeAnalysis.Testing;
 
 namespace AutoConstructor.Tests.Verifiers;
 
 public static class CSharpSourceGeneratorVerifier<TSourceGenerator>
     where TSourceGenerator : ISourceGenerator, new()
 {
-    internal class Test : CSharpSourceGeneratorTest<TSourceGenerator, XUnitVerifier>
+    public static async Task RunAsync(
+        string code,
+        string? generated = null,
+        string? generatedName = "Test.Test.g.cs",
+        bool nullable = false,
+        IEnumerable<DiagnosticResult>? diagnostics = null,
+        IEnumerable<(string filename, SourceText content)>? configFiles = null)
+    {
+        CSharpSourceGeneratorVerifier<TSourceGenerator>.Test test = new()
+        {
+            TestState =
+                {
+                    Sources = { code },
+                    GeneratedSources =
+                    {
+                        (typeof(AutoConstructorGenerator), "AutoConstructorAttribute.cs", SourceText.From(Source.AttributeText, Encoding.UTF8)),
+                        (typeof(AutoConstructorGenerator), "AutoConstructorIgnoreAttribute.cs", SourceText.From(Source.IgnoreAttributeText, Encoding.UTF8)),
+                        (typeof(AutoConstructorGenerator), "AutoConstructorInjectAttribute.cs", SourceText.From(Source.InjectAttributeText, Encoding.UTF8)),
+                    }
+                },
+            EnableNullable = nullable,
+            LanguageVersion = LanguageVersion.Default,
+        };
+
+        if (generated is not null)
+        {
+            test.TestState.GeneratedSources.Add((typeof(AutoConstructorGenerator), generatedName ?? "class.g.cs", SourceText.From(generated, Encoding.UTF8)));
+        }
+
+        if (diagnostics is not null)
+        {
+            test.TestState.ExpectedDiagnostics.AddRange(diagnostics);
+        }
+
+        if (configFiles is not null)
+        {
+            test.TestState.AnalyzerConfigFiles.AddRange(configFiles);
+        }
+
+        await test.RunAsync();
+    }
+
+    private class Test : CSharpSourceGeneratorTest<TSourceGenerator, XUnitVerifier>
     {
         public bool EnableNullable { get; set; }
 

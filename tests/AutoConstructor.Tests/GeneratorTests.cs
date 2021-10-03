@@ -1,4 +1,3 @@
-﻿using System.Text;
 using AutoConstructor.Generator;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Testing;
@@ -34,20 +33,7 @@ namespace Test
     }
 }
 ";
-        await new VerifySourceGenerator.Test
-        {
-            TestState =
-                {
-                    Sources = { code },
-                    GeneratedSources =
-                    {
-                        (typeof(AutoConstructorGenerator), "AutoConstructorAttribute.cs", SourceText.From(Source.AttributeText, Encoding.UTF8)),
-                        (typeof(AutoConstructorGenerator), "AutoConstructorIgnoreAttribute.cs", SourceText.From(Source.IgnoreAttributeText, Encoding.UTF8)),
-                        (typeof(AutoConstructorGenerator), "AutoConstructorInjectAttribute.cs", SourceText.From(Source.InjectAttributeText, Encoding.UTF8)),
-                        (typeof(AutoConstructorGenerator), "Test.Test.g.cs", SourceText.From(generated, Encoding.UTF8)),
-                    }
-                }
-        }.RunAsync();
+        await VerifySourceGenerator.RunAsync(code, generated);
     }
 
     [Theory]
@@ -202,20 +188,7 @@ namespace Test
 ")]
     public async Task Run_WithInjectAttribute_ShouldGenerateClass(string code, string generated)
     {
-        await new VerifySourceGenerator.Test
-        {
-            TestState =
-                {
-                    Sources = { code },
-                    GeneratedSources =
-                    {
-                        (typeof(AutoConstructorGenerator), "AutoConstructorAttribute.cs", SourceText.From(Source.AttributeText, Encoding.UTF8)),
-                        (typeof(AutoConstructorGenerator), "AutoConstructorIgnoreAttribute.cs", SourceText.From(Source.IgnoreAttributeText, Encoding.UTF8)),
-                        (typeof(AutoConstructorGenerator), "AutoConstructorInjectAttribute.cs", SourceText.From(Source.InjectAttributeText, Encoding.UTF8)),
-                        (typeof(AutoConstructorGenerator), "Test.Test.g.cs", SourceText.From(generated, Encoding.UTF8)),
-                    }
-                }
-        }.RunAsync();
+        await VerifySourceGenerator.RunAsync(code, generated);
     }
 
     [Theory]
@@ -257,19 +230,7 @@ namespace Test
 }")]
     public async Task Run_NoFieldsToInject_ShouldNotGenerateClass(string code)
     {
-        await new VerifySourceGenerator.Test
-        {
-            TestState =
-                {
-                    Sources = { code },
-                    GeneratedSources =
-                    {
-                        (typeof(AutoConstructorGenerator), "AutoConstructorAttribute.cs", SourceText.From(Source.AttributeText, Encoding.UTF8)),
-                        (typeof(AutoConstructorGenerator), "AutoConstructorIgnoreAttribute.cs", SourceText.From(Source.IgnoreAttributeText, Encoding.UTF8)),
-                        (typeof(AutoConstructorGenerator), "AutoConstructorInjectAttribute.cs", SourceText.From(Source.InjectAttributeText, Encoding.UTF8)),
-                    }
-                }
-        }.RunAsync();
+        await VerifySourceGenerator.RunAsync(code);
     }
 
     [Fact]
@@ -285,19 +246,7 @@ namespace Test
     }
 }";
 
-        await new VerifySourceGenerator.Test
-        {
-            TestState =
-                {
-                    Sources = { code },
-                    GeneratedSources =
-                    {
-                        (typeof(AutoConstructorGenerator), "AutoConstructorAttribute.cs", SourceText.From(Source.AttributeText, Encoding.UTF8)),
-                        (typeof(AutoConstructorGenerator), "AutoConstructorIgnoreAttribute.cs", SourceText.From(Source.IgnoreAttributeText, Encoding.UTF8)),
-                        (typeof(AutoConstructorGenerator), "AutoConstructorInjectAttribute.cs", SourceText.From(Source.InjectAttributeText, Encoding.UTF8)),
-                    }
-                }
-        }.RunAsync();
+        await VerifySourceGenerator.RunAsync(code);
     }
 
     [Fact]
@@ -319,20 +268,7 @@ partial class Test
 }
 ";
 
-        await new VerifySourceGenerator.Test
-        {
-            TestState =
-                {
-                    Sources = { code },
-                    GeneratedSources =
-                    {
-                        (typeof(AutoConstructorGenerator), "AutoConstructorAttribute.cs", SourceText.From(Source.AttributeText, Encoding.UTF8)),
-                        (typeof(AutoConstructorGenerator), "AutoConstructorIgnoreAttribute.cs", SourceText.From(Source.IgnoreAttributeText, Encoding.UTF8)),
-                        (typeof(AutoConstructorGenerator), "AutoConstructorInjectAttribute.cs", SourceText.From(Source.InjectAttributeText, Encoding.UTF8)),
-                        (typeof(AutoConstructorGenerator), "Test.g.cs", SourceText.From(generated, Encoding.UTF8)),
-                    }
-                }
-        }.RunAsync();
+        await VerifySourceGenerator.RunAsync(code, generated, generatedName: "Test.g.cs");
     }
 
     [Theory]
@@ -362,20 +298,7 @@ namespace Test
     }}
 }}
 ";
-        await new VerifySourceGenerator.Test
-        {
-            TestState =
-                {
-                    Sources = { code },
-                    GeneratedSources =
-                    {
-                        (typeof(AutoConstructorGenerator), "AutoConstructorAttribute.cs", SourceText.From(Source.AttributeText, Encoding.UTF8)),
-                        (typeof(AutoConstructorGenerator), "AutoConstructorIgnoreAttribute.cs", SourceText.From(Source.IgnoreAttributeText, Encoding.UTF8)),
-                        (typeof(AutoConstructorGenerator), "AutoConstructorInjectAttribute.cs", SourceText.From(Source.InjectAttributeText, Encoding.UTF8)),
-                        (typeof(AutoConstructorGenerator), "Test.Test.g.cs", SourceText.From(generated, Encoding.UTF8)),
-                    }
-                }
-        }.RunAsync();
+        await VerifySourceGenerator.RunAsync(code, generated);
     }
 
     [Theory]
@@ -404,24 +327,13 @@ namespace Test
     }}
 }}
 ";
-        await new VerifySourceGenerator.Test
-        {
-            TestState =
-                {
-                    Sources = { code },
-                    GeneratedSources =
-                    {
-                        (typeof(AutoConstructorGenerator), "AutoConstructorAttribute.cs", SourceText.From(Source.AttributeText, Encoding.UTF8)),
-                        (typeof(AutoConstructorGenerator), "AutoConstructorIgnoreAttribute.cs", SourceText.From(Source.IgnoreAttributeText, Encoding.UTF8)),
-                        (typeof(AutoConstructorGenerator), "AutoConstructorInjectAttribute.cs", SourceText.From(Source.InjectAttributeText, Encoding.UTF8)),
-                        (typeof(AutoConstructorGenerator), "Test.Test.g.cs", SourceText.From(generated, Encoding.UTF8)),
-                    },
-                AnalyzerConfigFiles = { ("/.editorconfig", $@"
+
+        (string, SourceText) configFile = ("/.editorconfig", SourceText.From($@"
 is_global=true
 build_property.AutoConstructor_DisableNullChecking = {disableNullChecks}
-") }
-                }
-        }.RunAsync();
+"));
+
+        await VerifySourceGenerator.RunAsync(code, generated, configFiles: new[] { configFile });
     }
 
     [Fact]
@@ -439,20 +351,8 @@ namespace Test
     }
 }";
 
-        await new VerifySourceGenerator.Test
-        {
-            TestState =
-                {
-                    Sources = { code },
-                    GeneratedSources =
-                    {
-                        (typeof(AutoConstructorGenerator), "AutoConstructorAttribute.cs", SourceText.From(Source.AttributeText, Encoding.UTF8)),
-                        (typeof(AutoConstructorGenerator), "AutoConstructorIgnoreAttribute.cs", SourceText.From(Source.IgnoreAttributeText, Encoding.UTF8)),
-                        (typeof(AutoConstructorGenerator), "AutoConstructorInjectAttribute.cs", SourceText.From(Source.InjectAttributeText, Encoding.UTF8)),
-                    },
-                    ExpectedDiagnostics = { new DiagnosticResult(AutoConstructorGenerator.MistmatchTypesDiagnosticId, DiagnosticSeverity.Error).WithSpan(4, 5, 10, 6) },
-                }
-        }.RunAsync();
+        DiagnosticResult diagnosticResult = new DiagnosticResult(AutoConstructorGenerator.MistmatchTypesDiagnosticId, DiagnosticSeverity.Error).WithSpan(4, 5, 10, 6);
+        await VerifySourceGenerator.RunAsync(code, diagnostics: new[] { diagnosticResult });
     }
 
     [Fact]
@@ -472,20 +372,8 @@ namespace Test
     }
 }";
 
-        await new VerifySourceGenerator.Test
-        {
-            TestState =
-                {
-                    Sources = { code },
-                    GeneratedSources =
-                    {
-                        (typeof(AutoConstructorGenerator), "AutoConstructorAttribute.cs", SourceText.From(Source.AttributeText, Encoding.UTF8)),
-                        (typeof(AutoConstructorGenerator), "AutoConstructorIgnoreAttribute.cs", SourceText.From(Source.IgnoreAttributeText, Encoding.UTF8)),
-                        (typeof(AutoConstructorGenerator), "AutoConstructorInjectAttribute.cs", SourceText.From(Source.InjectAttributeText, Encoding.UTF8)),
-                    },
-                    ExpectedDiagnostics = { new DiagnosticResult(AutoConstructorGenerator.MistmatchTypesDiagnosticId, DiagnosticSeverity.Error).WithSpan(4, 5, 12, 6) },
-                }
-        }.RunAsync();
+        DiagnosticResult diagnosticResult = new DiagnosticResult(AutoConstructorGenerator.MistmatchTypesDiagnosticId, DiagnosticSeverity.Error).WithSpan(4, 5, 12, 6);
+        await VerifySourceGenerator.RunAsync(code, diagnostics: new[] { diagnosticResult });
     }
 
     [Fact]
@@ -512,20 +400,7 @@ namespace Test
     }
 }
 ";
-        await new VerifySourceGenerator.Test
-        {
-            TestState =
-                {
-                    Sources = { code },
-                    GeneratedSources =
-                    {
-                        (typeof(AutoConstructorGenerator), "AutoConstructorAttribute.cs", SourceText.From(Source.AttributeText, Encoding.UTF8)),
-                        (typeof(AutoConstructorGenerator), "AutoConstructorIgnoreAttribute.cs", SourceText.From(Source.IgnoreAttributeText, Encoding.UTF8)),
-                        (typeof(AutoConstructorGenerator), "AutoConstructorInjectAttribute.cs", SourceText.From(Source.InjectAttributeText, Encoding.UTF8)),
-                        (typeof(AutoConstructorGenerator), "Test.Test.g.cs", SourceText.From(generated, Encoding.UTF8)),
-                    }
-                }
-        }.RunAsync();
+        await VerifySourceGenerator.RunAsync(code, generated);
     }
 
     [Fact]
@@ -552,21 +427,7 @@ namespace Test
     }
 }
 ";
-        await new VerifySourceGenerator.Test
-        {
-            TestState =
-                {
-                    Sources = { code },
-                    GeneratedSources =
-                    {
-                        (typeof(AutoConstructorGenerator), "AutoConstructorAttribute.cs", SourceText.From(Source.AttributeText, Encoding.UTF8)),
-                        (typeof(AutoConstructorGenerator), "AutoConstructorIgnoreAttribute.cs", SourceText.From(Source.IgnoreAttributeText, Encoding.UTF8)),
-                        (typeof(AutoConstructorGenerator), "AutoConstructorInjectAttribute.cs", SourceText.From(Source.InjectAttributeText, Encoding.UTF8)),
-                        (typeof(AutoConstructorGenerator), "Test.Test.g.cs", SourceText.From(generated, Encoding.UTF8)),
-                    }
-                },
-            EnableNullable = true,
-        }.RunAsync();
+        await VerifySourceGenerator.RunAsync(code, generated, nullable: true);
     }
 
     [Theory]
@@ -594,20 +455,6 @@ namespace Test
     }}
 }}
 ";
-        await new VerifySourceGenerator.Test
-        {
-            TestState =
-                {
-                    Sources = { code },
-                    GeneratedSources =
-                    {
-                        (typeof(AutoConstructorGenerator), "AutoConstructorAttribute.cs", SourceText.From(Source.AttributeText, Encoding.UTF8)),
-                        (typeof(AutoConstructorGenerator), "AutoConstructorIgnoreAttribute.cs", SourceText.From(Source.IgnoreAttributeText, Encoding.UTF8)),
-                        (typeof(AutoConstructorGenerator), "AutoConstructorInjectAttribute.cs", SourceText.From(Source.InjectAttributeText, Encoding.UTF8)),
-                        (typeof(AutoConstructorGenerator), "Test.Test.g.cs", SourceText.From(generated, Encoding.UTF8)),
-                    }
-                },
-            EnableNullable = enableBoolean,
-        }.RunAsync();
+        await VerifySourceGenerator.RunAsync(code, generated, nullable: enableBoolean);
     }
 }
