@@ -6,6 +6,9 @@
     <AnalysisMode>AllEnabledByDefault</AnalysisMode>
     <ImplicitUsings>enable</ImplicitUsings>
     <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+
+    <!-- Workaround for https://github.com/dotnet/roslyn-analyzers/issues/5529 -->
+    <AnalysisLevel>5</AnalysisLevel>
   </PropertyGroup>
 
   <ItemGroup>

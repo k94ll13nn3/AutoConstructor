@@ -1,4 +1,4 @@
-﻿using AutoConstructor.Generator;
+using AutoConstructor.Generator;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CodeFixes;
 using Microsoft.CodeAnalysis.CSharp.Testing;
@@ -8,7 +8,7 @@ using Microsoft.CodeAnalysis.Testing.Verifiers;
 
 namespace AutoConstructor.Tests.Verifiers;
 
-public static class CSharpCodeFixVerifier<TAnalyzer, TCodeFix>
+internal static class CSharpCodeFixVerifier<TAnalyzer, TCodeFix>
     where TAnalyzer : DiagnosticAnalyzer, new()
     where TCodeFix : CodeFixProvider, new()
 {

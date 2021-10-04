@@ -1,17 +1,16 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework> <!-- Cannot use 2.1, see https://github.com/dotnet/roslyn/issues/47087 -->
+    <TargetFramework>netstandard2.0</TargetFramework>
     <GenerateDocumentationFile>false</GenerateDocumentationFile>
     <IncludeBuildOutput>false</IncludeBuildOutput> <!-- Do not include the generator as a lib dependency -->
     <SuppressDependenciesWhenPacking>true</SuppressDependenciesWhenPacking>
     <DevelopmentDependency>true</DevelopmentDependency>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <NoWarn>$(NoWarn);NU5128</NoWarn> <!-- see https://github.com/nuget/home/issues/8583 -->
     <IsRoslynComponent>true</IsRoslynComponent>
     <EnablePackageValidation>true</EnablePackageValidation>
   </PropertyGroup>
-  
+
   <PropertyGroup>
     <Authors>k94ll13nn3</Authors>
     <NeutralLanguage>en-US</NeutralLanguage>
