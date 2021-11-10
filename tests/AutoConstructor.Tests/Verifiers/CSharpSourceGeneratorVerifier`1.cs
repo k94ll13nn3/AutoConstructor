@@ -1,16 +1,16 @@
-using AutoConstructor.Generator;
 using System.Text;
+using AutoConstructor.Generator;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Testing;
+using Microsoft.CodeAnalysis.Testing;
 using Microsoft.CodeAnalysis.Testing.Verifiers;
 using Microsoft.CodeAnalysis.Text;
-using Microsoft.CodeAnalysis.Testing;
 
 namespace AutoConstructor.Tests.Verifiers;
 
 public static class CSharpSourceGeneratorVerifier<TSourceGenerator>
-    where TSourceGenerator : ISourceGenerator, new()
+    where TSourceGenerator : IIncrementalGenerator, new()
 {
     public static async Task RunAsync(
         string code,
