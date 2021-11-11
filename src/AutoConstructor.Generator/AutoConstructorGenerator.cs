@@ -3,12 +3,13 @@ using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.CodeAnalysis.Text;
 
 namespace AutoConstructor.Generator;
 
 [Generator]
-public class AutoConstructorGenerator : ISourceGenerator
+public class AutoConstructorGenerator : IIncrementalGenerator
 {
     public const string MistmatchTypesDiagnosticId = "ACONS06";
 
@@ -23,36 +24,58 @@ public class AutoConstructorGenerator : ISourceGenerator
         $"https://github.com/k94ll13nn3/AutoConstructor#{MistmatchTypesDiagnosticId}",
         WellKnownDiagnosticTags.Build);
 
-    public void Initialize(GeneratorInitializationContext context)
+    public void Initialize(IncrementalGeneratorInitializationContext context)
     {
         // Register the attribute source
-        context.RegisterForPostInitialization((i) =>
+        context.RegisterPostInitializationOutput((i) =>
         {
             i.AddSource(Source.AttributeFullName, SourceText.From(Source.AttributeText, Encoding.UTF8));
             i.AddSource(Source.IgnoreAttributeFullName, SourceText.From(Source.IgnoreAttributeText, Encoding.UTF8));
             i.AddSource(Source.InjectAttributeFullName, SourceText.From(Source.InjectAttributeText, Encoding.UTF8));
         });
 
-        // Register a syntax receiver that will be created for each generation pass.
-        context.RegisterForSyntaxNotifications(() => new SyntaxReceiver());
+        IncrementalValuesProvider<ClassDeclarationSyntax> classDeclarations = context.SyntaxProvider
+                .CreateSyntaxProvider(static (s, _) => IsSyntaxTargetForGeneration(s), static (ctx, _) => GetSemanticTargetForGeneration(ctx))
+                .Where(static m => m is not null)!;
+
+        IncrementalValueProvider<(Compilation compilation, ImmutableArray<ClassDeclarationSyntax> classes, AnalyzerConfigOptions options)> valueProvider =
+            context.CompilationProvider
+            .Combine(classDeclarations.Collect())
+            .Combine(context.AnalyzerConfigOptionsProvider.Select((c, _) => c.GlobalOptions))
+            .Select((c, _) => (compilation: c.Left.Left, classes: c.Left.Right, options: c.Right));
+
+        context.RegisterSourceOutput(valueProvider, static (spc, source) => Execute(source.compilation, source.classes, spc, source.options));
     }
 
-    public void Execute(GeneratorExecutionContext context)
+    private static bool IsSyntaxTargetForGeneration(SyntaxNode node)
     {
-        if (context.SyntaxContextReceiver is not SyntaxReceiver receiver)
+        return node is ClassDeclarationSyntax classDeclarationSyntax && classDeclarationSyntax.Modifiers.Any(SyntaxKind.PartialKeyword);
+    }
+
+    private static ClassDeclarationSyntax? GetSemanticTargetForGeneration(GeneratorSyntaxContext context)
+    {
+        var classDeclarationSyntax = (ClassDeclarationSyntax)context.Node;
+
+        INamedTypeSymbol? symbol = context.SemanticModel.GetDeclaredSymbol(classDeclarationSyntax);
+
+        return symbol?.HasAttribute(Source.AttributeFullName, context.SemanticModel.Compilation) is true ? classDeclarationSyntax : null;
+    }
+
+    private static void Execute(Compilation compilation, ImmutableArray<ClassDeclarationSyntax> classes, SourceProductionContext context, AnalyzerConfigOptions options)
+    {
+        if (classes.IsDefaultOrEmpty)
         {
             return;
         }
 
-        foreach (ClassDeclarationSyntax candidateClass in receiver.CandidateClasses)
+        foreach (ClassDeclarationSyntax candidateClass in classes)
         {
             if (context.CancellationToken.IsCancellationRequested)
             {
                 break;
             }
 
-            INamedTypeSymbol? symbol = context
-                .Compilation
+            INamedTypeSymbol? symbol = compilation
                 .GetSemanticModel(candidateClass.SyntaxTree)
                 .GetDeclaredSymbol(candidateClass);
             if (symbol is not null)
@@ -64,7 +87,7 @@ public class AutoConstructorGenerator : ISourceGenerator
                 }
 
                 bool emitNullChecks = true;
-                if (context.AnalyzerConfigOptions.GlobalOptions.TryGetValue("build_property.AutoConstructor_DisableNullChecking", out string? disableNullCheckingSwitch))
+                if (options.TryGetValue("build_property.AutoConstructor_DisableNullChecking", out string? disableNullCheckingSwitch))
                 {
                     emitNullChecks = !disableNullCheckingSwitch.Equals("true", StringComparison.OrdinalIgnoreCase);
                 }
@@ -74,8 +97,8 @@ public class AutoConstructorGenerator : ISourceGenerator
                         && !x.IsStatic
                         && x.IsReadOnly
                         && !x.IsInitialized()
-                        && !x.HasAttribute(Source.IgnoreAttributeFullName, context.Compilation))
-                    .Select(x => GetFieldInfo(x, context.Compilation, emitNullChecks))
+                        && !x.HasAttribute(Source.IgnoreAttributeFullName, compilation))
+                    .Select(x => GetFieldInfo(x, compilation, emitNullChecks))
                     .ToList();
 
                 if (fields.Count == 0)
