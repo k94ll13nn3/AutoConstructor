@@ -1,5 +1,6 @@
 using System.Collections.Immutable;
 using System.Text;
+using System.Xml;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -92,6 +93,12 @@ public class AutoConstructorGenerator : IIncrementalGenerator
                     emitNullChecks = !disableNullCheckingSwitch.Equals("true", StringComparison.OrdinalIgnoreCase);
                 }
 
+                bool generateConstructorDocumentation = false;
+                if (options.TryGetValue("build_property.AutoConstructor_GenerateConstructorDocumentation", out string? generateConstructorDocumentationSwitch))
+                {
+                    generateConstructorDocumentation = generateConstructorDocumentationSwitch.Equals("true", StringComparison.OrdinalIgnoreCase);
+                }
+
                 var fields = symbol.GetMembers().OfType<IFieldSymbol>()
                     .Where(x => x.CanBeReferencedByName
                         && !x.IsStatic
@@ -116,12 +123,12 @@ public class AutoConstructorGenerator : IIncrementalGenerator
                     continue;
                 }
 
-                context.AddSource(filename, SourceText.From(GenerateAutoConstructor(symbol, fields), Encoding.UTF8));
+                context.AddSource(filename, SourceText.From(GenerateAutoConstructor(symbol, fields, generateConstructorDocumentation), Encoding.UTF8));
             }
         }
     }
 
-    private static string GenerateAutoConstructor(INamedTypeSymbol symbol, IEnumerable<FieldInfo> fields)
+    private static string GenerateAutoConstructor(INamedTypeSymbol symbol, IEnumerable<FieldInfo> fields, bool generateConstructorDocumentation)
     {
         var constructorParameters = fields
             .GroupBy(x => x.ParameterName)
@@ -149,7 +156,23 @@ namespace {symbol.ContainingNamespace.ToDisplayString()}
 
         source.Append($@"
 {tabulation}partial class {symbol.Name}
-{tabulation}{{
+{tabulation}{{");
+
+        if (generateConstructorDocumentation)
+        {
+            source.Append($@"
+{tabulation}    /// <summary>
+{tabulation}    /// Initializes a new instance of the {symbol.Name} class.
+{tabulation}    /// </summary>");
+
+            foreach (FieldInfo parameter in constructorParameters)
+            {
+                source.Append($@"
+{tabulation}    /// <param name=""{parameter.ParameterName}"">{parameter.Comment ?? parameter.ParameterName}</param>");
+            }
+        }
+
+        source.Append($@"
 {tabulation}    public {symbol.Name}({string.Join(", ", constructorParameters.Select(it => $"{it.Type ?? it.FallbackType} {it.ParameterName}"))})
 {tabulation}    {{");
 
@@ -177,6 +200,17 @@ namespace {symbol.ContainingNamespace.ToDisplayString()}
         string? typeDisplay = type.ToDisplayString();
         string parameterName = fieldSymbol.Name.TrimStart('_');
         string initializer = parameterName;
+
+        string? documentationComment = fieldSymbol.GetDocumentationCommentXml();
+        string? summaryText = null;
+
+        if (!string.IsNullOrWhiteSpace(documentationComment))
+        {
+            using var reader = new StringReader(documentationComment);
+            var document = new XmlDocument();
+            document.Load(reader);
+            summaryText = document.SelectSingleNode("member/summary")?.InnerText.Trim();
+        }
 
         AttributeData? attributeData = fieldSymbol.GetAttribute(Source.InjectAttributeFullName, compilation);
         if (attributeData is not null)
@@ -208,7 +242,8 @@ namespace {symbol.ContainingNamespace.ToDisplayString()}
             fieldSymbol.Name,
             initializer,
             type.ToDisplayString(),
-            type.IsReferenceType && type.NullableAnnotation == NullableAnnotation.Annotated);
+            type.IsReferenceType && type.NullableAnnotation == NullableAnnotation.Annotated,
+            summaryText);
     }
 
     private static string? GetParameterValue(string parameterName, ImmutableArray<IParameterSymbol> parameters, ImmutableArray<TypedConstant> arguments)

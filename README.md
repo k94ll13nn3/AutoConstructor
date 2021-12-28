@@ -43,11 +43,32 @@ and even use a parameter from another field not annotated with `AutoConstructorI
 
 ## Configuration
 
+### Generating `ArgumentNullException`
+
 By default, null checks with `ArgumentNullException` will be generated when needed.
 To disable this behavior, set `AutoConstructor_DisableNullChecking` to `false` in the project file:
 
 ``` xml
 <AutoConstructor_DisableNullChecking>true</AutoConstructor_DisableNullChecking>
+```
+
+### Generating XML documentation comment
+
+By default, no XML documentation comment will be generated for the constructor.
+To enable this behavior, set `AutoConstructor_GenerateConstructorDocumentation` to `true` in the project file:
+
+``` xml
+<AutoConstructor_GenerateConstructorDocumentation>true</AutoConstructor_GenerateConstructorDocumentation>
+```
+
+This will generate a default comment like this one, with each parameter reusing the corresponding field summary if available, and the parameter name otherwise:
+
+``` c#
+/// <summary>
+/// Initializes a new instance of the Test class.
+/// </summary>
+/// <param name=""t1"">Some field.</param>
+/// <param name=""t2"">t2</param>
 ```
 
 ## Sample

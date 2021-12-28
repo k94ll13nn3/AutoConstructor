@@ -1,8 +1,8 @@
-﻿namespace AutoConstructor.Generator;
+namespace AutoConstructor.Generator;
 
 public class FieldInfo
 {
-    public FieldInfo(string? type, string parameterName, string fieldName, string initializer, string fallbackType, bool nullable)
+    public FieldInfo(string? type, string parameterName, string fieldName, string initializer, string fallbackType, bool nullable, string? comment)
     {
         Type = type;
         ParameterName = parameterName;
@@ -10,17 +10,20 @@ public class FieldInfo
         Initializer = initializer;
         FallbackType = fallbackType;
         Nullable = nullable;
+        Comment = comment;
     }
 
-    public string? Type { get; set; }
+    public string? Type { get; }
 
-    public string ParameterName { get; set; }
+    public string ParameterName { get; }
 
-    public string FieldName { get; set; }
+    public string FieldName { get; }
 
-    public string Initializer { get; set; }
+    public string Initializer { get; }
 
-    public string FallbackType { get; set; }
+    public string FallbackType { get; }
 
-    public bool Nullable { get; set; }
+    public bool Nullable { get; }
+
+    public string? Comment { get; }
 }
