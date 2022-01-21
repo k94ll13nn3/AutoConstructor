@@ -71,6 +71,22 @@ This will generate a default comment like this one, with each parameter reusing 
 /// <param name=""t2"">t2</param>
 ```
 
+By using the `AutoConstructor_ConstructorDocumentationComment` property, you can configure the comment message:
+
+``` xml
+<AutoConstructor_ConstructorDocumentationComment>Some comment for the {0} class.</AutoConstructor_ConstructorDocumentationComment>
+```
+
+This will generate the following code:
+
+``` c#
+/// <summary>
+/// Some comment for the Test class.
+/// </summary>
+/// <param name=""t1"">Some field.</param>
+/// <param name=""t2"">t2</param>
+```
+
 ## Sample
 
 The following code

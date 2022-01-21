@@ -1,4 +1,5 @@
 using System.Collections.Immutable;
+using System.Globalization;
 using System.Text;
 using System.Xml;
 using Microsoft.CodeAnalysis;
@@ -93,12 +94,6 @@ public class AutoConstructorGenerator : IIncrementalGenerator
                     emitNullChecks = !disableNullCheckingSwitch.Equals("true", StringComparison.OrdinalIgnoreCase);
                 }
 
-                bool generateConstructorDocumentation = false;
-                if (options.TryGetValue("build_property.AutoConstructor_GenerateConstructorDocumentation", out string? generateConstructorDocumentationSwitch))
-                {
-                    generateConstructorDocumentation = generateConstructorDocumentationSwitch.Equals("true", StringComparison.OrdinalIgnoreCase);
-                }
-
                 var fields = symbol.GetMembers().OfType<IFieldSymbol>()
                     .Where(x => x.CanBeReferencedByName
                         && !x.IsStatic
@@ -123,13 +118,24 @@ public class AutoConstructorGenerator : IIncrementalGenerator
                     continue;
                 }
 
-                context.AddSource(filename, SourceText.From(GenerateAutoConstructor(symbol, fields, generateConstructorDocumentation), Encoding.UTF8));
+                context.AddSource(filename, SourceText.From(GenerateAutoConstructor(symbol, fields, options), Encoding.UTF8));
             }
         }
     }
 
-    private static string GenerateAutoConstructor(INamedTypeSymbol symbol, IEnumerable<FieldInfo> fields, bool generateConstructorDocumentation)
+    private static string GenerateAutoConstructor(INamedTypeSymbol symbol, IEnumerable<FieldInfo> fields, AnalyzerConfigOptions options)
     {
+        bool generateConstructorDocumentation = false;
+        if (options.TryGetValue("build_property.AutoConstructor_GenerateConstructorDocumentation", out string? generateConstructorDocumentationSwitch))
+        {
+            generateConstructorDocumentation = generateConstructorDocumentationSwitch.Equals("true", StringComparison.OrdinalIgnoreCase);
+        }
+
+        if (!options.TryGetValue("build_property.AutoConstructor_ConstructorDocumentationComment", out string? constructorDocumentationComment))
+        {
+            constructorDocumentationComment = "Initializes a new instance of the {0} class.";
+        }
+
         var constructorParameters = fields
             .GroupBy(x => x.ParameterName)
             .Select(x => x.Any(c => c.Type is not null) ? x.First(c => c.Type is not null) : x.First())
@@ -162,7 +168,7 @@ namespace {symbol.ContainingNamespace.ToDisplayString()}
         {
             source.Append($@"
 {tabulation}    /// <summary>
-{tabulation}    /// Initializes a new instance of the {symbol.Name} class.
+{tabulation}    /// {string.Format(CultureInfo.InvariantCulture, constructorDocumentationComment, symbol.Name)}
 {tabulation}    /// </summary>");
 
             foreach (FieldInfo parameter in constructorParameters)

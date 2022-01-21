@@ -3,6 +3,7 @@
   <ItemGroup>
     <CompilerVisibleProperty Include="AutoConstructor_DisableNullChecking" />
     <CompilerVisibleProperty Include="AutoConstructor_GenerateConstructorDocumentation" />
+    <CompilerVisibleProperty Include="AutoConstructor_ConstructorDocumentationComment" />
   </ItemGroup>
 
 </Project>
