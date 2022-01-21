@@ -20,7 +20,7 @@ public static class CSharpSourceGeneratorVerifier<TSourceGenerator>
         IEnumerable<DiagnosticResult>? diagnostics = null,
         IEnumerable<(string filename, SourceText content)>? configFiles = null)
     {
-        CSharpSourceGeneratorVerifier<TSourceGenerator>.Test test = new()
+        var test = new CSharpSourceGeneratorVerifier<TSourceGenerator>.Test()
         {
             TestState =
                 {

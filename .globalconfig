@@ -9,3 +9,8 @@ dotnet_diagnostic.RCS1197.severity = none
 
 # S3903 : Move class to namespace. Not detecting file scoped namespace
 dotnet_diagnostic.S3903.severity = silent
+
+roslynator_accessibility_modifiers = explicit
+roslynator_enum_has_flag_style = method
+roslynator_object_creation_type_style = implicit_when_type_is_obvious
+roslynator_use_var_instead_of_implicit_object_creation = true

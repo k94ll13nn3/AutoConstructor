@@ -236,7 +236,7 @@ namespace {symbol.ContainingNamespace.ToDisplayString()}
             initializer = $"{initializer} ?? throw new System.ArgumentNullException(nameof({parameterName}))";
         }
 
-        return new(
+        return new FieldInfo(
             typeDisplay,
             parameterName,
             fieldSymbol.Name,
