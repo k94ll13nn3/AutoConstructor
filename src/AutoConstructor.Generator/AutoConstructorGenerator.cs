@@ -131,7 +131,8 @@ public class AutoConstructorGenerator : IIncrementalGenerator
             generateConstructorDocumentation = generateConstructorDocumentationSwitch.Equals("true", StringComparison.OrdinalIgnoreCase);
         }
 
-        if (!options.TryGetValue("build_property.AutoConstructor_ConstructorDocumentationComment", out string? constructorDocumentationComment))
+        options.TryGetValue("build_property.AutoConstructor_ConstructorDocumentationComment", out string? constructorDocumentationComment);
+        if (string.IsNullOrWhiteSpace(constructorDocumentationComment))
         {
             constructorDocumentationComment = "Initializes a new instance of the {0} class.";
         }
