@@ -169,7 +169,7 @@ namespace {symbol.ContainingNamespace.ToDisplayString()}
         if (symbol.ContainingType is not null)
         {
             source.Append($@"
-{tabulation}partial{(symbol.ContainingType.IsStatic ? " static " : " ")}class {symbol.ContainingType.Name}
+{tabulation}{(symbol.ContainingType.IsStatic ? "static " : "")}partial class {symbol.ContainingType.Name}
 {tabulation}{{");
             tabulation += "    ";
         }
