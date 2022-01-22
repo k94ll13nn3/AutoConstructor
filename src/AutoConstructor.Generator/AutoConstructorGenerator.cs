@@ -83,6 +83,11 @@ public class AutoConstructorGenerator : IIncrementalGenerator
             if (symbol is not null)
             {
                 string filename = $"{symbol.Name}.g.cs";
+                if (symbol.ContainingType is not null)
+                {
+                    filename = $"{symbol.ContainingType.Name}.{filename}";
+                }
+
                 if (!symbol.ContainingNamespace.IsGlobalNamespace)
                 {
                     filename = $"{symbol.ContainingNamespace.ToDisplayString()}.{filename}";
@@ -161,6 +166,14 @@ namespace {symbol.ContainingNamespace.ToDisplayString()}
 {{");
         }
 
+        if (symbol.ContainingType is not null)
+        {
+            source.Append($@"
+{tabulation}partial{(symbol.ContainingType.IsStatic ? " static " : " ")}class {symbol.ContainingType.Name}
+{tabulation}{{");
+            tabulation += "    ";
+        }
+
         source.Append($@"
 {tabulation}partial class {symbol.Name}
 {tabulation}{{");
@@ -192,6 +205,14 @@ namespace {symbol.ContainingNamespace.ToDisplayString()}
 {tabulation}    }}
 {tabulation}}}
 ");
+
+        if (symbol.ContainingType is not null)
+        {
+            tabulation = tabulation.Substring(0, tabulation.Length - 4);
+            source.Append($@"{tabulation}}}
+");
+        }
+
         if (!symbol.ContainingNamespace.IsGlobalNamespace)
         {
             source.Append(@"}
