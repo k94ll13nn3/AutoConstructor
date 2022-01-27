@@ -26,6 +26,7 @@
     <PackageOutputPath>..\..\artifacts\</PackageOutputPath>
     <RepositoryType>git</RepositoryType>
     <RepositoryUrl>https://github.com/k94ll13nn3/AutoConstructor</RepositoryUrl>
+    <PackageReleaseNotes>https://github.com/k94ll13nn3/AutoConstructor/blob/main/CHANGELOG.md</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>
