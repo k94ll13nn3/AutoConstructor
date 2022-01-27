@@ -39,7 +39,7 @@ public class ClassWithoutFieldsToInjectAnalyzer : DiagnosticAnalyzer
         if (symbol.GetAttribute(Source.AttributeFullName, context.Compilation) is AttributeData attr)
         {
             var fields = symbol.GetMembers().OfType<IFieldSymbol>()
-                .Where(x => x.CanBeReferencedByName && !x.IsStatic && x.IsReadOnly && !x.IsInitialized() && !x.HasAttribute(Source.IgnoreAttributeFullName, context.Compilation))
+                .Where(x => x.CanBeInjected(context.Compilation) && !x.IsStatic && x.IsReadOnly && !x.IsInitialized() && !x.HasAttribute(Source.IgnoreAttributeFullName, context.Compilation))
                 .ToList();
 
             if (fields.Count == 0)

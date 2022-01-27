@@ -100,7 +100,7 @@ public class AutoConstructorGenerator : IIncrementalGenerator
                 }
 
                 var fields = symbol.GetMembers().OfType<IFieldSymbol>()
-                    .Where(x => x.CanBeReferencedByName
+                    .Where(x => x.CanBeInjected(compilation)
                         && !x.IsStatic
                         && x.IsReadOnly
                         && !x.IsInitialized()
@@ -227,9 +227,13 @@ namespace {symbol.ContainingNamespace.ToDisplayString()}
         ITypeSymbol type = fieldSymbol.Type;
         string? typeDisplay = type.ToDisplayString();
         string parameterName = fieldSymbol.Name.TrimStart('_');
-        string initializer = parameterName;
+        if (fieldSymbol.AssociatedSymbol is not null)
+        {
+            parameterName = char.ToLowerInvariant(fieldSymbol.AssociatedSymbol.Name[0]) + fieldSymbol.AssociatedSymbol.Name.Substring(1);
+        }
 
-        string? documentationComment = fieldSymbol.GetDocumentationCommentXml();
+        string initializer = parameterName;
+        string? documentationComment = (fieldSymbol.AssociatedSymbol ?? fieldSymbol).GetDocumentationCommentXml();
         string? summaryText = null;
 
         if (!string.IsNullOrWhiteSpace(documentationComment))
@@ -267,7 +271,7 @@ namespace {symbol.ContainingNamespace.ToDisplayString()}
         return new FieldInfo(
             typeDisplay,
             parameterName,
-            fieldSymbol.Name,
+            fieldSymbol.AssociatedSymbol?.Name ?? fieldSymbol.Name,
             initializer,
             type.ToDisplayString(),
             type.IsReferenceType && type.NullableAnnotation == NullableAnnotation.Annotated,

@@ -31,6 +31,7 @@ Fields marked with `AutoConstructorIgnoreAttribute` will be ignored.
 
 Use `AutoConstructorInjectAttribute` to customize the behavior, usualy when the injected parameter and the fields
 do not have the same type. It takes three optionals parameters:
+
 - `initializer`: a string that will be used to initialize the field (by example `myService.GetData()`), default to the `parameterName` if null or empty.
 - `parameterName`: the name of the parameter to used in the constructor  (by example `myService`), default to the field name trimmed if null or empty.
 - `injectedType`: the type of the parameter to used in the constructor  (by example `IMyService`), default to the field type if null.
@@ -40,6 +41,17 @@ won't make the field injectable.
 
 When using `AutoConstructorInjectAttribute`, the parameter name can be shared across multiple fields,
 and even use a parameter from another field not annotated with `AutoConstructorInjectAttribute`, but type must match.
+
+### Get-only properties
+
+By default, get-only properties (`public int Property { get; }`) are not injected by the generator, and it is not possible to use attributes on them to force the injection. However, using [auto-implemented property field-targeted attributes](https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/proposals/csharp-7.3/auto-prop-field-attrs), it is possible to force the injection of a get-only property by appling the attribute on its backing field. The following code show an injected get-only property:
+
+```csharp
+[field: AutoConstructorInject]
+public int Property { get; }
+```
+
+⚠️ The compiler support for auto-implemented property field-targeted attributes is not perfect (as described in the link above), and Roslyn analyzers are not running on backings fields so some warnings may not be reported.
 
 ## Configuration
 

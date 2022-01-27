@@ -1,4 +1,4 @@
-﻿using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace AutoConstructor.Generator;
@@ -9,11 +9,19 @@ public static class SymbolExtension
     {
         _ = symbol ?? throw new ArgumentNullException(nameof(symbol));
 
-        return (symbol.DeclaringSyntaxReferences.FirstOrDefault()?.GetSyntax() as VariableDeclaratorSyntax)?.Initializer != null;
+        bool isInitialized = false;
+        if (symbol.AssociatedSymbol is not null)
+        {
+            isInitialized = (symbol.AssociatedSymbol.DeclaringSyntaxReferences.FirstOrDefault()?.GetSyntax() as PropertyDeclarationSyntax)?.Initializer != null;
+        }
+
+        return isInitialized ||
+            (symbol.DeclaringSyntaxReferences.FirstOrDefault()?.GetSyntax() as VariableDeclaratorSyntax)?.Initializer != null;
     }
 
     public static bool HasAttribute(this ISymbol symbol, string attributeName, Compilation compilation)
     {
+        _ = symbol ?? throw new ArgumentNullException(nameof(symbol));
         _ = compilation ?? throw new ArgumentNullException(nameof(compilation));
 
         return symbol.GetAttribute(attributeName, compilation) is not null;
@@ -21,9 +29,21 @@ public static class SymbolExtension
 
     public static AttributeData? GetAttribute(this ISymbol symbol, string attributeName, Compilation compilation)
     {
+        _ = symbol ?? throw new ArgumentNullException(nameof(symbol));
         _ = compilation ?? throw new ArgumentNullException(nameof(compilation));
 
         INamedTypeSymbol? attributeSymbol = compilation.GetTypeByMetadataName(attributeName);
-        return symbol?.GetAttributes().FirstOrDefault(ad => ad.AttributeClass?.Equals(attributeSymbol, SymbolEqualityComparer.Default) == true);
+        return symbol.GetAttributes().FirstOrDefault(ad => ad.AttributeClass?.Equals(attributeSymbol, SymbolEqualityComparer.Default) == true);
+    }
+
+    public static bool CanBeInjected(this ISymbol symbol, Compilation compilation)
+    {
+        _ = symbol ?? throw new ArgumentNullException(nameof(symbol));
+        _ = compilation ?? throw new ArgumentNullException(nameof(compilation));
+
+        return symbol.CanBeReferencedByName
+            || (!symbol.CanBeReferencedByName
+                && symbol.HasAttribute(Source.InjectAttributeFullName, compilation)
+                && (symbol as IFieldSymbol)?.AssociatedSymbol is not null);
     }
 }
