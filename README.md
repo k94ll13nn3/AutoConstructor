@@ -18,6 +18,44 @@ C# source generator that generates a constructor from readonly fields in a class
 | <=1.3.0 | 16.10+        | 5.0.300+ |
 | >=2.0.0 | 17.0+         | 6.0.100+ |
 
+## Basic usage
+
+The following code:
+
+```csharp
+[AutoConstructor]
+public partial class MyClass
+{
+    private readonly MyDbContext _context;
+    private readonly IHttpClientFactory _clientFactory;
+    private readonly IService _service;
+
+    [AutoConstructorInject("options?.Value", "options", typeof(IOptions<ApplicationOptions>))]
+    private readonly ApplicationOptions _options;
+}
+```
+
+will generate:
+
+```csharp
+partial class MyClass
+{
+    public MyClass(
+        MyApp.MyDbContext context,
+        System.Net.Http.IHttpClientFactory clientFactory,
+        MyApp.IService service,
+        Microsoft.Extensions.Options.IOptions<MyApp.ApplicationOptions> options)
+    {
+        this._context = context;
+        this._clientFactory = clientFactory;
+        this._service = service;
+        this._options = options?.Value;
+    }
+}
+```
+
+A sample containing more cases is available at the end of this README.
+
 ## How to use
 
 For any class where the generator will be used:
@@ -99,7 +137,7 @@ This will generate the following code:
 /// <param name=""t2"">t2</param>
 ```
 
-## Sample
+## Sample describing some cases
 
 The following code
 
@@ -181,6 +219,7 @@ A type specified in `AutoConstructorInject` attribute does not match the type of
 
 In the folowing sample, both fields will be injected with `guid` as parameter name, but one of type `string` and the other of type `Guid`,
 preventing the generator from running.
+
 ``` csharp
 public partial class Test
 {
