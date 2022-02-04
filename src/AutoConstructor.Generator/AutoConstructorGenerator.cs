@@ -151,7 +151,7 @@ public class AutoConstructorGenerator : IIncrementalGenerator
 
         if (generateConstructorDocumentation)
         {
-            codeGenerator.AddDocumentation(constructorDocumentationComment);
+            codeGenerator.AddDocumentation(string.Format(CultureInfo.InvariantCulture, constructorDocumentationComment, symbol.Name));
         }
 
         if (!symbol.ContainingNamespace.IsGlobalNamespace)
