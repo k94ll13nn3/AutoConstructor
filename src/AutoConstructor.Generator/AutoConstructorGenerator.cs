@@ -101,24 +101,24 @@ public class AutoConstructorGenerator : IIncrementalGenerator
                     emitNullChecks = !disableNullCheckingSwitch.Equals("true", StringComparison.OrdinalIgnoreCase);
                 }
 
-                var fields = symbol.GetMembers().OfType<IFieldSymbol>()
+                FieldInfo[] fields = symbol.GetMembers().OfType<IFieldSymbol>()
                     .Where(x => x.CanBeInjected(compilation)
                         && !x.IsStatic
                         && x.IsReadOnly
                         && !x.IsInitialized()
                         && !x.HasAttribute(Source.IgnoreAttributeFullName, compilation))
                     .Select(x => GetFieldInfo(x, compilation, emitNullChecks))
-                    .ToList();
+                    .ToArray();
 
-                if (fields.Count == 0)
+                if (fields.Length == 0)
                 {
-                    // No need to report diagnostic, taken care by the analyers.
+                    // No need to report diagnostic, taken care by the analyzers.
                     continue;
                 }
 
                 if (fields.GroupBy(x => x.ParameterName).Any(g =>
-                    g.Where(c => c.Type is not null).Select(c => c.Type).Distinct().Count() > 1
-                    || (g.All(c => c.Type is null) && g.Select(c => c.FallbackType).Distinct().Count() > 1)
+                    g.Where(c => c.Type is not null).Select(c => c.Type).Distinct(SymbolEqualityComparer.Default).Count() > 1
+                    || (g.All(c => c.Type is null) && g.Select(c => c.FallbackType).Distinct(SymbolEqualityComparer.Default).Count() > 1)
                     ))
                 {
                     context.ReportDiagnostic(Diagnostic.Create(Rule, candidateClass.GetLocation()));
@@ -130,7 +130,7 @@ public class AutoConstructorGenerator : IIncrementalGenerator
         }
     }
 
-    private static string GenerateAutoConstructor(INamedTypeSymbol symbol, IEnumerable<FieldInfo> fields, AnalyzerConfigOptions options)
+    private static string GenerateAutoConstructor(INamedTypeSymbol symbol, FieldInfo[] fields, AnalyzerConfigOptions options)
     {
         bool generateConstructorDocumentation = false;
         if (options.TryGetValue("build_property.AutoConstructor_GenerateConstructorDocumentation", out string? generateConstructorDocumentationSwitch))
@@ -176,7 +176,7 @@ public class AutoConstructorGenerator : IIncrementalGenerator
     private static FieldInfo GetFieldInfo(IFieldSymbol fieldSymbol, Compilation compilation, bool emitNullChecks)
     {
         ITypeSymbol type = fieldSymbol.Type;
-        string? typeDisplay = type.ToDisplayString();
+        ITypeSymbol? injectedType = type;
         string parameterName = fieldSymbol.Name.TrimStart('_');
         if (fieldSymbol.AssociatedSymbol is not null)
         {
@@ -199,40 +199,36 @@ public class AutoConstructorGenerator : IIncrementalGenerator
         if (attributeData is not null)
         {
             ImmutableArray<IParameterSymbol> parameters = attributeData.AttributeConstructor?.Parameters ?? ImmutableArray.Create<IParameterSymbol>();
-            if (GetParameterValue("parameterName", parameters, attributeData.ConstructorArguments) is string { Length: > 0 } parameterNameValue)
+            if (GetParameterValue<string>("parameterName", parameters, attributeData.ConstructorArguments) is string { Length: > 0 } parameterNameValue)
             {
                 parameterName = parameterNameValue;
                 initializer = parameterNameValue;
             }
 
-            if (GetParameterValue("initializer", parameters, attributeData.ConstructorArguments) is string { Length: > 0 } initializerValue)
+            if (GetParameterValue<string>("initializer", parameters, attributeData.ConstructorArguments) is string { Length: > 0 } initializerValue)
             {
                 initializer = initializerValue;
             }
 
-            string? injectedTypeValue = GetParameterValue("injectedType", parameters, attributeData.ConstructorArguments);
-            typeDisplay = string.IsNullOrWhiteSpace(injectedTypeValue) ? null : injectedTypeValue;
-        }
-
-        if (type.NullableAnnotation != NullableAnnotation.NotAnnotated && emitNullChecks)
-        {
-            initializer = $"{initializer} ?? throw new System.ArgumentNullException(nameof({parameterName}))";
+            injectedType = GetParameterValue<INamedTypeSymbol>("injectedType", parameters, attributeData.ConstructorArguments);
         }
 
         return new FieldInfo(
-            typeDisplay,
+            injectedType,
             parameterName,
             fieldSymbol.AssociatedSymbol?.Name ?? fieldSymbol.Name,
             initializer,
-            type.ToDisplayString(),
+            type,
             type.IsReferenceType && type.NullableAnnotation == NullableAnnotation.Annotated,
-            summaryText);
+            summaryText,
+            type.NullableAnnotation != NullableAnnotation.NotAnnotated && emitNullChecks);
     }
 
-    private static string? GetParameterValue(string parameterName, ImmutableArray<IParameterSymbol> parameters, ImmutableArray<TypedConstant> arguments)
+    private static T? GetParameterValue<T>(string parameterName, ImmutableArray<IParameterSymbol> parameters, ImmutableArray<TypedConstant> arguments)
+        where T : class
     {
         return parameters.ToList().FindIndex(c => c.Name == parameterName) is int index and not -1
-            ? (arguments[index].Value?.ToString())
+            ? (arguments[index].Value as T)
             : null;
     }
 }

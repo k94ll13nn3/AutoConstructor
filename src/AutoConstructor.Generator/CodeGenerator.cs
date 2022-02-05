@@ -74,7 +74,7 @@ public class CodeGenerator
         return this;
     }
 
-    public CodeGenerator AddConstructor(IEnumerable<FieldInfo> parameters)
+    public CodeGenerator AddConstructor(FieldInfo[] parameters)
     {
         if (_current is ClassDeclarationSyntax classDeclarationSyntax)
         {
@@ -153,26 +153,26 @@ public class CodeGenerator
         return declaration;
     }
 
-    private static ConstructorDeclarationSyntax GetConstructor(SyntaxToken identifier, IEnumerable<FieldInfo> parameters, string? constructorDocumentationComment)
+    private static ConstructorDeclarationSyntax GetConstructor(SyntaxToken identifier, FieldInfo[] parameters, string? constructorDocumentationComment)
     {
-        var constructorParameters = parameters
+        FieldInfo[] constructorParameters = parameters
             .GroupBy(x => x.ParameterName)
             .Select(x => x.Any(c => c.Type is not null) ? x.First(c => c.Type is not null) : x.First())
-            .ToList();
+            .ToArray();
 
         SyntaxToken modifiers = Token(SyntaxKind.PublicKeyword);
-        if (constructorDocumentationComment is { Length: > 0 })
+        if (constructorDocumentationComment is string { Length: > 0 })
         {
             modifiers = Token(TriviaList(Trivia(GetDocumentation(constructorDocumentationComment, parameters))), SyntaxKind.PublicKeyword, TriviaList());
         }
 
         return ConstructorDeclaration(identifier)
             .AddModifiers(modifiers)
-            .AddParameterListParameters(constructorParameters.Select(GetParameter).ToArray())
-            .AddBodyStatements(parameters.Select(p => GetParameterAssignement(p)).ToArray());
+            .AddParameterListParameters(Array.ConvertAll(constructorParameters, GetParameter))
+            .AddBodyStatements(Array.ConvertAll(parameters, GetParameterAssignement));
     }
 
-    private static DocumentationCommentTriviaSyntax GetDocumentation(string constructorDocumentationComment, IEnumerable<FieldInfo> parameters)
+    private static DocumentationCommentTriviaSyntax GetDocumentation(string constructorDocumentationComment, FieldInfo[] parameters)
     {
         var nodes = new List<XmlNodeSyntax>
         {
@@ -195,23 +195,26 @@ public class CodeGenerator
 
     private static ParameterSyntax GetParameter(FieldInfo parameter)
     {
-        // TODO: Use QualifiedName for XX.XX.XX types and PredefinedType for types with SpecialType.
+        ITypeSymbol parameterType = parameter.Type ?? parameter.FallbackType;
+
         return Parameter(Identifier(parameter.ParameterName))
-            .WithType(IdentifierName(parameter.Type ?? parameter.FallbackType));
+            .WithType(ParseTypeName(parameterType.ToDisplayString()));
     }
 
-    private static ExpressionStatementSyntax GetParameterAssignement(FieldInfo parameter, bool emitArgumentNullException = false)
+    private static ExpressionStatementSyntax GetParameterAssignement(FieldInfo parameter)
     {
         ExpressionSyntax left = MemberAccessExpression(SyntaxKind.SimpleMemberAccessExpression, ThisExpression(), IdentifierName(parameter.FieldName));
         ExpressionSyntax right = IdentifierName(parameter.Initializer);
-        if (emitArgumentNullException)
+
+        if (parameter.EmitArgumentNullException)
         {
-            right = BinaryExpression(
-                        SyntaxKind.CoalesceExpression,
-                        right,
-                        ThrowExpression(
-                            ObjectCreationExpression(QualifiedName(IdentifierName("System"), IdentifierName("ArgumentNullException")))
-                            .AddArgumentListArguments(Argument(NameOf("name2")))));
+            right =
+                BinaryExpression(
+                    SyntaxKind.CoalesceExpression,
+                    right,
+                    ThrowExpression(
+                        ObjectCreationExpression(QualifiedName(IdentifierName("System"), IdentifierName("ArgumentNullException")))
+                        .AddArgumentListArguments(Argument(NameOf(parameter.ParameterName)))));
         }
 
         return ExpressionStatement(AssignmentExpression(SyntaxKind.SimpleAssignmentExpression, left, right));
