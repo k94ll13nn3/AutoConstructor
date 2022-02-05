@@ -149,7 +149,7 @@ public class CodeGenerator
         SyntaxToken firstModifier = Token(isStatic ? SyntaxKind.StaticKeyword : SyntaxKind.PartialKeyword);
         if (addHeaderTrivia)
         {
-            firstModifier = Token(GetHeaderTrivia(addNullableAnnotation), SyntaxKind.PartialKeyword, TriviaList());
+            firstModifier = Token(GetHeaderTrivia(addNullableAnnotation), isStatic ? SyntaxKind.StaticKeyword : SyntaxKind.PartialKeyword, TriviaList());
         }
 
         ClassDeclarationSyntax declaration = ClassDeclaration(identifier).AddModifiers(firstModifier);

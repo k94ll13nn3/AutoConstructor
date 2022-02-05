@@ -46,4 +46,19 @@ public static class SymbolExtension
                 && symbol.HasAttribute(Source.InjectAttributeFullName, compilation)
                 && (symbol as IFieldSymbol)?.AssociatedSymbol is not null);
     }
+
+    public static IEnumerable<INamedTypeSymbol> GetContainingTypes(this INamedTypeSymbol symbol)
+    {
+        _ = symbol ?? throw new ArgumentNullException(nameof(symbol));
+
+        if (symbol.ContainingType is not null)
+        {
+            foreach (INamedTypeSymbol item in GetContainingTypes(symbol.ContainingType))
+            {
+                yield return item;
+            }
+
+            yield return symbol.ContainingType;
+        }
+    }
 }

@@ -82,12 +82,14 @@ public class AutoConstructorGenerator : IIncrementalGenerator
                 .GetDeclaredSymbol(candidateClass);
             if (symbol is not null)
             {
-                string filename = $"{symbol.Name}.g.cs";
+                string filename = string.Empty;
+
                 if (symbol.ContainingType is not null)
                 {
-                    filename = $"{symbol.ContainingType.Name}.{filename}";
+                    filename = $"{string.Join(".", symbol.GetContainingTypes().Select(c => c.Name))}.";
                 }
 
+                filename += $"{symbol.Name}.g.cs";
                 if (!symbol.ContainingNamespace.IsGlobalNamespace)
                 {
                     filename = $"{symbol.ContainingNamespace.ToDisplayString()}.{filename}";
@@ -159,9 +161,9 @@ public class AutoConstructorGenerator : IIncrementalGenerator
             codeGenerator.AddNamespace(symbol.ContainingNamespace.ToDisplayString());
         }
 
-        if (symbol.ContainingType is not null)
+        foreach (INamedTypeSymbol containingType in symbol.GetContainingTypes())
         {
-            codeGenerator.AddClass(symbol.ContainingType.Name, symbol.ContainingType.IsStatic);
+            codeGenerator.AddClass(containingType.Name, containingType.IsStatic);
         }
 
         codeGenerator
