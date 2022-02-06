@@ -70,16 +70,14 @@ public class AutoConstructorGenerator : IIncrementalGenerator
             return;
         }
 
-        foreach (ClassDeclarationSyntax candidateClass in classes)
+        foreach (IGrouping<ISymbol?, ClassDeclarationSyntax> groupedClasses in classes.GroupBy(c => compilation.GetSemanticModel(c.SyntaxTree).GetDeclaredSymbol(c), SymbolEqualityComparer.Default))
         {
             if (context.CancellationToken.IsCancellationRequested)
             {
                 break;
             }
 
-            INamedTypeSymbol? symbol = compilation
-                .GetSemanticModel(candidateClass.SyntaxTree)
-                .GetDeclaredSymbol(candidateClass);
+            INamedTypeSymbol? symbol = groupedClasses.Key as INamedTypeSymbol;
             if (symbol is not null)
             {
                 string filename = string.Empty;
@@ -121,7 +119,11 @@ public class AutoConstructorGenerator : IIncrementalGenerator
                     || (g.All(c => c.Type is null) && g.Select(c => c.FallbackType).Distinct(SymbolEqualityComparer.Default).Count() > 1)
                     ))
                 {
-                    context.ReportDiagnostic(Diagnostic.Create(Rule, candidateClass.GetLocation()));
+                    foreach (ClassDeclarationSyntax classDeclaration in groupedClasses)
+                    {
+                        context.ReportDiagnostic(Diagnostic.Create(Rule, classDeclaration.GetLocation()));
+                    }
+
                     continue;
                 }
 
