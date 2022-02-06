@@ -63,7 +63,7 @@ For any class where the generator will be used:
 - Mark the class as `partial`
 - Use `AutoConstructorAttribute` on the class
 
-By default, all `private readonly` without initialization will be used. The will be injected with the same name without any leading `_`.
+By default, all `readonly` non-`static` fields without initialization will be used. They will be injected with the same name without any leading `_`.
 
 Fields marked with `AutoConstructorIgnoreAttribute` will be ignored.
 
