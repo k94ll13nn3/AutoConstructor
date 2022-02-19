@@ -82,10 +82,11 @@ and even use a parameter from another field not annotated with `AutoConstructorI
 
 ### Get-only properties
 
-By default, get-only properties (`public int Property { get; }`) are not injected by the generator, and it is not possible to use attributes on them to force the injection. However, using [auto-implemented property field-targeted attributes](https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/proposals/csharp-7.3/auto-prop-field-attrs), it is possible to force the injection of a get-only property by appling the attribute on its backing field. The following code show an injected get-only property:
+Since version 3.0.0, get-only properties (`public int Property { get; }`) are injected by the generator by default.
+The behavior of the injection can be modified using [auto-implemented property field-targeted attributes](https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/proposals/csharp-7.3/auto-prop-field-attrs) on its backing field. The following code show an injected get-only property with a custom injecter:
 
 ```csharp
-[field: AutoConstructorInject]
+[field: AutoConstructorInject(initializer: "injected.ToString()", injectedType: typeof(int), parameterName: "injected")]
 public int Property { get; }
 ```
 
@@ -137,7 +138,9 @@ This will generate the following code:
 /// <param name=""t2"">t2</param>
 ```
 
-## Sample describing some cases
+## Samples describing some cases
+
+### Sample for fields
 
 The following code
 
@@ -188,6 +191,63 @@ public Test(string name, System.DateTime? date, System.Collections.Generic.List<
     this._guidString = guid.ToString() ?? throw new System.ArgumentNullException(nameof(guid));
     this._guidLength = guid.ToString().Length;
     this._nameShared = name.ToUpper() ?? throw new System.ArgumentNullException(nameof(name));
+}
+```
+
+### Sample for get-only properties
+
+The following code
+
+``` csharp
+[AutoConstructor]
+public partial class Test
+{
+    [field: AutoConstructorInject]
+    public int Injected { get; }
+
+    public int AlsoInjectedEvenWhenMissingAttribute { get; }
+
+    /// <summary>
+    /// Some property.
+    /// </summary>
+    [field: AutoConstructorInject]
+    public int InjectedWithDocumentation { get; }
+
+    [field: AutoConstructorInject]
+    public int NotInjectedBecauseNotReadonly { get; set; }
+
+    [field: AutoConstructorInject]
+    public static int NotInjectedBecauseStatic { get; }
+
+    [field: AutoConstructorInject]
+    public int NotInjectedBecauseInitialized { get; } = 2;
+
+    [field: AutoConstructorIgnore]
+    public int NotInjectedBecauseHasIgnoreAttribute { get; }
+
+    [field: AutoConstructorInject(initializer: ""injected.ToString()"", injectedType: typeof(int), parameterName: ""injected"")]
+    public string InjectedWithoutCreatingAParam { get; }
+}
+```
+
+will generate
+
+```csharp
+partial class Test
+{
+    /// <summary>
+    /// Initializes a new instance of the Test class.
+    /// </summary>
+    /// <param name=""injected"">injected</param>
+    /// <param name=""injectedWithDocumentation"">Some property.</param>
+    /// <param name=""alsoInjectedEvenWhenMissingAttribute"">alsoInjectedEvenWhenMissingAttribute</param>
+    public Test(int injected, int injectedWithDocumentation, int alsoInjectedEvenWhenMissingAttribute)
+    {
+        this.Injected = injected;
+        this.InjectedWithDocumentation = injectedWithDocumentation;
+        this.AlsoInjectedEvenWhenMissingAttribute = alsoInjectedEvenWhenMissingAttribute;
+        this.InjectedWithoutCreatingAParam = injected.ToString() ?? throw new System.ArgumentNullException(nameof(injected));
+    }
 }
 ```
 

@@ -41,9 +41,6 @@ public static class SymbolExtension
         _ = symbol ?? throw new ArgumentNullException(nameof(symbol));
         _ = compilation ?? throw new ArgumentNullException(nameof(compilation));
 
-        // TODO: for get-only properties :
-        // Update doc to indicate that it is now enabled by default
-        // Add setting to disable it
         return symbol.CanBeReferencedByName
             || (!symbol.CanBeReferencedByName
                 && (symbol as IFieldSymbol)?.AssociatedSymbol is not null);

@@ -163,7 +163,7 @@ public class CodeGenerator
         SyntaxToken modifiers = Token(SyntaxKind.PublicKeyword);
         if (constructorDocumentationComment is string { Length: > 0 })
         {
-            modifiers = Token(TriviaList(Trivia(GetDocumentation(constructorDocumentationComment, parameters))), SyntaxKind.PublicKeyword, TriviaList());
+            modifiers = Token(TriviaList(Trivia(GetDocumentation(constructorDocumentationComment, constructorParameters))), SyntaxKind.PublicKeyword, TriviaList());
         }
 
         return ConstructorDeclaration(identifier)
