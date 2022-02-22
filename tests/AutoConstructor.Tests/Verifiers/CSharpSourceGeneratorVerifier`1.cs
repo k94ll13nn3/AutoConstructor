@@ -54,11 +54,16 @@ public static class CSharpSourceGeneratorVerifier<TSourceGenerator>
         await test.RunAsync();
     }
 
-    private class Test : CSharpSourceGeneratorTest<TSourceGenerator, XUnitVerifier>
+    private class Test : CSharpSourceGeneratorTest<EmptySourceGeneratorProvider, XUnitVerifier>
     {
         public bool EnableNullable { get; set; }
 
         public LanguageVersion LanguageVersion { get; set; }
+
+        protected override IEnumerable<ISourceGenerator> GetSourceGenerators()
+        {
+            yield return new TSourceGenerator().AsSourceGenerator();
+        }
 
         protected override CompilationOptions CreateCompilationOptions()
         {
