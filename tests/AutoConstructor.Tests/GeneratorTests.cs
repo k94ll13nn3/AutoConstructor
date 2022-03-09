@@ -523,7 +523,10 @@ namespace Test
     [AutoConstructor]
     internal partial class Test
     {
-        private readonly string? _t;
+        private readonly string? _t1;
+        private readonly string _t2;
+        private readonly int _d1;
+        private readonly int? _d2;
     }
 }";
         const string generated = @"#nullable enable
@@ -531,9 +534,12 @@ namespace Test
 {
     partial class Test
     {
-        public Test(string? t)
+        public Test(string? t1, string t2, int d1, int? d2)
         {
-            this._t = t ?? throw new System.ArgumentNullException(nameof(t));
+            this._t1 = t1;
+            this._t2 = t2;
+            this._d1 = d1;
+            this._d2 = d2;
         }
     }
 }

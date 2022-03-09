@@ -223,7 +223,7 @@ public class AutoConstructorGenerator : IIncrementalGenerator
             type,
             type.IsReferenceType && type.NullableAnnotation == NullableAnnotation.Annotated,
             summaryText,
-            type.NullableAnnotation != NullableAnnotation.NotAnnotated && emitNullChecks);
+            type.IsReferenceType && type.NullableAnnotation == NullableAnnotation.None && emitNullChecks);
     }
 
     private static T? GetParameterValue<T>(string parameterName, ImmutableArray<IParameterSymbol> parameters, ImmutableArray<TypedConstant> arguments)
