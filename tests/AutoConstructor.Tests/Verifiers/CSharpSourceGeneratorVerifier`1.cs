@@ -18,7 +18,7 @@ public static class CSharpSourceGeneratorVerifier<TSourceGenerator>
         string? generatedName = "Test.Test.g.cs",
         bool nullable = false,
         IEnumerable<DiagnosticResult>? diagnostics = null,
-        IEnumerable<(string filename, SourceText content)>? configFiles = null)
+        string? configFileContent = null)
     {
         var test = new CSharpSourceGeneratorVerifier<TSourceGenerator>.Test()
         {
@@ -55,10 +55,11 @@ public static class CSharpSourceGeneratorVerifier<TSourceGenerator>
             test.TestState.ExpectedDiagnostics.AddRange(diagnostics);
         }
 
-        if (configFiles is not null)
-        {
-            test.TestState.AnalyzerConfigFiles.AddRange(configFiles);
-        }
+        // Enable null checks for the tests.
+        test.TestState.AnalyzerConfigFiles.Add(("/.editorconfig", SourceText.From($@"
+is_global=true
+build_property.AutoConstructor_DisableNullChecking = false
+{configFileContent}")));
 
         await test.RunAsync();
     }

@@ -93,7 +93,7 @@ public class AutoConstructorGenerator : IIncrementalGenerator
                     filename = $"{symbol.ContainingNamespace.ToDisplayString()}.{filename}";
                 }
 
-                bool emitNullChecks = true;
+                bool emitNullChecks = false;
                 if (options.TryGetValue("build_property.AutoConstructor_DisableNullChecking", out string? disableNullCheckingSwitch))
                 {
                     emitNullChecks = !disableNullCheckingSwitch.Equals("true", StringComparison.OrdinalIgnoreCase);

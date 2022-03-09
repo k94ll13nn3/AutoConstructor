@@ -82,7 +82,7 @@ and even use a parameter from another field not annotated with `AutoConstructorI
 
 ### Get-only properties
 
-Since version 3.0.0, get-only properties (`public int Property { get; }`) are injected by the generator by default.
+Get-only properties (`public int Property { get; }`) are injected by the generator by default.
 The behavior of the injection can be modified using [auto-implemented property field-targeted attributes](https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/proposals/csharp-7.3/auto-prop-field-attrs) on its backing field. The following code show an injected get-only property with a custom injecter:
 
 ```csharp
@@ -96,11 +96,11 @@ public int Property { get; }
 
 ### Generating `ArgumentNullException`
 
-By default, null checks with `ArgumentNullException` will be generated when needed.
-To disable this behavior, set `AutoConstructor_DisableNullChecking` to `false` in the project file:
+By default, null checks with `ArgumentNullException` are not generated when needed.
+To enable this behavior, set `AutoConstructor_DisableNullChecking` to `false` in the project file:
 
 ``` xml
-<AutoConstructor_DisableNullChecking>true</AutoConstructor_DisableNullChecking>
+<AutoConstructor_DisableNullChecking>false</AutoConstructor_DisableNullChecking>
 ```
 
 ### Generating XML documentation comment

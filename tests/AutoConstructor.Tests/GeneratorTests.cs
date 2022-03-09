@@ -318,12 +318,7 @@ namespace Test
 }}
 ";
 
-        (string, SourceText) configFile = ("/.editorconfig", SourceText.From($@"
-is_global=true
-build_property.AutoConstructor_DisableNullChecking = {disableNullChecks}
-"));
-
-        await VerifySourceGenerator.RunAsync(code, generated, configFiles: new[] { configFile });
+        await VerifySourceGenerator.RunAsync(code, generated, configFileContent: $"build_property.AutoConstructor_DisableNullChecking = {disableNullChecks}");
     }
 
     [Theory]
@@ -379,12 +374,10 @@ namespace Test
 ";
         }
 
-        (string, SourceText) configFile = ("/.editorconfig", SourceText.From($@"
-is_global=true
-build_property.AutoConstructor_GenerateConstructorDocumentation = {generateDocumentation}
-"));
-
-        await VerifySourceGenerator.RunAsync(code, generated, configFiles: new[] { configFile });
+        await VerifySourceGenerator.RunAsync(
+            code,
+            generated,
+            configFileContent: $"build_property.AutoConstructor_GenerateConstructorDocumentation = {generateDocumentation}");
     }
 
     [Theory]
@@ -430,23 +423,19 @@ namespace Test
 }}
 ";
 
-        var configSource = SourceText.From(@"
-is_global=true
+        string configFileContent = @"
 build_property.AutoConstructor_GenerateConstructorDocumentation = true
-");
+";
 
         if (hasCustomComment)
         {
-            configSource = SourceText.From($@"
-is_global=true
+            configFileContent = $@"
 build_property.AutoConstructor_GenerateConstructorDocumentation = true
 build_property.AutoConstructor_ConstructorDocumentationComment = {commentConfig}
-");
+";
         }
 
-        (string, SourceText) configFile = ("/.editorconfig", configSource);
-
-        await VerifySourceGenerator.RunAsync(code, generated, configFiles: new[] { configFile });
+        await VerifySourceGenerator.RunAsync(code, generated, configFileContent: configFileContent);
     }
 
     [Fact]
@@ -786,12 +775,8 @@ namespace Test
     }
 }
 ";
-        (string, SourceText) configFile = ("/.editorconfig", SourceText.From(@"
-is_global=true
-build_property.AutoConstructor_GenerateConstructorDocumentation = true
-"));
 
-        await VerifySourceGenerator.RunAsync(code, generated, configFiles: new[] { configFile });
+        await VerifySourceGenerator.RunAsync(code, generated, configFileContent: "build_property.AutoConstructor_GenerateConstructorDocumentation = true");
     }
 
     [Fact]
