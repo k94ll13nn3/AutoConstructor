@@ -7,20 +7,7 @@ namespace AutoConstructor.Generator.Analyzers;
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public class IgnoreAttributeOnNonProcessedFieldAnalyzer : DiagnosticAnalyzer
 {
-    public const string DiagnosticId = "ACONS03";
-
-    private static readonly DiagnosticDescriptor Rule = new(
-        DiagnosticId,
-        $"Remove {Source.IgnoreAttributeFullName}",
-        $"{Source.IgnoreAttributeFullName} has no effect on a field that cannot be injected",
-        "Usage",
-        DiagnosticSeverity.Info,
-        true,
-        null,
-        $"https://github.com/k94ll13nn3/AutoConstructor#{DiagnosticId}",
-        WellKnownDiagnosticTags.Unnecessary);
-
-    public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => ImmutableArray.Create(Rule);
+    public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => ImmutableArray.Create(DiagnosticDescriptors.IgnoreAttributeOnNonProcessedFieldRule);
 
     public override void Initialize(AnalysisContext context)
     {
@@ -43,7 +30,7 @@ public class IgnoreAttributeOnNonProcessedFieldAnalyzer : DiagnosticAnalyzer
             if (propertyTypeIdentifier is not null)
             {
                 var location = Location.Create(propertyTypeIdentifier.SyntaxTree, propertyTypeIdentifier.Span);
-                var diagnostic = Diagnostic.Create(Rule, location);
+                var diagnostic = Diagnostic.Create(DiagnosticDescriptors.IgnoreAttributeOnNonProcessedFieldRule, location);
                 context.ReportDiagnostic(diagnostic);
             }
         }

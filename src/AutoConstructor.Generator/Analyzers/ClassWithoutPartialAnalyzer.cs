@@ -1,4 +1,4 @@
-﻿using System.Collections.Immutable;
+using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -9,20 +9,7 @@ namespace AutoConstructor.Generator.Analyzers;
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public class ClassWithoutPartialAnalyzer : DiagnosticAnalyzer
 {
-    public const string DiagnosticId = "ACONS01";
-
-    private static readonly DiagnosticDescriptor Rule = new(
-        DiagnosticId,
-        "Couldn't generate constructor",
-        $"Type decorated with {Source.AttributeFullName} must be also declared partial",
-        "Usage",
-        DiagnosticSeverity.Warning,
-        true,
-        null,
-        $"https://github.com/k94ll13nn3/AutoConstructor#{DiagnosticId}",
-        WellKnownDiagnosticTags.Build);
-
-    public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => ImmutableArray.Create(Rule);
+    public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => ImmutableArray.Create(DiagnosticDescriptors.ClassWithoutPartialRule);
 
     public override void Initialize(AnalysisContext context)
     {
@@ -42,7 +29,7 @@ public class ClassWithoutPartialAnalyzer : DiagnosticAnalyzer
             && symbol.HasAttribute(Source.AttributeFullName, context.Compilation)
             && !classDeclarationSyntax.Modifiers.Any(SyntaxKind.PartialKeyword))
         {
-            var diagnostic = Diagnostic.Create(Rule, classDeclarationSyntax.Identifier.GetLocation());
+            var diagnostic = Diagnostic.Create(DiagnosticDescriptors.ClassWithoutPartialRule, classDeclarationSyntax.Identifier.GetLocation());
             context.ReportDiagnostic(diagnostic);
         }
     }

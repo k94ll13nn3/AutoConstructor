@@ -7,20 +7,7 @@ namespace AutoConstructor.Generator.Analyzers;
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public class ClassWithoutFieldsToInjectAnalyzer : DiagnosticAnalyzer
 {
-    public const string DiagnosticId = "ACONS02";
-
-    private static readonly DiagnosticDescriptor Rule = new(
-        DiagnosticId,
-        $"Remove {Source.AttributeFullName}",
-        $"{Source.AttributeFullName} has no effect on a class without fields to inject",
-        "Usage",
-        DiagnosticSeverity.Warning,
-        true,
-        null,
-        $"https://github.com/k94ll13nn3/AutoConstructor#{DiagnosticId}",
-        WellKnownDiagnosticTags.Unnecessary);
-
-    public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => ImmutableArray.Create(Rule);
+    public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => ImmutableArray.Create(DiagnosticDescriptors.ClassWithoutFieldsToInjectRule);
 
     public override void Initialize(AnalysisContext context)
     {
@@ -48,7 +35,7 @@ public class ClassWithoutFieldsToInjectAnalyzer : DiagnosticAnalyzer
                 if (propertyTypeIdentifier is not null)
                 {
                     var location = Location.Create(propertyTypeIdentifier.SyntaxTree, propertyTypeIdentifier.Span);
-                    var diagnostic = Diagnostic.Create(Rule, location);
+                    var diagnostic = Diagnostic.Create(DiagnosticDescriptors.ClassWithoutFieldsToInjectRule, location);
                     context.ReportDiagnostic(diagnostic);
                 }
             }

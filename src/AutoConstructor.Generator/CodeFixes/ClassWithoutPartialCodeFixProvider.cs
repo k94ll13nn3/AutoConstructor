@@ -1,6 +1,5 @@
-﻿using System.Collections.Immutable;
+using System.Collections.Immutable;
 using System.Composition;
-using AutoConstructor.Generator.Analyzers;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CodeActions;
 using Microsoft.CodeAnalysis.CodeFixes;
@@ -13,7 +12,7 @@ namespace AutoConstructor.Generator.CodeFixes;
 [ExportCodeFixProvider(LanguageNames.CSharp, Name = nameof(ClassWithoutPartialCodeFixProvider)), Shared]
 public class ClassWithoutPartialCodeFixProvider : CodeFixProvider
 {
-    public sealed override ImmutableArray<string> FixableDiagnosticIds => ImmutableArray.Create(ClassWithoutPartialAnalyzer.DiagnosticId);
+    public sealed override ImmutableArray<string> FixableDiagnosticIds => ImmutableArray.Create(DiagnosticDescriptors.ClassWithoutPartialDiagnosticId);
 
     public sealed override FixAllProvider GetFixAllProvider()
     {

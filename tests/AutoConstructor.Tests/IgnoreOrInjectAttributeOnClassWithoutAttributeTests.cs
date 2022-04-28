@@ -1,4 +1,4 @@
-﻿using AutoConstructor.Generator.Analyzers;
+using AutoConstructor.Generator;
 using Microsoft.CodeAnalysis.Testing;
 using Xunit;
 using VerifyIgnoreOrInjectAttributeOnClassWithoutAttribute = AutoConstructor.Tests.Verifiers.CSharpCodeFixVerifier<
@@ -31,7 +31,7 @@ namespace Test
     public async Task Analyzer_IgnoreOrInjectAttributeOnClassWithoutAttribute_ShouldReportDiagnostic(string test)
     {
         DiagnosticResult[] expected = new[] {
-                VerifyIgnoreOrInjectAttributeOnClassWithoutAttribute.Diagnostic(IgnoreOrInjectAttributeOnClassWithoutAttributeAnalyzer.DiagnosticId).WithLocation(0),
+                VerifyIgnoreOrInjectAttributeOnClassWithoutAttribute.Diagnostic(DiagnosticDescriptors.IgnoreOrInjectAttributeOnClassWithoutAttributeDiagnosticId).WithLocation(0),
             };
         await VerifyIgnoreOrInjectAttributeOnClassWithoutAttribute.VerifyAnalyzerAsync(test, expected);
     }
@@ -72,7 +72,7 @@ namespace Test
     public async Task Analyzer_IgnoreOrInjectAttributeOnClassWithoutAttribute_ShouldFixCode(string test, string fixtest)
     {
         DiagnosticResult[] expected = new[] {
-                VerifyIgnoreOrInjectAttributeOnClassWithoutAttribute.Diagnostic(IgnoreOrInjectAttributeOnClassWithoutAttributeAnalyzer.DiagnosticId).WithLocation(0),
+                VerifyIgnoreOrInjectAttributeOnClassWithoutAttribute.Diagnostic(DiagnosticDescriptors.IgnoreOrInjectAttributeOnClassWithoutAttributeDiagnosticId).WithLocation(0),
             };
         await VerifyIgnoreOrInjectAttributeOnClassWithoutAttribute.VerifyCodeFixAsync(test, expected, fixtest);
     }
@@ -101,8 +101,8 @@ namespace Test
 }";
 
         DiagnosticResult[] expected = new[] {
-                VerifyIgnoreOrInjectAttributeOnClassWithoutAttribute.Diagnostic(IgnoreOrInjectAttributeOnClassWithoutAttributeAnalyzer.DiagnosticId).WithLocation(0),
-                VerifyIgnoreOrInjectAttributeOnClassWithoutAttribute.Diagnostic(IgnoreOrInjectAttributeOnClassWithoutAttributeAnalyzer.DiagnosticId).WithLocation(1),
+                VerifyIgnoreOrInjectAttributeOnClassWithoutAttribute.Diagnostic(DiagnosticDescriptors.IgnoreOrInjectAttributeOnClassWithoutAttributeDiagnosticId).WithLocation(0),
+                VerifyIgnoreOrInjectAttributeOnClassWithoutAttribute.Diagnostic(DiagnosticDescriptors.IgnoreOrInjectAttributeOnClassWithoutAttributeDiagnosticId).WithLocation(1),
             };
         await VerifyIgnoreOrInjectAttributeOnClassWithoutAttribute.VerifyCodeFixAsync(test, expected, fixtest);
     }

@@ -1,6 +1,5 @@
 using System.Collections.Immutable;
 using System.Composition;
-using AutoConstructor.Generator.Analyzers;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CodeActions;
 using Microsoft.CodeAnalysis.CodeFixes;
@@ -13,10 +12,10 @@ namespace AutoConstructor.Generator.CodeFixes;
 public class RemoveAttributeCodeFixProvider : CodeFixProvider
 {
     public sealed override ImmutableArray<string> FixableDiagnosticIds => ImmutableArray.Create(
-        ClassWithoutFieldsToInjectAnalyzer.DiagnosticId,
-        IgnoreAttributeOnNonProcessedFieldAnalyzer.DiagnosticId,
-        InjectAttributeOnIgnoredFieldAnalyzer.DiagnosticId,
-        IgnoreOrInjectAttributeOnClassWithoutAttributeAnalyzer.DiagnosticId);
+        DiagnosticDescriptors.ClassWithoutFieldsToInjectDiagnosticId,
+        DiagnosticDescriptors.IgnoreAttributeOnNonProcessedFieldDiagnosticId,
+        DiagnosticDescriptors.InjectAttributeOnIgnoredFieldDiagnosticId,
+        DiagnosticDescriptors.IgnoreOrInjectAttributeOnClassWithoutAttributeDiagnosticId);
 
     public sealed override FixAllProvider GetFixAllProvider()
     {

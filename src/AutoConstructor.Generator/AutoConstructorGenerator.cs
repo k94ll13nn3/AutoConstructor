@@ -13,19 +13,6 @@ namespace AutoConstructor.Generator;
 [Generator]
 public class AutoConstructorGenerator : IIncrementalGenerator
 {
-    public const string MistmatchTypesDiagnosticId = "ACONS06";
-
-    private static readonly DiagnosticDescriptor Rule = new(
-        MistmatchTypesDiagnosticId,
-        "Couldn't generate constructor",
-        "One or more parameter have mismatching types",
-        "Usage",
-        DiagnosticSeverity.Error,
-        true,
-        null,
-        $"https://github.com/k94ll13nn3/AutoConstructor#{MistmatchTypesDiagnosticId}",
-        WellKnownDiagnosticTags.Build);
-
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
         // Register the attribute source
@@ -121,7 +108,7 @@ public class AutoConstructorGenerator : IIncrementalGenerator
                 {
                     foreach (ClassDeclarationSyntax classDeclaration in groupedClasses)
                     {
-                        context.ReportDiagnostic(Diagnostic.Create(Rule, classDeclaration.GetLocation()));
+                        context.ReportDiagnostic(Diagnostic.Create(DiagnosticDescriptors.MistmatchTypesRule, classDeclaration.GetLocation()));
                     }
 
                     continue;

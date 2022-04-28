@@ -452,7 +452,7 @@ namespace Test
     }
 }";
 
-        DiagnosticResult diagnosticResult = new DiagnosticResult(AutoConstructorGenerator.MistmatchTypesDiagnosticId, DiagnosticSeverity.Error).WithSpan(4, 5, 10, 6);
+        DiagnosticResult diagnosticResult = new DiagnosticResult(DiagnosticDescriptors.MistmatchTypesDiagnosticId, DiagnosticSeverity.Error).WithSpan(4, 5, 10, 6);
         await VerifySourceGenerator.RunAsync(code, diagnostics: new[] { diagnosticResult });
     }
 
@@ -473,7 +473,7 @@ namespace Test
     }
 }";
 
-        DiagnosticResult diagnosticResult = new DiagnosticResult(AutoConstructorGenerator.MistmatchTypesDiagnosticId, DiagnosticSeverity.Error).WithSpan(4, 5, 12, 6);
+        DiagnosticResult diagnosticResult = new DiagnosticResult(DiagnosticDescriptors.MistmatchTypesDiagnosticId, DiagnosticSeverity.Error).WithSpan(4, 5, 12, 6);
         await VerifySourceGenerator.RunAsync(code, diagnostics: new[] { diagnosticResult });
     }
 
@@ -889,8 +889,8 @@ namespace Test
     }
 }";
 
-        DiagnosticResult diagnosticResultFirstPart = new DiagnosticResult(AutoConstructorGenerator.MistmatchTypesDiagnosticId, DiagnosticSeverity.Error).WithSpan(4, 5, 9, 6);
-        DiagnosticResult diagnosticResultSecondPart = new DiagnosticResult(AutoConstructorGenerator.MistmatchTypesDiagnosticId, DiagnosticSeverity.Error).WithSpan(11, 5, 14, 6);
+        DiagnosticResult diagnosticResultFirstPart = new DiagnosticResult(DiagnosticDescriptors.MistmatchTypesDiagnosticId, DiagnosticSeverity.Error).WithSpan(4, 5, 9, 6);
+        DiagnosticResult diagnosticResultSecondPart = new DiagnosticResult(DiagnosticDescriptors.MistmatchTypesDiagnosticId, DiagnosticSeverity.Error).WithSpan(11, 5, 14, 6);
         await VerifySourceGenerator.RunAsync(code, diagnostics: new[] { diagnosticResultFirstPart, diagnosticResultSecondPart });
     }
 }

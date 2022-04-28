@@ -1,4 +1,4 @@
-﻿using AutoConstructor.Generator.Analyzers;
+using AutoConstructor.Generator;
 using Microsoft.CodeAnalysis.Testing;
 using Xunit;
 using VerifyIgnoreAttributeOnNonProcessedField = AutoConstructor.Tests.Verifiers.CSharpCodeFixVerifier<
@@ -24,7 +24,7 @@ namespace Test
 }";
 
         DiagnosticResult[] expected = new[] {
-                VerifyIgnoreAttributeOnNonProcessedField.Diagnostic(IgnoreAttributeOnNonProcessedFieldAnalyzer.DiagnosticId).WithLocation(0),
+                VerifyIgnoreAttributeOnNonProcessedField.Diagnostic(DiagnosticDescriptors.IgnoreAttributeOnNonProcessedFieldDiagnosticId).WithLocation(0),
             };
         await VerifyIgnoreAttributeOnNonProcessedField.VerifyAnalyzerAsync(test, expected);
     }
@@ -51,7 +51,7 @@ namespace Test
     public async Task Analyzer_IgnoreAttributeOnNonProcessedField_ShouldFixCode(string test, string fixtest)
     {
         DiagnosticResult[] expected = new[] {
-                VerifyIgnoreAttributeOnNonProcessedField.Diagnostic(IgnoreAttributeOnNonProcessedFieldAnalyzer.DiagnosticId).WithLocation(0),
+                VerifyIgnoreAttributeOnNonProcessedField.Diagnostic(DiagnosticDescriptors.IgnoreAttributeOnNonProcessedFieldDiagnosticId).WithLocation(0),
             };
         await VerifyIgnoreAttributeOnNonProcessedField.VerifyCodeFixAsync(test, expected, fixtest);
     }

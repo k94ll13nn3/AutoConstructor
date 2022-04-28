@@ -1,4 +1,4 @@
-﻿using AutoConstructor.Generator.Analyzers;
+using AutoConstructor.Generator;
 using Microsoft.CodeAnalysis.Testing;
 using Xunit;
 using VerifyInjectAttributeOnIgnoredField = AutoConstructor.Tests.Verifiers.CSharpCodeFixVerifier<
@@ -24,7 +24,7 @@ namespace Test
 }";
 
         DiagnosticResult[] expected = new[] {
-                VerifyInjectAttributeOnIgnoredField.Diagnostic(InjectAttributeOnIgnoredFieldAnalyzer.DiagnosticId).WithLocation(0),
+                VerifyInjectAttributeOnIgnoredField.Diagnostic(DiagnosticDescriptors.InjectAttributeOnIgnoredFieldDiagnosticId).WithLocation(0),
             };
         await VerifyInjectAttributeOnIgnoredField.VerifyAnalyzerAsync(test, expected);
     }
@@ -51,7 +51,7 @@ namespace Test
     public async Task Analyzer_InjectAttributeOnIgnoredField_ShouldFixCode(string test, string fixtest)
     {
         DiagnosticResult[] expected = new[] {
-                VerifyInjectAttributeOnIgnoredField.Diagnostic(InjectAttributeOnIgnoredFieldAnalyzer.DiagnosticId).WithLocation(0),
+                VerifyInjectAttributeOnIgnoredField.Diagnostic(DiagnosticDescriptors.InjectAttributeOnIgnoredFieldDiagnosticId).WithLocation(0),
             };
         await VerifyInjectAttributeOnIgnoredField.VerifyCodeFixAsync(test, expected, fixtest);
     }
