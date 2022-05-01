@@ -47,6 +47,7 @@ internal static class CSharpCodeFixVerifier<TAnalyzer, TCodeFix>
         valueWithCode += $"{Source.AttributeText}\n";
         valueWithCode += $"{Source.IgnoreAttributeText}\n";
         valueWithCode += $"{Source.InjectAttributeText}\n";
+        valueWithCode += $"{Source.InitializerAttributeText}\n";
         return valueWithCode;
     }
 

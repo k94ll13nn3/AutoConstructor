@@ -26,6 +26,7 @@ public sealed class AutoConstructorGenerator : IIncrementalGenerator
             i.AddSource(Source.AttributeFullName, SourceText.From(Source.AttributeText, Encoding.UTF8));
             i.AddSource(Source.IgnoreAttributeFullName, SourceText.From(Source.IgnoreAttributeText, Encoding.UTF8));
             i.AddSource(Source.InjectAttributeFullName, SourceText.From(Source.InjectAttributeText, Encoding.UTF8));
+            i.AddSource(Source.InitializerAttributeFullName, SourceText.From(Source.InitializerAttributeText, Encoding.UTF8));
         });
 
         IncrementalValuesProvider<(GeneratorExectutionResult? result, Options options)> valueProvider = context.SyntaxProvider

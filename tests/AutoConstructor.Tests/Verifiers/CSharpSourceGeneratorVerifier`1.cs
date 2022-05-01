@@ -40,6 +40,7 @@ internal static partial class CSharpSourceGeneratorVerifier<TSourceGenerator>
                         (typeof(AutoConstructorGenerator), "AutoConstructorAttribute.cs", SourceText.From(Source.AttributeText, Encoding.UTF8)),
                         (typeof(AutoConstructorGenerator), "AutoConstructorIgnoreAttribute.cs", SourceText.From(Source.IgnoreAttributeText, Encoding.UTF8)),
                         (typeof(AutoConstructorGenerator), "AutoConstructorInjectAttribute.cs", SourceText.From(Source.InjectAttributeText, Encoding.UTF8)),
+                        (typeof(AutoConstructorGenerator), "AutoConstructorInitializerAttribute.cs", SourceText.From(Source.InitializerAttributeText, Encoding.UTF8)),
                     }
                 },
             EnableNullable = nullable,
