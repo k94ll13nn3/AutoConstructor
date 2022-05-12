@@ -893,4 +893,142 @@ namespace Test
         DiagnosticResult diagnosticResultSecondPart = new DiagnosticResult(DiagnosticDescriptors.MistmatchTypesDiagnosticId, DiagnosticSeverity.Error).WithSpan(11, 5, 14, 6);
         await VerifySourceGenerator.RunAsync(code, diagnostics: new[] { diagnosticResultFirstPart, diagnosticResultSecondPart });
     }
+
+    [Theory]
+    [InlineData(@"
+namespace Test
+{
+    [AutoConstructor]
+    internal partial class Test<T>
+    {
+        private readonly T _generic;
+    }
+}", @"namespace Test
+{
+    partial class Test<T>
+    {
+        public Test(T generic)
+        {
+            this._generic = generic;
+        }
+    }
+}
+")]
+    [InlineData(@"
+namespace Test
+{
+    [AutoConstructor]
+    internal partial class Test<T1, T2>
+    {
+        private readonly T1 _generic1;
+        private readonly T2 _generic2;
+    }
+}", @"namespace Test
+{
+    partial class Test<T1, T2>
+    {
+        public Test(T1 generic1, T2 generic2)
+        {
+            this._generic1 = generic1;
+            this._generic2 = generic2;
+        }
+    }
+}
+")]
+    [InlineData(@"
+namespace Test
+{
+    [AutoConstructor]
+    internal partial class Test<T> where T : class
+    {
+        private readonly T _generic;
+    }
+}", @"namespace Test
+{
+    partial class Test<T>
+    {
+        public Test(T generic)
+        {
+            this._generic = generic ?? throw new System.ArgumentNullException(nameof(generic));
+        }
+    }
+}
+")]
+    [InlineData(@"
+namespace Nested
+{
+    internal partial class Outer<T>
+    {
+        [AutoConstructor]
+        internal partial class Inner
+        {
+            private readonly T _t;
+        }
+    }
+}", @"namespace Nested
+{
+    partial class Outer<T>
+    {
+        partial class Inner
+        {
+            public Inner(T t)
+            {
+                this._t = t;
+            }
+        }
+    }
+}
+", "Nested.Outer.Inner.g.cs")]
+    [InlineData(@"
+namespace Nested
+{
+    internal partial class Outer<T1>
+    {
+        [AutoConstructor]
+        internal partial class Inner<T2>
+        {
+            private readonly T1 _t1;
+            private readonly T2 _t2;
+        }
+    }
+}", @"namespace Nested
+{
+    partial class Outer<T1>
+    {
+        partial class Inner<T2>
+        {
+            public Inner(T1 t1, T2 t2)
+            {
+                this._t1 = t1;
+                this._t2 = t2;
+            }
+        }
+    }
+}
+", "Nested.Outer.Inner.g.cs")]
+    [InlineData(@"
+namespace Test
+{
+    interface IThing<T> {}
+
+    [AutoConstructor]
+    internal partial class Test<T>
+    {
+        private readonly IThing<T> _generic;
+    }
+}", @"namespace Test
+{
+    partial class Test<T>
+    {
+        public Test(Test.IThing<T> generic)
+        {
+            this._generic = generic ?? throw new System.ArgumentNullException(nameof(generic));
+        }
+    }
+}
+")]
+    public async Task Run_WithGenericClass_ShouldGenerateClass(string code, string generated, string generatedName = "Test.Test.g.cs")
+    {
+        await VerifySourceGenerator.RunAsync(code, generated, generatedName: generatedName);
+    }
 }
