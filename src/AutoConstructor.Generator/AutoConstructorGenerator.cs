@@ -152,11 +152,11 @@ public class AutoConstructorGenerator : IIncrementalGenerator
 
         foreach (INamedTypeSymbol containingType in symbol.GetContainingTypes())
         {
-            codeGenerator.AddClass(containingType.Name, containingType.IsStatic);
+            codeGenerator.AddClass(containingType.Name, containingType.IsStatic, containingType.TypeParameters.ToArray());
         }
 
         codeGenerator
-            .AddClass(symbol.Name)
+            .AddClass(symbol.Name, typeParameterList: symbol.TypeParameters.ToArray())
             .AddConstructor(fields);
 
         return codeGenerator.ToString();

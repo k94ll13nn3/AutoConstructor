@@ -44,9 +44,14 @@ public class CodeGenerator
         return this;
     }
 
-    public CodeGenerator AddClass(string identifier, bool isStatic = false)
+    public CodeGenerator AddClass(string identifier, bool isStatic = false, ITypeParameterSymbol[]? typeParameterList = null)
     {
-        ClassDeclarationSyntax classSyntax = GetClass(identifier, _current is null, _addNullableAnnotation, isStatic);
+        ClassDeclarationSyntax classSyntax = GetClass(
+            identifier,
+            _current is null,
+            _addNullableAnnotation,
+            isStatic,
+            typeParameterList ?? Array.Empty<ITypeParameterSymbol>());
 
         if (_current is null)
         {
@@ -143,7 +148,7 @@ public class CodeGenerator
             .WithNamespaceKeyword(Token(GetHeaderTrivia(addNullableAnnotation), SyntaxKind.NamespaceKeyword, TriviaList()));
     }
 
-    private static ClassDeclarationSyntax GetClass(string identifier, bool addHeaderTrivia, bool addNullableAnnotation, bool isStatic)
+    private static ClassDeclarationSyntax GetClass(string identifier, bool addHeaderTrivia, bool addNullableAnnotation, bool isStatic, ITypeParameterSymbol[] typeParameterList)
     {
         SyntaxToken firstModifier = Token(isStatic ? SyntaxKind.StaticKeyword : SyntaxKind.PartialKeyword);
         if (addHeaderTrivia)
@@ -155,6 +160,11 @@ public class CodeGenerator
         if (isStatic)
         {
             declaration = declaration.AddModifiers(Token(SyntaxKind.PartialKeyword));
+        }
+
+        if (typeParameterList.Length > 0)
+        {
+            declaration = declaration.AddTypeParameterListParameters(Array.ConvertAll(typeParameterList, GetTypeParameter));
         }
 
         return declaration;
@@ -206,6 +216,11 @@ public class CodeGenerator
 
         return Parameter(Identifier(parameter.ParameterName))
             .WithType(ParseTypeName(parameterType.ToDisplayString()));
+    }
+
+    private static TypeParameterSyntax GetTypeParameter(ITypeParameterSymbol identifier)
+    {
+        return TypeParameter(Identifier(identifier.Name));
     }
 
     private static ExpressionStatementSyntax GetParameterAssignement(FieldInfo parameter)
