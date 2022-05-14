@@ -147,16 +147,16 @@ public class AutoConstructorGenerator : IIncrementalGenerator
 
         if (!symbol.ContainingNamespace.IsGlobalNamespace)
         {
-            codeGenerator.AddNamespace(symbol.ContainingNamespace.ToDisplayString());
+            codeGenerator.AddNamespace(symbol.ContainingNamespace);
         }
 
         foreach (INamedTypeSymbol containingType in symbol.GetContainingTypes())
         {
-            codeGenerator.AddClass(containingType.Name, containingType.IsStatic, containingType.TypeParameters.ToArray());
+            codeGenerator.AddClass(containingType);
         }
 
         codeGenerator
-            .AddClass(symbol.Name, typeParameterList: symbol.TypeParameters.ToArray())
+            .AddClass(symbol)
             .AddConstructor(fields);
 
         return codeGenerator.ToString();

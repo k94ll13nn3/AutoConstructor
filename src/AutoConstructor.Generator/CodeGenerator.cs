@@ -5,7 +5,7 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace AutoConstructor.Generator;
 
-public class CodeGenerator
+internal class CodeGenerator
 {
     private MemberDeclarationSyntax? _current;
     private bool _addNullableAnnotation;
@@ -33,25 +33,29 @@ public class CodeGenerator
         return this;
     }
 
-    public CodeGenerator AddNamespace(string identifier)
+    public CodeGenerator AddNamespace(INamespaceSymbol namespaceSymbol)
     {
         if (_current is not null)
         {
             throw new InvalidOperationException($"Method {nameof(AddNamespace)} must be called first.");
         }
 
-        _current = GetNamespace(identifier, _addNullableAnnotation);
+        _current = GetNamespace(namespaceSymbol.ToDisplayString(), _addNullableAnnotation);
         return this;
     }
 
-    public CodeGenerator AddClass(string identifier, bool isStatic = false, ITypeParameterSymbol[]? typeParameterList = null)
+    public CodeGenerator AddClass(INamedTypeSymbol classSymbol)
     {
+        string identifier = classSymbol.Name;
+        bool isStatic = classSymbol.IsStatic;
+        ITypeParameterSymbol[] typeParameterList = classSymbol.TypeParameters.ToArray();
+
         ClassDeclarationSyntax classSyntax = GetClass(
             identifier,
             _current is null,
             _addNullableAnnotation,
             isStatic,
-            typeParameterList ?? Array.Empty<ITypeParameterSymbol>());
+            typeParameterList);
 
         if (_current is null)
         {
