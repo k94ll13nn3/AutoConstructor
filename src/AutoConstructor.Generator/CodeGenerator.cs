@@ -187,10 +187,18 @@ internal class CodeGenerator
             modifiers = Token(TriviaList(Trivia(GetDocumentation(constructorDocumentationComment, constructorParameters))), SyntaxKind.PublicKeyword, TriviaList());
         }
 
-        return ConstructorDeclaration(identifier)
+        ConstructorDeclarationSyntax constructor = ConstructorDeclaration(identifier)
             .AddModifiers(modifiers)
             .AddParameterListParameters(Array.ConvertAll(constructorParameters, GetParameter))
-            .AddBodyStatements(Array.ConvertAll(parameters, GetParameterAssignement));
+            .AddBodyStatements(Array.ConvertAll(parameters.Where(p => p.FieldType.HasFlag(FieldType.Initialized)).ToArray(), GetParameterAssignement));
+
+        if (constructorParameters.Any(p => p.FieldType.HasFlag(FieldType.PassedToBase)))
+        {
+            constructor = constructor.WithInitializer(ConstructorInitializer(SyntaxKind.BaseConstructorInitializer)
+                .AddArgumentListArguments(Array.ConvertAll(constructorParameters.Where(p => p.FieldType.HasFlag(FieldType.PassedToBase)).ToArray(), GetArgument)));
+        }
+
+        return constructor;
     }
 
     private static DocumentationCommentTriviaSyntax GetDocumentation(string constructorDocumentationComment, FieldInfo[] parameters)
@@ -225,6 +233,11 @@ internal class CodeGenerator
     private static TypeParameterSyntax GetTypeParameter(ITypeParameterSymbol identifier)
     {
         return TypeParameter(Identifier(identifier.Name));
+    }
+
+    private static ArgumentSyntax GetArgument(FieldInfo parameter)
+    {
+        return Argument(IdentifierName(parameter.ParameterName));
     }
 
     private static ExpressionStatementSyntax GetParameterAssignement(FieldInfo parameter)

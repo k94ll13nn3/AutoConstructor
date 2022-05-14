@@ -12,7 +12,8 @@ public class FieldInfo
         ITypeSymbol fallbackType,
         bool nullable,
         string? comment,
-        bool emitArgumentNullException)
+        bool emitArgumentNullException,
+        FieldType fieldType)
     {
         Type = type;
         ParameterName = parameterName;
@@ -22,6 +23,7 @@ public class FieldInfo
         Nullable = nullable;
         Comment = comment;
         EmitArgumentNullException = emitArgumentNullException;
+        FieldType = fieldType;
     }
 
     public ITypeSymbol? Type { get; }
@@ -39,4 +41,6 @@ public class FieldInfo
     public string? Comment { get; }
 
     public bool EmitArgumentNullException { get; }
+
+    public FieldType FieldType { get; set; }
 }

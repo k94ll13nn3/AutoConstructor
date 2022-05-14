@@ -1031,4 +1031,36 @@ namespace Test
     {
         await VerifySourceGenerator.RunAsync(code, generated, generatedName: generatedName);
     }
+
+    [Fact]
+    public async Task Run_WithBasicInheritance_ShouldGenerateClass()
+    {
+        const string code = @"
+namespace Test
+{
+    internal class BaseClass
+    {
+        private readonly int _t;
+        public BaseClass(int t)
+        {
+            this._t = t;
+        }
+    }
+    [AutoConstructor]
+    internal partial class Test : BaseClass
+    {
+    }
+}";
+        const string generated = @"namespace Test
+{
+    partial class Test
+    {
+        public Test(int t) : base(t)
+        {
+        }
+    }
+}
+";
+        await VerifySourceGenerator.RunAsync(code, generated);
+    }
 }
