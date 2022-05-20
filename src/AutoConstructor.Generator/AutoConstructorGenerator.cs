@@ -86,14 +86,43 @@ public class AutoConstructorGenerator : IIncrementalGenerator
                     emitNullChecks = !disableNullCheckingSwitch.Equals("true", StringComparison.OrdinalIgnoreCase);
                 }
 
-                FieldInfo[] fields = symbol.GetMembers().OfType<IFieldSymbol>()
+                List<FieldInfo> concatenatedFields = symbol.GetMembers().OfType<IFieldSymbol>()
                     .Where(x => x.CanBeInjected(compilation)
                         && !x.IsStatic
                         && x.IsReadOnly
                         && !x.IsInitialized()
                         && !x.HasAttribute(Source.IgnoreAttributeFullName, compilation))
                     .Select(x => GetFieldInfo(x, compilation, emitNullChecks))
-                    .ToArray();
+                    .ToList();
+
+                INamedTypeSymbol? baseType = symbol.BaseType;
+                if (baseType?.Constructors.Length == 1)
+                {
+                    IMethodSymbol constructor = baseType.Constructors[0];
+                    foreach (IParameterSymbol parameter in constructor.Parameters)
+                    {
+                        int index = concatenatedFields.FindIndex(p => p.ParameterName == parameter.Name);
+                        if (index != -1)
+                        {
+                            concatenatedFields[index].FieldType |= FieldType.PassedToBase;
+                        }
+                        else
+                        {
+                            concatenatedFields.Add(new FieldInfo(
+                                parameter.Type,
+                                parameter.Name,
+                                string.Empty,
+                                string.Empty,
+                                parameter.Type,
+                                false,
+                                null,
+                                false,
+                                FieldType.PassedToBase));
+                        }
+                    }
+                }
+
+                FieldInfo[] fields = concatenatedFields.ToArray();
 
                 if (fields.Length == 0)
                 {
@@ -210,7 +239,8 @@ public class AutoConstructorGenerator : IIncrementalGenerator
             type,
             type.IsReferenceType && type.NullableAnnotation == NullableAnnotation.Annotated,
             summaryText,
-            type.IsReferenceType && type.NullableAnnotation == NullableAnnotation.None && emitNullChecks);
+            type.IsReferenceType && type.NullableAnnotation == NullableAnnotation.None && emitNullChecks,
+            FieldType.Initialized);
     }
 
     private static T? GetParameterValue<T>(string parameterName, ImmutableArray<IParameterSymbol> parameters, ImmutableArray<TypedConstant> arguments)

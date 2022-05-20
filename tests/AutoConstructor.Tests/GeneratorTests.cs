@@ -1031,4 +1031,134 @@ namespace Test
     {
         await VerifySourceGenerator.RunAsync(code, generated, generatedName: generatedName);
     }
+
+    [Fact]
+    public async Task Run_WithBasicInheritance_ShouldGenerateClass()
+    {
+        const string code = @"
+namespace Test
+{
+    internal class BaseClass
+    {
+        private readonly int _t;
+        public BaseClass(int t)
+        {
+            this._t = t;
+        }
+    }
+    [AutoConstructor]
+    internal partial class Test : BaseClass
+    {
+    }
+}";
+        const string generated = @"namespace Test
+{
+    partial class Test
+    {
+        public Test(int t) : base(t)
+        {
+        }
+    }
+}
+";
+        await VerifySourceGenerator.RunAsync(code, generated);
+    }
+
+    [Theory]
+    [InlineData(@"
+namespace Test
+{
+    internal class BaseClass
+    {
+        private readonly int _t;
+        private readonly System.Guid _guid;
+        public BaseClass(System.Guid guid, int t)
+        {
+            this._t = t;
+            this._guid = guid;
+        }
+    }
+    [AutoConstructor]
+    internal partial class Test : BaseClass
+    {
+        [AutoConstructorInject(parameterName: ""guid"")]
+        private readonly System.Guid _guid2;
+    }
+}", @"namespace Test
+{
+    partial class Test
+    {
+        public Test(System.Guid guid, int t) : base(guid, t)
+        {
+            this._guid2 = guid;
+        }
+    }
+}
+")]
+    [InlineData(@"
+namespace Test
+{
+    internal class BaseClass
+    {
+        private readonly int _t;
+        public BaseClass(int t)
+        {
+            this._t = t;
+        }
+    }
+    [AutoConstructor]
+    internal partial class Test : BaseClass
+    {
+        private readonly System.Guid _guid;
+    }
+}", @"namespace Test
+{
+    partial class Test
+    {
+        public Test(System.Guid guid, int t) : base(t)
+        {
+            this._guid = guid;
+        }
+    }
+}
+")]
+    [InlineData(@"
+namespace Test
+{
+    internal class UpperClass
+    {
+        private readonly System.DateTime _date;
+        public UpperClass(System.DateTime date)
+        {
+            this._date = date;
+        }
+    }
+    internal class BaseClass : UpperClass
+    {
+        private readonly int _t;
+        public BaseClass(System.DateTime date, int t) : base(date)
+        {
+            this._t = t;
+        }
+    }
+    [AutoConstructor]
+    internal partial class Test : BaseClass
+    {
+        private readonly System.Guid _guid;
+    }
+}", @"namespace Test
+{
+    partial class Test
+    {
+        public Test(System.Guid guid, System.DateTime date, int t) : base(date, t)
+        {
+            this._guid = guid;
+        }
+    }
+}
+")]
+    public async Task Run_WithInheritanceAndFieldsInBothClasses_ShouldGenerateClass(string code, string generated)
+    {
+        await VerifySourceGenerator.RunAsync(code, generated);
+    }
 }
