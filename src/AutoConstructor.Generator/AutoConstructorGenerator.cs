@@ -86,41 +86,9 @@ public class AutoConstructorGenerator : IIncrementalGenerator
                     emitNullChecks = !disableNullCheckingSwitch.Equals("true", StringComparison.OrdinalIgnoreCase);
                 }
 
-                List<FieldInfo> concatenatedFields = symbol.GetMembers().OfType<IFieldSymbol>()
-                    .Where(x => x.CanBeInjected(compilation)
-                        && !x.IsStatic
-                        && x.IsReadOnly
-                        && !x.IsInitialized()
-                        && !x.HasAttribute(Source.IgnoreAttributeFullName, compilation))
-                    .Select(x => GetFieldInfo(x, compilation, emitNullChecks))
-                    .ToList();
+                List<FieldInfo> concatenatedFields = GetFieldsFromSymbol(compilation, symbol, emitNullChecks);
 
-                INamedTypeSymbol? baseType = symbol.BaseType;
-                if (baseType?.Constructors.Length == 1)
-                {
-                    IMethodSymbol constructor = baseType.Constructors[0];
-                    foreach (IParameterSymbol parameter in constructor.Parameters)
-                    {
-                        int index = concatenatedFields.FindIndex(p => p.ParameterName == parameter.Name);
-                        if (index != -1)
-                        {
-                            concatenatedFields[index].FieldType |= FieldType.PassedToBase;
-                        }
-                        else
-                        {
-                            concatenatedFields.Add(new FieldInfo(
-                                parameter.Type,
-                                parameter.Name,
-                                string.Empty,
-                                string.Empty,
-                                parameter.Type,
-                                false,
-                                null,
-                                false,
-                                FieldType.PassedToBase));
-                        }
-                    }
-                }
+                ExtractFieldsFromParent(compilation, symbol, emitNullChecks, concatenatedFields);
 
                 FieldInfo[] fields = concatenatedFields.ToArray();
 
@@ -191,6 +159,18 @@ public class AutoConstructorGenerator : IIncrementalGenerator
         return codeGenerator.ToString();
     }
 
+    private static List<FieldInfo> GetFieldsFromSymbol(Compilation compilation, INamedTypeSymbol symbol, bool emitNullChecks)
+    {
+        return symbol.GetMembers().OfType<IFieldSymbol>()
+            .Where(x => x.CanBeInjected(compilation)
+                && !x.IsStatic
+                && x.IsReadOnly
+                && !x.IsInitialized()
+                && !x.HasAttribute(Source.IgnoreAttributeFullName, compilation))
+            .Select(x => GetFieldInfo(x, compilation, emitNullChecks))
+            .ToList();
+    }
+
     private static FieldInfo GetFieldInfo(IFieldSymbol fieldSymbol, Compilation compilation, bool emitNullChecks)
     {
         ITypeSymbol type = fieldSymbol.Type;
@@ -249,5 +229,76 @@ public class AutoConstructorGenerator : IIncrementalGenerator
         return parameters.ToList().FindIndex(c => c.Name == parameterName) is int index and not -1
             ? (arguments[index].Value as T)
             : null;
+    }
+
+    private static void ExtractFieldsFromParent(Compilation compilation, INamedTypeSymbol symbol, bool emitNullChecks, List<FieldInfo> concatenatedFields)
+    {
+        INamedTypeSymbol? baseType = symbol.BaseType;
+
+        // Check if base type is not object (ie. its base type is null) and that there is only one constructor.
+        if (baseType?.BaseType is not null && baseType?.Constructors.Length == 1)
+        {
+            IMethodSymbol constructor = baseType.Constructors[0];
+            if (baseType?.HasAttribute(Source.AttributeFullName, compilation) is true)
+            {
+                ExtractFieldsFromGeneratedParent(compilation, emitNullChecks, concatenatedFields, baseType);
+            }
+            else
+            {
+                ExtractFieldsFromConstructedParent(concatenatedFields, constructor);
+            }
+        }
+    }
+
+    private static void ExtractFieldsFromConstructedParent(List<FieldInfo> concatenatedFields, IMethodSymbol constructor)
+    {
+        foreach (IParameterSymbol parameter in constructor.Parameters)
+        {
+            int index = concatenatedFields.FindIndex(p => p.ParameterName == parameter.Name);
+            if (index != -1)
+            {
+                concatenatedFields[index].FieldType |= FieldType.PassedToBase;
+            }
+            else
+            {
+                concatenatedFields.Add(new FieldInfo(
+                    parameter.Type,
+                    parameter.Name,
+                    string.Empty,
+                    string.Empty,
+                    parameter.Type,
+                    false,
+                    null,
+                    false,
+                    FieldType.PassedToBase));
+            }
+        }
+    }
+
+    private static void ExtractFieldsFromGeneratedParent(Compilation compilation, bool emitNullChecks, List<FieldInfo> concatenatedFields, INamedTypeSymbol symbol)
+    {
+        foreach (FieldInfo parameter in GetFieldsFromSymbol(compilation, symbol, emitNullChecks))
+        {
+            int index = concatenatedFields.FindIndex(p => p.ParameterName == parameter.ParameterName);
+            if (index != -1)
+            {
+                concatenatedFields[index].FieldType |= FieldType.PassedToBase;
+            }
+            else
+            {
+                concatenatedFields.Add(new FieldInfo(
+                    parameter.Type,
+                    parameter.ParameterName,
+                    string.Empty,
+                    string.Empty,
+                    parameter.FallbackType,
+                    false,
+                    null,
+                    false,
+                    FieldType.PassedToBase));
+            }
+        }
+
+        ExtractFieldsFromParent(compilation, symbol, emitNullChecks, concatenatedFields);
     }
 }

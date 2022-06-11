@@ -1161,4 +1161,183 @@ namespace Test
     {
         await VerifySourceGenerator.RunAsync(code, generated);
     }
+
+    [Fact]
+    public async Task Run_WithInheritanceAlsoGenerated_ShouldGenerateClass()
+    {
+        const string code = @"
+namespace Test
+{
+    [AutoConstructor]
+    internal partial class BaseClass
+    {
+        private readonly int _t;
+    }
+    [AutoConstructor]
+    internal partial class Test : BaseClass
+    {
+    }
+}";
+        const string generatedTest = @"namespace Test
+{
+    partial class Test
+    {
+        public Test(int t) : base(t)
+        {
+        }
+    }
+}
+";
+
+        const string generatedBase = @"namespace Test
+{
+    partial class BaseClass
+    {
+        public BaseClass(int t)
+        {
+            this._t = t;
+        }
+    }
+}
+";
+        await VerifySourceGenerator.RunAsync(code, new[] { (generatedBase, "Test.BaseClass.g.cs"), (generatedTest, "Test.Test.g.cs") });
+    }
+
+    [Fact]
+    public async Task Run_WithMultipleInheritanceAlsoGenerated_ShouldGenerateClass()
+    {
+        const string code = @"
+namespace Test
+{
+    [AutoConstructor]
+    internal partial class MotherClass
+    {
+        private readonly string _s;
+    }
+    [AutoConstructor]
+    internal partial class BaseClass : MotherClass
+    {
+        private readonly int _t;
+    }
+    [AutoConstructor]
+    internal partial class Test : BaseClass
+    {
+    }
+}";
+        const string generatedTest = @"namespace Test
+{
+    partial class Test
+    {
+        public Test(int t, string s) : base(t, s)
+        {
+        }
+    }
+}
+";
+
+        const string generatedBase = @"namespace Test
+{
+    partial class BaseClass
+    {
+        public BaseClass(int t, string s) : base(s)
+        {
+            this._t = t;
+        }
+    }
+}
+";
+
+        const string generatedMother = @"namespace Test
+{
+    partial class MotherClass
+    {
+        public MotherClass(string s)
+        {
+            this._s = s ?? throw new System.ArgumentNullException(nameof(s));
+        }
+    }
+}
+";
+        await VerifySourceGenerator.RunAsync(code, new[]
+        {
+            (generatedMother, "Test.MotherClass.g.cs"),
+            (generatedBase, "Test.BaseClass.g.cs"),
+            (generatedTest, "Test.Test.g.cs")
+        });
+    }
+
+    [Fact]
+    public async Task Run_WithMultipleInheritanceGeneratedAndNotGenerated_ShouldGenerateClass()
+    {
+        const string code = @"
+namespace Test
+{
+    internal class Class1
+    {
+        private readonly string _s;
+        public Class1(string s)
+        {
+            this._s = s ?? throw new System.ArgumentNullException(nameof(s));
+        }
+    }
+    [AutoConstructor]
+    internal partial class Class2 : Class1
+    {
+        private readonly int _t;
+    }
+    [AutoConstructor]
+    internal partial class Class3 : Class2
+    {
+    }
+    internal class Class4 : Class3
+    {
+        public Class4(int t, string s) : base(t, s)
+        {
+        }
+    }
+    [AutoConstructor]
+    internal partial class Class5 : Class4
+    {
+    }
+}";
+        const string generatedClass3 = @"namespace Test
+{
+    partial class Class3
+    {
+        public Class3(int t, string s) : base(t, s)
+        {
+        }
+    }
+}
+";
+
+        const string generatedClass2 = @"namespace Test
+{
+    partial class Class2
+    {
+        public Class2(int t, string s) : base(s)
+        {
+            this._t = t;
+        }
+    }
+}
+";
+
+        const string generatedClass5 = @"namespace Test
+{
+    partial class Class5
+    {
+        public Class5(int t, string s) : base(t, s)
+        {
+        }
+    }
+}
+";
+        await VerifySourceGenerator.RunAsync(code, new[]
+        {
+            (generatedClass2, "Test.Class2.g.cs"),
+            (generatedClass3, "Test.Class3.g.cs"),
+            (generatedClass5, "Test.Class5.g.cs")
+        });
+    }
 }
