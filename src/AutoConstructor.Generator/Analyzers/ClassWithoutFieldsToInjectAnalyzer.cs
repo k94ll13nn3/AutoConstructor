@@ -25,11 +25,8 @@ public class ClassWithoutFieldsToInjectAnalyzer : DiagnosticAnalyzer
 
         if (symbol.GetAttribute(Source.AttributeFullName, context.Compilation) is AttributeData attr)
         {
-            var fields = symbol.GetMembers().OfType<IFieldSymbol>()
-                .Where(x => x.CanBeInjected(context.Compilation) && !x.IsStatic && x.IsReadOnly && !x.IsInitialized() && !x.HasAttribute(Source.IgnoreAttributeFullName, context.Compilation))
-                .ToList();
-
-            if (fields.Count == 0)
+            bool hasFields = SymbolHasFields(context.Compilation, symbol) || ParentHasFields(context.Compilation, symbol);
+            if (!hasFields)
             {
                 SyntaxReference? propertyTypeIdentifier = attr.ApplicationSyntaxReference;
                 if (propertyTypeIdentifier is not null)
@@ -40,5 +37,31 @@ public class ClassWithoutFieldsToInjectAnalyzer : DiagnosticAnalyzer
                 }
             }
         }
+    }
+
+    private static bool SymbolHasFields(Compilation compilation, INamedTypeSymbol symbol)
+    {
+        return symbol.GetMembers()
+            .OfType<IFieldSymbol>()
+            .Any(x => x.CanBeInjected(compilation)
+                && !x.IsStatic
+                && x.IsReadOnly
+                && !x.IsInitialized()
+                && !x.HasAttribute(Source.IgnoreAttributeFullName, compilation));
+    }
+
+    private static bool ParentHasFields(Compilation compilation, INamedTypeSymbol symbol)
+    {
+        INamedTypeSymbol? baseType = symbol.BaseType;
+
+        if (baseType?.BaseType is not null && baseType?.Constructors.Length == 1)
+        {
+            IMethodSymbol constructor = baseType.Constructors[0];
+            return baseType?.HasAttribute(Source.AttributeFullName, compilation) is true
+                ? SymbolHasFields(compilation, symbol) || ParentHasFields(compilation, symbol)
+                : constructor.Parameters.Length > 0;
+        }
+
+        return false;
     }
 }

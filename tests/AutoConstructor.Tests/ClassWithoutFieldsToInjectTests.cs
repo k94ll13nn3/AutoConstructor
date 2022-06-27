@@ -27,6 +27,35 @@ namespace Test
         await VerifyClassWithoutFieldsToInject.VerifyAnalyzerAsync(test, expected);
     }
 
+    [Fact]
+    public async Task Analyzer_ClassWithoutFieldsToInjectButFieldsOnParent_ShouldNotReportDiagnostic()
+    {
+        const string test = @"
+namespace Test
+{
+    internal partial class Test<T>
+    {
+        public T MyType { get; }
+
+        public Test(T myType)
+        {
+            MyType = myType;
+        }
+    }
+
+    [AutoConstructor]
+    internal partial class Test2 : Test<int>
+    {
+        public Test2(int myType) : base(myType)
+        {
+        }
+    }
+}";
+
+        DiagnosticResult[] expected = Array.Empty<DiagnosticResult>();
+        await VerifyClassWithoutFieldsToInject.VerifyAnalyzerAsync(test, expected);
+    }
+
     [Theory]
     [InlineData(@"
 namespace Test
