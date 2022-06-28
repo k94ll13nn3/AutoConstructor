@@ -27,10 +27,8 @@ namespace Test
         await VerifyClassWithoutFieldsToInject.VerifyAnalyzerAsync(test, expected);
     }
 
-    [Fact]
-    public async Task Analyzer_ClassWithoutFieldsToInjectButFieldsOnParent_ShouldNotReportDiagnostic()
-    {
-        const string test = @"
+    [Theory]
+    [InlineData(@"
 namespace Test
 {
     internal partial class Test<T>
@@ -50,8 +48,71 @@ namespace Test
         {
         }
     }
-}";
+}")]
+    [InlineData(@"
+namespace Test
+{
+    [AutoConstructor]
+    internal partial class Test
+    {
+        private readonly int _t;
+    }
 
+    [AutoConstructor]
+    internal partial class Test2 : Test
+    {
+    }
+}")]
+    [InlineData(@"
+namespace Test
+{
+    [AutoConstructor]
+    internal partial class Test
+    {
+        private readonly int _t;
+    }
+
+    [AutoConstructor]
+    internal partial class Test2 : Test
+    {
+    }
+
+    [AutoConstructor]
+    internal partial class Test3 : Test2
+    {
+    }
+}")]
+    [InlineData(@"
+namespace Test
+{
+    internal partial class Test<T>
+    {
+        public T MyType { get; }
+
+        public Test(T myType)
+        {
+            MyType = myType;
+        }
+    }
+
+    [AutoConstructor]
+    internal partial class Test2 : Test<int>
+    {
+        public Test2(int myType) : base(myType)
+        {
+        }
+    }
+
+    [AutoConstructor]
+    internal partial class Test3 : Test2
+    {
+        public Test3(int myType) : base(myType)
+        {
+        }
+    }
+}")]
+    public async Task Analyzer_ClassWithoutFieldsToInjectButFieldsOnParent_ShouldNotReportDiagnostic(string test)
+    {
         DiagnosticResult[] expected = Array.Empty<DiagnosticResult>();
         await VerifyClassWithoutFieldsToInject.VerifyAnalyzerAsync(test, expected);
     }

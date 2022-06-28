@@ -58,7 +58,7 @@ public class ClassWithoutFieldsToInjectAnalyzer : DiagnosticAnalyzer
         {
             IMethodSymbol constructor = baseType.Constructors[0];
             return baseType?.HasAttribute(Source.AttributeFullName, compilation) is true
-                ? SymbolHasFields(compilation, symbol) || ParentHasFields(compilation, symbol)
+                ? SymbolHasFields(compilation, baseType) || ParentHasFields(compilation, baseType)
                 : constructor.Parameters.Length > 0;
         }
 
