@@ -74,11 +74,19 @@ public class AutoConstructorGenerator : IIncrementalGenerator
                     filename = $"{string.Join(".", symbol.GetContainingTypes().Select(c => c.Name))}.";
                 }
 
-                filename += $"{symbol.Name}.g.cs";
+                filename += $"{symbol.Name}";
+
+                if (symbol.TypeParameters.Length > 0)
+                {
+                    filename += string.Concat(symbol.TypeParameters.Select(tp => $".{tp.Name}"));
+                }
+
                 if (!symbol.ContainingNamespace.IsGlobalNamespace)
                 {
                     filename = $"{symbol.ContainingNamespace.ToDisplayString()}.{filename}";
                 }
+
+                filename += ".g.cs";
 
                 bool emitNullChecks = false;
                 if (options.TryGetValue("build_property.AutoConstructor_DisableNullChecking", out string? disableNullCheckingSwitch))

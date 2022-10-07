@@ -934,7 +934,7 @@ namespace Test
         }
     }
 }
-")]
+", "Test.Test.T1.T2.g.cs")]
     [InlineData(@"
 namespace Test
 {
@@ -1005,7 +1005,7 @@ namespace Nested
         }
     }
 }
-", "Nested.Outer.Inner.g.cs")]
+", "Nested.Outer.Inner.T2.g.cs")]
     [InlineData(@"
 namespace Test
 {
@@ -1027,7 +1027,7 @@ namespace Test
     }
 }
 ")]
-    public async Task Run_WithGenericClass_ShouldGenerateClass(string code, string generated, string generatedName = "Test.Test.g.cs")
+    public async Task Run_WithGenericClass_ShouldGenerateClass(string code, string generated, string generatedName = "Test.Test.T.g.cs")
     {
         await VerifySourceGenerator.RunAsync(code, generated, generatedName: generatedName);
     }
