@@ -76,9 +76,9 @@ public class AutoConstructorGenerator : IIncrementalGenerator
 
                 filename += $"{symbol.Name}";
 
-                if (symbol.TypeParameters.Length > 0)
+                if (symbol.TypeArguments.Length > 0)
                 {
-                    filename += string.Concat(symbol.TypeParameters.Select(tp => $".{tp.Name}"));
+                    filename += string.Concat(symbol.TypeArguments.Select(tp => $".{tp.Name}"));
                 }
 
                 if (!symbol.ContainingNamespace.IsGlobalNamespace)
@@ -225,10 +225,21 @@ public class AutoConstructorGenerator : IIncrementalGenerator
             fieldSymbol.AssociatedSymbol?.Name ?? fieldSymbol.Name,
             initializer,
             type,
-            type.IsReferenceType && type.NullableAnnotation == NullableAnnotation.Annotated,
+            IsNullable(type),
             summaryText,
             type.IsReferenceType && type.NullableAnnotation == NullableAnnotation.None && emitNullChecks,
             FieldType.Initialized);
+
+        static bool IsNullable(ITypeSymbol typeSymbol)
+        {
+            bool isNullable = typeSymbol.IsReferenceType && typeSymbol.NullableAnnotation == NullableAnnotation.Annotated;
+            if (typeSymbol is INamedTypeSymbol namedSymbol)
+            {
+                isNullable |= namedSymbol.TypeArguments.Any(IsNullable);
+            }
+
+            return isNullable;
+        }
     }
 
     private static T? GetParameterValue<T>(string parameterName, ImmutableArray<IParameterSymbol> parameters, ImmutableArray<TypedConstant> arguments)

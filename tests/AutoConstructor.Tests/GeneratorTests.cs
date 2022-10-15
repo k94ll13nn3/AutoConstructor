@@ -503,10 +503,8 @@ namespace Test
         await VerifySourceGenerator.RunAsync(code, generated);
     }
 
-    [Fact]
-    public async Task Run_WithNullableReferenceType_ShouldGenerateClass()
-    {
-        const string code = @"namespace Test
+    [Theory]
+    [InlineData(@"namespace Test
 {
     [AutoConstructor]
     internal partial class Test
@@ -516,8 +514,7 @@ namespace Test
         private readonly int _d1;
         private readonly int? _d2;
     }
-}";
-        const string generated = @"#nullable enable
+}", @"#nullable enable
 namespace Test
 {
     partial class Test
@@ -531,7 +528,47 @@ namespace Test
         }
     }
 }
-";
+")]
+    [InlineData(@"using System.Threading.Tasks;namespace Test
+{
+    [AutoConstructor]
+    internal partial class Test
+    {
+        private readonly Task<object?> _t1;
+    }
+}", @"#nullable enable
+namespace Test
+{
+    partial class Test
+    {
+        public Test(System.Threading.Tasks.Task<object?> t1)
+        {
+            this._t1 = t1;
+        }
+    }
+}
+")]
+    [InlineData(@"using System.Threading.Tasks;namespace Test
+{
+    [AutoConstructor]
+    internal partial class Test
+    {
+        private readonly Task<Task<object?>> _t1;
+    }
+}", @"#nullable enable
+namespace Test
+{
+    partial class Test
+    {
+        public Test(System.Threading.Tasks.Task<System.Threading.Tasks.Task<object?>> t1)
+        {
+            this._t1 = t1;
+        }
+    }
+}
+")]
+    public async Task Run_WithNullableReferenceType_ShouldGenerateClass(string code, string generated)
+    {
         await VerifySourceGenerator.RunAsync(code, generated, nullable: true);
     }
 
