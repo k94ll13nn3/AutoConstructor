@@ -774,7 +774,7 @@ namespace Test
         public int InjectedWithDocumentation { get; }
 
         [field: AutoConstructorInject]
-        public int NotInjectedBecauseNotReadonly { get; set; }
+        public int InjectedBecauseExplicitInjection { get; set; }
 
         [field: AutoConstructorInject]
         public static int NotInjectedBecauseStatic { get; }
@@ -800,11 +800,13 @@ namespace Test
         /// </summary>
         /// <param name=""injected"">injected</param>
         /// <param name=""injectedWithDocumentation"">Some property.</param>
+        /// <param name=""injectedBecauseExplicitInjection"">injectedBecauseExplicitInjection</param>
         /// <param name=""alsoInjectedEvenWhenMissingAttribute"">alsoInjectedEvenWhenMissingAttribute</param>
-        public Test(int injected, int injectedWithDocumentation, int alsoInjectedEvenWhenMissingAttribute)
+        public Test(int injected, int injectedWithDocumentation, int injectedBecauseExplicitInjection, int alsoInjectedEvenWhenMissingAttribute)
         {
             this.Injected = injected;
             this.InjectedWithDocumentation = injectedWithDocumentation;
+            this.InjectedBecauseExplicitInjection = injectedBecauseExplicitInjection;
             this.AlsoInjectedEvenWhenMissingAttribute = alsoInjectedEvenWhenMissingAttribute;
             this.InjectedWithoutCreatingAParam = injected.ToString() ?? throw new System.ArgumentNullException(nameof(injected));
         }
@@ -857,6 +859,8 @@ namespace Test
         public readonly int _t2;
         protected readonly int _t3;
         private static readonly int _t4;
+        [AutoConstructorInject]
+        private int _t5;
     }
 }";
         const string generated = @"namespace Test
