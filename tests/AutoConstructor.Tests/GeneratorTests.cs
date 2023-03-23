@@ -522,7 +522,7 @@ namespace Test
         public Test(string? t1, string t2, int d1, int? d2)
         {
             this._t1 = t1;
-            this._t2 = t2;
+            this._t2 = t2 ?? throw new System.ArgumentNullException(nameof(t2));
             this._d1 = d1;
             this._d2 = d2;
         }
@@ -543,7 +543,7 @@ namespace Test
     {
         public Test(System.Threading.Tasks.Task<object?> t1)
         {
-            this._t1 = t1;
+            this._t1 = t1 ?? throw new System.ArgumentNullException(nameof(t1));
         }
     }
 }
@@ -562,7 +562,7 @@ namespace Test
     {
         public Test(System.Threading.Tasks.Task<System.Threading.Tasks.Task<object?>> t1)
         {
-            this._t1 = t1;
+            this._t1 = t1 ?? throw new System.ArgumentNullException(nameof(t1));
         }
     }
 }
@@ -575,7 +575,7 @@ namespace Test
     [Theory]
     [InlineData(true)]
     [InlineData(false)]
-    public async Task Run_WithOrWithoutNullableReferenceType_ShouldGenerateClassWithOrWithoutNullCheck(bool enableBoolean)
+    public async Task Run_WithOrWithoutNullableReferenceType_ShouldGenerateClassWithNullCheck(bool enableBoolean)
     {
         const string code = @"namespace Test
 {
@@ -591,7 +591,7 @@ namespace Test
     {{
         public Test(string t)
         {{
-            this._t = t{(!enableBoolean ? " ?? throw new System.ArgumentNullException(nameof(t))" : "")};
+            this._t = t ?? throw new System.ArgumentNullException(nameof(t));
         }}
     }}
 }}
