@@ -5,7 +5,7 @@
 [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/k94ll13nn3/AutoConstructor/main/LICENSE)
 ![ci.yml](https://github.com/k94ll13nn3/AutoConstructor/workflows/.github/workflows/ci.yml/badge.svg)
 
-C# source generator that generates a constructor from readonly fields in a class.
+C# source generator that generates a constructor from readonly fields/properties in a class.
 
 ## Installation
 
@@ -67,8 +67,8 @@ By default, all `readonly` non-`static` fields without initialization will be us
 
 Fields marked with `AutoConstructorIgnoreAttribute` will be ignored.
 
-Use `AutoConstructorInjectAttribute` to customize the behavior, usualy when the injected parameter and the fields
-do not have the same type. It takes three optionals parameters:
+Use `AutoConstructorInjectAttribute` to customize the behavior, usually when the injected parameter and the fields
+do not have the same type. It takes three optional parameters:
 
 - `initializer`: a string that will be used to initialize the field (by example `myService.GetData()`), default to the `parameterName` if null or empty.
 - `parameterName`: the name of the parameter to used in the constructor  (by example `myService`), default to the field name trimmed if null or empty.
@@ -80,9 +80,10 @@ won't make the field injectable.
 When using `AutoConstructorInjectAttribute`, the parameter name can be shared across multiple fields,
 and even use a parameter from another field not annotated with `AutoConstructorInjectAttribute`, but type must match.
 
-### Get-only properties
+### Properties injection
 
 Get-only properties (`public int Property { get; }`) are injected by the generator by default.
+Non get-only properties (`public int Property { get; set;}`) are injected only if marked with (`[field: AutoConstructorInject]`) attributte.
 The behavior of the injection can be modified using [auto-implemented property field-targeted attributes](https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/proposals/csharp-7.3/auto-prop-field-attrs) on its backing field. The following code show an injected get-only property with a custom injecter:
 
 ```csharp
@@ -157,6 +158,10 @@ partial class Test
     [AutoConstructorIgnore]
     private readonly DateTime _dateNotTaken;
 
+    // Won't be injected because not readonly. Attribute would be taken into account if this were a property, not a field.
+    [AutoConstructorInject]
+    private int  _stuff;
+
     // Won't be injected
     private int? _toto;
 
@@ -214,7 +219,7 @@ public partial class Test
     public int InjectedWithDocumentation { get; }
 
     [field: AutoConstructorInject]
-    public int NotInjectedBecauseNotReadonly { get; set; }
+    public int InjectedBecauseExplicitInjection { get; set; }
 
     [field: AutoConstructorInject]
     public static int NotInjectedBecauseStatic { get; }
@@ -233,22 +238,24 @@ public partial class Test
 will generate
 
 ```csharp
-partial class Test
-{
-    /// <summary>
-    /// Initializes a new instance of the Test class.
-    /// </summary>
-    /// <param name=""injected"">injected</param>
-    /// <param name=""injectedWithDocumentation"">Some property.</param>
-    /// <param name=""alsoInjectedEvenWhenMissingAttribute"">alsoInjectedEvenWhenMissingAttribute</param>
-    public Test(int injected, int injectedWithDocumentation, int alsoInjectedEvenWhenMissingAttribute)
+ partial class Test
     {
-        this.Injected = injected;
-        this.InjectedWithDocumentation = injectedWithDocumentation;
-        this.AlsoInjectedEvenWhenMissingAttribute = alsoInjectedEvenWhenMissingAttribute;
-        this.InjectedWithoutCreatingAParam = injected.ToString() ?? throw new System.ArgumentNullException(nameof(injected));
+        /// <summary>
+        /// Initializes a new instance of the Test class.
+        /// </summary>
+        /// <param name=""injected"">injected</param>
+        /// <param name=""injectedWithDocumentation"">Some property.</param>
+        /// <param name=""injectedBecauseExplicitInjection"">injectedBecauseExplicitInjection</param>
+        /// <param name=""alsoInjectedEvenWhenMissingAttribute"">alsoInjectedEvenWhenMissingAttribute</param>
+        public Test(int injected, int injectedWithDocumentation, int injectedBecauseExplicitInjection, int alsoInjectedEvenWhenMissingAttribute)
+        {
+            this.Injected = injected;
+            this.InjectedWithDocumentation = injectedWithDocumentation;
+            this.InjectedBecauseExplicitInjection = injectedBecauseExplicitInjection;
+            this.AlsoInjectedEvenWhenMissingAttribute = alsoInjectedEvenWhenMissingAttribute;
+            this.InjectedWithoutCreatingAParam = injected.ToString() ?? throw new System.ArgumentNullException(nameof(injected));
+        }
     }
-}
 ```
 
 ## Diagnostics
@@ -277,7 +284,7 @@ The `AutoConstructorIgnore` or `AutoConstructorInject` are used on a class witho
 
 A type specified in `AutoConstructorInject` attribute does not match the type of another parameter with the same name.
 
-In the folowing sample, both fields will be injected with `guid` as parameter name, but one of type `string` and the other of type `Guid`,
+In the following sample, both fields will be injected with `guid` as parameter name, but one of type `string` and the other of type `Guid`,
 preventing the generator from running.
 
 ``` csharp

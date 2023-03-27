@@ -172,11 +172,16 @@ public class AutoConstructorGenerator : IIncrementalGenerator
         return symbol.GetMembers().OfType<IFieldSymbol>()
             .Where(x => x.CanBeInjected(compilation)
                 && !x.IsStatic
-                && x.IsReadOnly
+                && (x.IsReadOnly || IsPropertyWithExplicitInjection(x))
                 && !x.IsInitialized()
                 && !x.HasAttribute(Source.IgnoreAttributeFullName, compilation))
             .Select(x => GetFieldInfo(x, compilation, emitNullChecks))
             .ToList();
+
+        bool IsPropertyWithExplicitInjection(IFieldSymbol x)
+        {
+            return x.AssociatedSymbol is not null && x.HasAttribute(Source.InjectAttributeFullName, compilation);
+        }
     }
 
     private static FieldInfo GetFieldInfo(IFieldSymbol fieldSymbol, Compilation compilation, bool emitNullChecks)
