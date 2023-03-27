@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [v4.0.0] - 2023-03-27
+
+### Changed
+
+- [**Breaking**] Non get-only properties are now injectedable when using `AutoConstructorInject` (by @DomasM)
+- Null checks are generated even in nullable context when enabled (by @DomasM)
+
+### Pull Requests
+
+- [#56](https://github.com/k94ll13nn3/AutoConstructor/pull/56): Check for nulls even in nullable enabled context (by [DomasM](https://github.com/DomasM))
+- [#55](https://github.com/k94ll13nn3/AutoConstructor/pull/55): Allow explicit include of non-readonly properties in ctor (by [DomasM](https://github.com/DomasM))
+
 ## [v3.2.5] - 2022-10-15
 
 ### Fixed
@@ -172,6 +184,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 Initial release
 
+[v4.0.0]: https://github.com/k94ll13nn3/AutoConstructor/compare/v3.2.5...v4.0.0
 [v3.2.5]: https://github.com/k94ll13nn3/AutoConstructor/compare/v3.2.4...v3.2.5
 [3.2.4]: https://github.com/k94ll13nn3/AutoConstructor/compare/v3.2.3...v3.2.4
 [3.2.3]: https://github.com/k94ll13nn3/AutoConstructor/compare/v3.2.2...v3.2.3
