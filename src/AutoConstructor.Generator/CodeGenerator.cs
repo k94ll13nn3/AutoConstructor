@@ -206,14 +206,14 @@ internal class CodeGenerator
         var nodes = new List<XmlNodeSyntax>
         {
             XmlSummaryElement(
-                XmlNewLine(Environment.NewLine),
+                XmlNewLine("\r\n"),
                 XmlText(constructorDocumentationComment),
-                XmlNewLine(Environment.NewLine))
+                XmlNewLine("\r\n"))
         };
 
         foreach (FieldInfo parameter in parameters)
         {
-            nodes.Add(XmlNewLine(Environment.NewLine));
+            nodes.Add(XmlNewLine("\r\n"));
             nodes.Add(XmlParamElement(parameter.ParameterName, XmlText(parameter.Comment ?? parameter.ParameterName)));
         }
 

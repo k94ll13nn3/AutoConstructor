@@ -12,11 +12,11 @@ public static class SymbolExtension
         bool isInitialized = false;
         if (symbol.AssociatedSymbol is not null)
         {
-            isInitialized = (symbol.AssociatedSymbol.DeclaringSyntaxReferences.FirstOrDefault()?.GetSyntax() as PropertyDeclarationSyntax)?.Initializer != null;
+            isInitialized = symbol.AssociatedSymbol.DeclaringSyntaxReferences.FirstOrDefault()?.GetSyntax() is PropertyDeclarationSyntax { Initializer: not null };
         }
 
         return isInitialized ||
-            (symbol.DeclaringSyntaxReferences.FirstOrDefault()?.GetSyntax() as VariableDeclaratorSyntax)?.Initializer != null;
+            symbol.DeclaringSyntaxReferences.FirstOrDefault()?.GetSyntax() is VariableDeclaratorSyntax { Initializer: not null };
     }
 
     public static bool HasAttribute(this ISymbol symbol, string attributeName, Compilation compilation)
@@ -43,7 +43,7 @@ public static class SymbolExtension
 
         return symbol.CanBeReferencedByName
             || (!symbol.CanBeReferencedByName
-                && (symbol as IFieldSymbol)?.AssociatedSymbol is not null);
+                && symbol is IFieldSymbol { AssociatedSymbol: not null });
     }
 
     public static IEnumerable<INamedTypeSymbol> GetContainingTypes(this INamedTypeSymbol symbol)

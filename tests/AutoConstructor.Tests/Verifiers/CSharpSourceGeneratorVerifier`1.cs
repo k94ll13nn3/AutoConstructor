@@ -77,7 +77,7 @@ build_property.AutoConstructor_DisableNullChecking = false
         await test.RunAsync();
     }
 
-    private class Test : CSharpSourceGeneratorTest<EmptySourceGeneratorProvider, XUnitVerifier>
+    private sealed class Test : CSharpSourceGeneratorTest<EmptySourceGeneratorProvider, XUnitVerifier>
     {
         public bool EnableNullable { get; set; }
 

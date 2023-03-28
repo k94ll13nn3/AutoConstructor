@@ -585,16 +585,16 @@ namespace Test
         private readonly string _t;
     }
 }";
-        string generated = $@"namespace Test
-{{
+        const string generated = @"namespace Test
+{
     partial class Test
-    {{
+    {
         public Test(string t)
-        {{
+        {
             this._t = t ?? throw new System.ArgumentNullException(nameof(t));
-        }}
-    }}
-}}
+        }
+    }
+}
 ";
         await VerifySourceGenerator.RunAsync(code, generated, nullable: enableBoolean);
     }

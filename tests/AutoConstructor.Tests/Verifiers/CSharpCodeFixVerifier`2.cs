@@ -51,7 +51,7 @@ internal static class CSharpCodeFixVerifier<TAnalyzer, TCodeFix>
         return valueWithCode;
     }
 
-    internal class Test : CSharpCodeFixTest<TAnalyzer, TCodeFix, XUnitVerifier>
+    internal sealed class Test : CSharpCodeFixTest<TAnalyzer, TCodeFix, XUnitVerifier>
     {
         public Test()
         {
