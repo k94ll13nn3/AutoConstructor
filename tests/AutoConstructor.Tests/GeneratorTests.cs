@@ -567,6 +567,34 @@ namespace Test
     }
 }
 ")]
+    [InlineData(@"using System.Threading.Tasks;namespace Test
+{
+    [AutoConstructor]
+    internal partial class Test : TestBase
+    {
+        
+    }
+
+    internal partial class TestBase
+    {
+        public readonly Task<Task<object?>> _t1;
+
+        public TestBase(System.Threading.Tasks.Task<System.Threading.Tasks.Task<object?>> t1)
+        {
+            this._t1 = t1 ?? throw new System.ArgumentNullException(nameof(t1));
+        }
+    }
+}", @"#nullable enable
+namespace Test
+{
+    partial class Test
+    {
+        public Test(System.Threading.Tasks.Task<System.Threading.Tasks.Task<object?>> t1) : base(t1)
+        {
+        }
+    }
+}
+")]
     public async Task Run_WithNullableReferenceType_ShouldGenerateClass(string code, string generated)
     {
         await VerifySourceGenerator.RunAsync(code, generated, nullable: true);
