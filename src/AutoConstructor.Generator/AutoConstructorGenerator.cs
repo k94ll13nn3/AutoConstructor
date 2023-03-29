@@ -234,7 +234,6 @@ public class AutoConstructorGenerator : IIncrementalGenerator
             summaryText,
             type.IsReferenceType && type.NullableAnnotation != NullableAnnotation.Annotated && emitNullChecks,
             FieldType.Initialized);
-        
     }
 
     private static bool IsNullable(ITypeSymbol typeSymbol)
