@@ -5,11 +5,25 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [v4.0.1] - 2023-03-29
+
+### Fixed
+
+- Fix nullable context not generated when using base class
+
+### Issues
+
+- [#58](https://github.com/k94ll13nn3/AutoConstructor/issues/58): #nullable enable line not generated if only fields in base type are nullable
+
+### Pull Requests
+
+- [#59](https://github.com/k94ll13nn3/AutoConstructor/pull/59): fix/nullability-of-fields-not-extracted (by [DomasM](https://github.com/DomasM))
+
 ## [v4.0.0] - 2023-03-27
 
 ### Changed
 
-- [**Breaking**] Non get-only properties are now injectedable when using `AutoConstructorInject` (by @DomasM)
+- [**Breaking**] Non get-only properties are now injected when using `AutoConstructorInject` (by @DomasM)
 - Null checks are generated even in nullable context when enabled (by @DomasM)
 
 ### Pull Requests
@@ -184,6 +198,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 Initial release
 
+[v4.0.1]: https://github.com/k94ll13nn3/AutoConstructor/compare/v4.0.0...v4.0.1
 [v4.0.0]: https://github.com/k94ll13nn3/AutoConstructor/compare/v3.2.5...v4.0.0
 [v3.2.5]: https://github.com/k94ll13nn3/AutoConstructor/compare/v3.2.4...v3.2.5
 [3.2.4]: https://github.com/k94ll13nn3/AutoConstructor/compare/v3.2.3...v3.2.4
