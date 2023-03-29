@@ -234,17 +234,18 @@ public class AutoConstructorGenerator : IIncrementalGenerator
             summaryText,
             type.IsReferenceType && type.NullableAnnotation != NullableAnnotation.Annotated && emitNullChecks,
             FieldType.Initialized);
+        
+    }
 
-        static bool IsNullable(ITypeSymbol typeSymbol)
+    private static bool IsNullable(ITypeSymbol typeSymbol)
+    {
+        bool isNullable = typeSymbol.IsReferenceType && typeSymbol.NullableAnnotation == NullableAnnotation.Annotated;
+        if (typeSymbol is INamedTypeSymbol namedSymbol)
         {
-            bool isNullable = typeSymbol.IsReferenceType && typeSymbol.NullableAnnotation == NullableAnnotation.Annotated;
-            if (typeSymbol is INamedTypeSymbol namedSymbol)
-            {
-                isNullable |= namedSymbol.TypeArguments.Any(IsNullable);
-            }
-
-            return isNullable;
+            isNullable |= namedSymbol.TypeArguments.Any(IsNullable);
         }
+
+        return isNullable;
     }
 
     private static T? GetParameterValue<T>(string parameterName, ImmutableArray<IParameterSymbol> parameters, ImmutableArray<TypedConstant> arguments)
@@ -291,7 +292,7 @@ public class AutoConstructorGenerator : IIncrementalGenerator
                     string.Empty,
                     string.Empty,
                     parameter.Type,
-                    false,
+                    IsNullable(parameter.Type),
                     null,
                     false,
                     FieldType.PassedToBase));
@@ -316,7 +317,7 @@ public class AutoConstructorGenerator : IIncrementalGenerator
                     string.Empty,
                     string.Empty,
                     parameter.FallbackType,
-                    false,
+                    IsNullable(parameter.FallbackType),
                     null,
                     false,
                     FieldType.PassedToBase));
