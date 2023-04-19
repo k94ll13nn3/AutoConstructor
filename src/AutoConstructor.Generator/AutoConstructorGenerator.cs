@@ -57,7 +57,17 @@ public class AutoConstructorGenerator : IIncrementalGenerator
             return;
         }
 
-        foreach (IGrouping<ISymbol?, ClassDeclarationSyntax> groupedClasses in classes.GroupBy(c => compilation.GetSemanticModel(c.SyntaxTree).GetDeclaredSymbol(c), SymbolEqualityComparer.Default))
+        IEnumerable<IGrouping<ISymbol?, ClassDeclarationSyntax>> classesBySymbol = Enumerable.Empty<IGrouping<ISymbol?, ClassDeclarationSyntax>>();
+        try
+        {
+            classesBySymbol = classes.GroupBy(c => compilation.GetSemanticModel(c.SyntaxTree).GetDeclaredSymbol(c), SymbolEqualityComparer.Default);
+        }
+        catch (ArgumentException)
+        {
+            return;
+        }
+
+        foreach (IGrouping<ISymbol?, ClassDeclarationSyntax> groupedClasses in classesBySymbol)
         {
             if (context.CancellationToken.IsCancellationRequested)
             {
