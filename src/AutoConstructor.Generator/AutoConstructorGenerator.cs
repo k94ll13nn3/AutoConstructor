@@ -270,9 +270,9 @@ public class AutoConstructorGenerator : IIncrementalGenerator
         INamedTypeSymbol? baseType = symbol.BaseType;
 
         // Check if base type is not object (ie. its base type is null) and that there is only one constructor.
-        if (baseType?.BaseType is not null && baseType?.Constructors.Length == 1)
+        if (baseType?.BaseType is not null && baseType?.Constructors.Count(d => !d.IsStatic) == 1)
         {
-            IMethodSymbol constructor = baseType.Constructors[0];
+            IMethodSymbol constructor = baseType.Constructors.Single(d => !d.IsStatic);
             if (baseType?.HasAttribute(Source.AttributeFullName, compilation) is true)
             {
                 ExtractFieldsFromGeneratedParent(compilation, emitNullChecks, concatenatedFields, baseType);

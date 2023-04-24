@@ -52,6 +52,30 @@ namespace Test
     [InlineData(@"
 namespace Test
 {
+    internal partial class Test<T>
+    {
+        public T MyType { get; }
+
+        private static readonly int _t1 = 3;
+
+        public Test(T myType)
+        {
+            MyType = myType;
+        }
+    }
+
+    [AutoConstructor]
+    internal partial class Test2 : Test<int>
+    {
+    
+        public Test2(int myType) : base(myType)
+        {
+        }
+    }
+}")]
+    [InlineData(@"
+namespace Test
+{
     [AutoConstructor]
     internal partial class Test
     {
