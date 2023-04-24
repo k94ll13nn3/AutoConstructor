@@ -5,13 +5,28 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
-## [v4.0.2] - 2023-04-19
+## [4.0.3] - 2023-04-24
+
+### Fixed
+
+- Fix calls to base constructor if the class also has a static constructor
+- Fix handling of AutoConstructor_DisableNullChecking when no value is provided
+
+### Issues
+
+- [#60](https://github.com/k94ll13nn3/AutoConstructor/issues/60): Fails to call base constructor if base has static constructor
+
+### Pull Requests
+
+- [#61](https://github.com/k94ll13nn3/AutoConstructor/pull/61): Fix static ctor in base class should be ignored (by [DomasM](https://github.com/DomasM))
+
+## [4.0.2] - 2023-04-19
 
 ### Fixed
 
 - Fix possible ArgumentException
 
-## [v4.0.1] - 2023-03-29
+## [4.0.1] - 2023-03-29
 
 ### Fixed
 
@@ -25,7 +40,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 - [#59](https://github.com/k94ll13nn3/AutoConstructor/pull/59): fix/nullability-of-fields-not-extracted (by [DomasM](https://github.com/DomasM))
 
-## [v4.0.0] - 2023-03-27
+## [4.0.0] - 2023-03-27
 
 ### Changed
 
@@ -37,7 +52,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - [#56](https://github.com/k94ll13nn3/AutoConstructor/pull/56): Check for nulls even in nullable enabled context (by [DomasM](https://github.com/DomasM))
 - [#55](https://github.com/k94ll13nn3/AutoConstructor/pull/55): Allow explicit include of non-readonly properties in ctor (by [DomasM](https://github.com/DomasM))
 
-## [v3.2.5] - 2022-10-15
+## [3.2.5] - 2022-10-15
 
 ### Fixed
 
@@ -204,10 +219,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 Initial release
 
-[v4.0.2]: https://github.com/k94ll13nn3/AutoConstructor/compare/v4.0.1...v4.0.2
-[v4.0.1]: https://github.com/k94ll13nn3/AutoConstructor/compare/v4.0.0...v4.0.1
-[v4.0.0]: https://github.com/k94ll13nn3/AutoConstructor/compare/v3.2.5...v4.0.0
-[v3.2.5]: https://github.com/k94ll13nn3/AutoConstructor/compare/v3.2.4...v3.2.5
+[4.0.3]: https://github.com/k94ll13nn3/AutoConstructor/compare/v4.0.2...v4.0.3
+[4.0.2]: https://github.com/k94ll13nn3/AutoConstructor/compare/v4.0.1...v4.0.2
+[4.0.1]: https://github.com/k94ll13nn3/AutoConstructor/compare/v4.0.0...v4.0.1
+[4.0.0]: https://github.com/k94ll13nn3/AutoConstructor/compare/v3.2.5...v4.0.0
+[3.2.5]: https://github.com/k94ll13nn3/AutoConstructor/compare/v3.2.4...v3.2.5
 [3.2.4]: https://github.com/k94ll13nn3/AutoConstructor/compare/v3.2.3...v3.2.4
 [3.2.3]: https://github.com/k94ll13nn3/AutoConstructor/compare/v3.2.2...v3.2.3
 [3.2.2]: https://github.com/k94ll13nn3/AutoConstructor/compare/v3.2.1...v3.2.2

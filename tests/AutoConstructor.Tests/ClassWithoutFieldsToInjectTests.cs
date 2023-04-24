@@ -67,7 +67,6 @@ namespace Test
     [AutoConstructor]
     internal partial class Test2 : Test<int>
     {
-    
         public Test2(int myType) : base(myType)
         {
         }

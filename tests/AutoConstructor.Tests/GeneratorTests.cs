@@ -907,23 +907,23 @@ namespace Test
         await VerifySourceGenerator.RunAsync(code, generated);
     }
 
-
     [Fact]
     public async Task Run_OnInheritedWithStaticImplicitConstructor_ShouldGenerateBaseCall()
     {
         const string code = @"
 namespace Test
 {
+    internal class TestBase
+    {
+        private static readonly int _s = 1;
 
-    internal class TestBase{
+        private readonly int _t1;
 
-    private static readonly int _s_t5=1;
-    private readonly int _t1;
-
-    public TestBase(int t1){
-        this._t1 = t1;
+        public TestBase(int t1)
+        {
+            this._t1 = t1;
+        }
     }
-   }
 
     [AutoConstructor]
     internal partial class Test : TestBase
@@ -942,7 +942,6 @@ namespace Test
 ";
         await VerifySourceGenerator.RunAsync(code, generated);
     }
-
 
     [Fact]
     public async Task Run_MultiplePartialParts_ShouldGenerateClass()
