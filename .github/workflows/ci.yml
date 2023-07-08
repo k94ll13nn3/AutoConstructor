@@ -8,8 +8,8 @@ on:
 
 jobs:
   build:
-    name: windows-latest
-    runs-on: windows-latest
+    name: ubuntu-latest
+    runs-on: ubuntu-latest
 
     steps:
     - name: Checkout code

@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [4.1.0] - 2023-07-08
+
+### Changed
+
+- Add call to parameterless constructor if one is defined 
+
+### Issues
+
+- [#70](https://github.com/k94ll13nn3/AutoConstructor/issues/70): Call default/empty constructor if exists
+
 ## [4.0.3] - 2023-04-24
 
 ### Fixed
@@ -219,6 +229,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 Initial release
 
+[4.1.0]: https://github.com/k94ll13nn3/AutoConstructor/compare/v4.0.3...v4.1.0
 [4.0.3]: https://github.com/k94ll13nn3/AutoConstructor/compare/v4.0.2...v4.0.3
 [4.0.2]: https://github.com/k94ll13nn3/AutoConstructor/compare/v4.0.1...v4.0.2
 [4.0.1]: https://github.com/k94ll13nn3/AutoConstructor/compare/v4.0.0...v4.0.1
