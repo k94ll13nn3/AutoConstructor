@@ -83,12 +83,12 @@ internal class CodeGenerator
         return this;
     }
 
-    public CodeGenerator AddConstructor(FieldInfo[] parameters)
+    public CodeGenerator AddConstructor(FieldInfo[] parameters, bool symbolHasParameterlessConstructor)
     {
         if (_current is ClassDeclarationSyntax classDeclarationSyntax)
         {
             ClassDeclarationSyntax lastClassSyntax = classDeclarationSyntax.DescendantNodesAndSelf().OfType<ClassDeclarationSyntax>().LastOrDefault();
-            _current = classDeclarationSyntax.ReplaceNode(lastClassSyntax, lastClassSyntax.AddMembers(GetConstructor(lastClassSyntax.Identifier, parameters, _constructorDocumentationComment)));
+            _current = classDeclarationSyntax.ReplaceNode(lastClassSyntax, lastClassSyntax.AddMembers(GetConstructor(lastClassSyntax.Identifier, parameters, _constructorDocumentationComment, symbolHasParameterlessConstructor)));
         }
         else if (_current is BaseNamespaceDeclarationSyntax namespaceDeclarationSyntax && namespaceDeclarationSyntax.Members.First() is ClassDeclarationSyntax)
         {
@@ -98,7 +98,7 @@ internal class CodeGenerator
                 throw new InvalidOperationException("No class was added to the generator.");
             }
 
-            _current = namespaceDeclarationSyntax.ReplaceNode(lastClassSyntax, lastClassSyntax.AddMembers(GetConstructor(lastClassSyntax.Identifier, parameters, _constructorDocumentationComment)));
+            _current = namespaceDeclarationSyntax.ReplaceNode(lastClassSyntax, lastClassSyntax.AddMembers(GetConstructor(lastClassSyntax.Identifier, parameters, _constructorDocumentationComment, symbolHasParameterlessConstructor)));
         }
         else if (_current is null)
         {
@@ -174,7 +174,7 @@ internal class CodeGenerator
         return declaration;
     }
 
-    private static ConstructorDeclarationSyntax GetConstructor(SyntaxToken identifier, FieldInfo[] parameters, string? constructorDocumentationComment)
+    private static ConstructorDeclarationSyntax GetConstructor(SyntaxToken identifier, FieldInfo[] parameters, string? constructorDocumentationComment, bool generateThisInitializer)
     {
         FieldInfo[] constructorParameters = parameters
             .GroupBy(x => x.ParameterName)
@@ -192,10 +192,14 @@ internal class CodeGenerator
             .AddParameterListParameters(Array.ConvertAll(constructorParameters, GetParameter))
             .AddBodyStatements(Array.ConvertAll(parameters.Where(p => p.FieldType.HasFlag(FieldType.Initialized)).ToArray(), GetParameterAssignement));
 
-        if (constructorParameters.Any(p => p.FieldType.HasFlag(FieldType.PassedToBase)))
+        if (Array.Exists(constructorParameters, p => p.FieldType.HasFlag(FieldType.PassedToBase)))
         {
-            constructor = constructor.WithInitializer(ConstructorInitializer(SyntaxKind.BaseConstructorInitializer)
+            return constructor.WithInitializer(ConstructorInitializer(SyntaxKind.BaseConstructorInitializer)
                 .AddArgumentListArguments(Array.ConvertAll(constructorParameters.Where(p => p.FieldType.HasFlag(FieldType.PassedToBase)).ToArray(), GetArgument)));
+        }
+        else if (generateThisInitializer)
+        {
+            return constructor.WithInitializer(ConstructorInitializer(SyntaxKind.ThisConstructorInitializer));
         }
 
         return constructor;

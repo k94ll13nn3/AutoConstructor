@@ -129,12 +129,16 @@ public class AutoConstructorGenerator : IIncrementalGenerator
                     continue;
                 }
 
-                context.AddSource(filename, SourceText.From(GenerateAutoConstructor(symbol, fields, options), Encoding.UTF8));
+                bool hasParameterlessConstructor =
+                    groupedClasses.SelectMany(c => c.ChildNodes().Where(n => n.IsKind(SyntaxKind.ConstructorDeclaration))).Count() == 1
+                    && symbol.Constructors.Any(d => !d.IsStatic && d.Parameters.Length == 0);
+
+                context.AddSource(filename, SourceText.From(GenerateAutoConstructor(symbol, fields, options, hasParameterlessConstructor), Encoding.UTF8));
             }
         }
     }
 
-    private static string GenerateAutoConstructor(INamedTypeSymbol symbol, FieldInfo[] fields, AnalyzerConfigOptions options)
+    private static string GenerateAutoConstructor(INamedTypeSymbol symbol, FieldInfo[] fields, AnalyzerConfigOptions options, bool hasParameterlessConstructor)
     {
         bool generateConstructorDocumentation = false;
         if (options.TryGetValue("build_property.AutoConstructor_GenerateConstructorDocumentation", out string? generateConstructorDocumentationSwitch))
@@ -150,7 +154,7 @@ public class AutoConstructorGenerator : IIncrementalGenerator
 
         var codeGenerator = new CodeGenerator();
 
-        if (fields.Any(f => f.Nullable))
+        if (Array.Exists(fields, f => f.Nullable))
         {
             codeGenerator.AddNullableAnnotation();
         }
@@ -172,7 +176,7 @@ public class AutoConstructorGenerator : IIncrementalGenerator
 
         codeGenerator
             .AddClass(symbol)
-            .AddConstructor(fields);
+            .AddConstructor(fields, hasParameterlessConstructor);
 
         return codeGenerator.ToString();
     }

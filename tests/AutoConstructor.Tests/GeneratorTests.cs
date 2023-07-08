@@ -1445,4 +1445,68 @@ namespace Test
             (generatedClass5, "Test.Class5.g.cs")
         });
     }
+
+    [Fact]
+    public async Task Run_ClassWithParameterlessConstructor_ShouldGenerateClass()
+    {
+        const string code = @"
+namespace Test
+{
+    [AutoConstructor]
+    internal partial class Test
+    {
+        private readonly int _t;
+        public Test(){
+            System.Console.WriteLine(""Hello world!"");
+        }
+    }
+}";
+        const string generated = @"namespace Test
+{
+    partial class Test
+    {
+        public Test(int t) : this()
+        {
+            this._t = t;
+        }
+    }
+}
+";
+        await VerifySourceGenerator.RunAsync(code, generated);
+    }
+
+    [Fact]
+    public async Task Run_ClassWithParameterlessConstructorAndBaseClass_ShouldGenerateClass()
+    {
+        const string code = @"
+namespace Test
+{
+    internal class BaseClass
+    {
+        private readonly int _t;
+        public BaseClass(int t)
+        {
+            this._t = t;
+        }
+    }
+    [AutoConstructor]
+    internal partial class Test : BaseClass
+    {
+        public Test() : base(0)
+        {
+        }
+    }
+}";
+        const string generated = @"namespace Test
+{
+    partial class Test
+    {
+        public Test(int t) : base(t)
+        {
+        }
+    }
+}
+";
+        await VerifySourceGenerator.RunAsync(code, generated);
+    }
 }
