@@ -8,22 +8,22 @@ on:
 
 jobs:
   build:
-    name: ubuntu-latest
-    runs-on: ubuntu-latest
+    name: windows-latest
+    runs-on: windows-latest
 
     steps:
     - name: Checkout code
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
       with:
         fetch-depth: 0 # for minver
     - name: Setup .NET Core
-      uses: actions/setup-dotnet@v1
+      uses: actions/setup-dotnet@v3
     - name: Execute build and run tests
       run: |
         dotnet build --configuration Release /nologo
         dotnet test --configuration Release
     - name: Upload artifact
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
         name: AutoConstructor
         path: artifacts/*
