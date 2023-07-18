@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [] - 2023-07-18
+
+### Fixed
+
+- Fix wrong call to `this` when a static constructor is found
+
+### Issues
+
+- [#71](https://github.com/k94ll13nn3/AutoConstructor/issues/71): Erroneous call to default ctor generated if the type declares a static constructor
+
+### Pull Requests
+
+- [#72](https://github.com/k94ll13nn3/AutoConstructor/pull/72): Fix call to this with static constructor (by [k94ll13nn3](https://github.com/k94ll13nn3))
+
 ## [4.1.0] - 2023-07-08
 
 ### Changed
@@ -229,6 +243,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 Initial release
 
+[]: https://github.com/k94ll13nn3/AutoConstructor/compare/v4.1.0...v4.1.1
 [4.1.0]: https://github.com/k94ll13nn3/AutoConstructor/compare/v4.0.3...v4.1.0
 [4.0.3]: https://github.com/k94ll13nn3/AutoConstructor/compare/v4.0.2...v4.0.3
 [4.0.2]: https://github.com/k94ll13nn3/AutoConstructor/compare/v4.0.1...v4.0.2
