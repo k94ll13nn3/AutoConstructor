@@ -1509,4 +1509,34 @@ namespace Test
 ";
         await VerifySourceGenerator.RunAsync(code, generated);
     }
+
+    [Fact]
+    public async Task Run_ClassWithStaticConstructor_ShouldGenerateClassWithoutCallToStaticConstructor()
+    {
+        const string code = @"
+namespace Test
+{
+    [AutoConstructor]
+    internal partial class Test
+    {
+        static Test()
+        {
+        }
+
+        private readonly object _someDependency;
+    }
+}";
+        const string generated = @"namespace Test
+{
+    partial class Test
+    {
+        public Test(object someDependency)
+        {
+            this._someDependency = someDependency ?? throw new System.ArgumentNullException(nameof(someDependency));
+        }
+    }
+}
+";
+        await VerifySourceGenerator.RunAsync(code, generated);
+    }
 }

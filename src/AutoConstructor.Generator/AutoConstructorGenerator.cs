@@ -130,7 +130,11 @@ public class AutoConstructorGenerator : IIncrementalGenerator
                 }
 
                 bool hasParameterlessConstructor =
-                    groupedClasses.SelectMany(c => c.ChildNodes().Where(n => n.IsKind(SyntaxKind.ConstructorDeclaration))).Count() == 1
+                    groupedClasses
+                    .SelectMany(c => c
+                        .ChildNodes()
+                        .Where(n => n is ConstructorDeclarationSyntax constructor && !constructor.Modifiers.Any(m => m.IsKind(SyntaxKind.StaticKeyword))))
+                    .Count() == 1
                     && symbol.Constructors.Any(d => !d.IsStatic && d.Parameters.Length == 0);
 
                 context.AddSource(filename, SourceText.From(GenerateAutoConstructor(symbol, fields, options, hasParameterlessConstructor), Encoding.UTF8));
