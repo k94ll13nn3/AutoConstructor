@@ -1,15 +1,13 @@
-using Microsoft.CodeAnalysis;
-
 namespace AutoConstructor.Generator;
 
-public class FieldInfo
+public record FieldInfo
 {
     public FieldInfo(
-        ITypeSymbol? type,
+        string? type,
         string parameterName,
         string fieldName,
         string initializer,
-        ITypeSymbol fallbackType,
+        string fallbackType,
         bool nullable,
         string? comment,
         bool emitArgumentNullException,
@@ -26,7 +24,7 @@ public class FieldInfo
         FieldType = fieldType;
     }
 
-    public ITypeSymbol? Type { get; }
+    public string? Type { get; }
 
     public string ParameterName { get; }
 
@@ -34,7 +32,7 @@ public class FieldInfo
 
     public string Initializer { get; }
 
-    public ITypeSymbol FallbackType { get; }
+    public string FallbackType { get; }
 
     public bool Nullable { get; }
 

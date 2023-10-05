@@ -33,22 +33,22 @@ internal class CodeGenerator
         return this;
     }
 
-    public CodeGenerator AddNamespace(INamespaceSymbol namespaceSymbol)
+    public CodeGenerator AddNamespace(string namespaceSymbolDisplayString)
     {
         if (_current is not null)
         {
             throw new InvalidOperationException($"Method {nameof(AddNamespace)} must be called first.");
         }
 
-        _current = GetNamespace(namespaceSymbol.ToDisplayString(), _addNullableAnnotation);
+        _current = GetNamespace(namespaceSymbolDisplayString, _addNullableAnnotation);
         return this;
     }
 
-    public CodeGenerator AddClass(INamedTypeSymbol classSymbol)
+    public CodeGenerator AddClass(NamedTypeSymbolInfo classSymbol)
     {
         string identifier = classSymbol.Name;
         bool isStatic = classSymbol.IsStatic;
-        ITypeParameterSymbol[] typeParameterList = classSymbol.TypeParameters.ToArray();
+        EquatableArray<string> typeParameterList = classSymbol.TypeParameters;
 
         ClassDeclarationSyntax classSyntax = GetClass(
             identifier,
@@ -83,7 +83,7 @@ internal class CodeGenerator
         return this;
     }
 
-    public CodeGenerator AddConstructor(FieldInfo[] parameters, bool symbolHasParameterlessConstructor)
+    public CodeGenerator AddConstructor(EquatableArray<FieldInfo> parameters, bool symbolHasParameterlessConstructor)
     {
         if (_current is ClassDeclarationSyntax classDeclarationSyntax)
         {
@@ -110,6 +110,19 @@ internal class CodeGenerator
         }
 
         return this;
+    }
+
+    public CompilationUnitSyntax GetCompilationUnit()
+    {
+        if (_current is null)
+        {
+            throw new InvalidOperationException("No class was added to the generator.");
+        }
+
+        return CompilationUnit()
+            .AddMembers(_current)
+            .NormalizeWhitespace()
+            .WithTrailingTrivia(CarriageReturnLineFeed);
     }
 
     public override string ToString()
@@ -152,7 +165,7 @@ internal class CodeGenerator
             .WithNamespaceKeyword(Token(GetHeaderTrivia(addNullableAnnotation), SyntaxKind.NamespaceKeyword, TriviaList()));
     }
 
-    private static ClassDeclarationSyntax GetClass(string identifier, bool addHeaderTrivia, bool addNullableAnnotation, bool isStatic, ITypeParameterSymbol[] typeParameterList)
+    private static ClassDeclarationSyntax GetClass(string identifier, bool addHeaderTrivia, bool addNullableAnnotation, bool isStatic, EquatableArray<string> typeParameterList)
     {
         SyntaxToken firstModifier = Token(isStatic ? SyntaxKind.StaticKeyword : SyntaxKind.PartialKeyword);
         if (addHeaderTrivia)
@@ -166,15 +179,15 @@ internal class CodeGenerator
             declaration = declaration.AddModifiers(Token(SyntaxKind.PartialKeyword));
         }
 
-        if (typeParameterList.Length > 0)
+        if (!typeParameterList.IsEmpty)
         {
-            declaration = declaration.AddTypeParameterListParameters(Array.ConvertAll(typeParameterList, GetTypeParameter));
+            declaration = declaration.AddTypeParameterListParameters(typeParameterList.Select(GetTypeParameter).ToArray());
         }
 
         return declaration;
     }
 
-    private static ConstructorDeclarationSyntax GetConstructor(SyntaxToken identifier, FieldInfo[] parameters, string? constructorDocumentationComment, bool generateThisInitializer)
+    private static ConstructorDeclarationSyntax GetConstructor(SyntaxToken identifier, EquatableArray<FieldInfo> parameters, string? constructorDocumentationComment, bool generateThisInitializer)
     {
         FieldInfo[] constructorParameters = parameters
             .GroupBy(x => x.ParameterName)
@@ -228,15 +241,15 @@ internal class CodeGenerator
 
     private static ParameterSyntax GetParameter(FieldInfo parameter)
     {
-        ITypeSymbol parameterType = parameter.Type ?? parameter.FallbackType;
+        string parameterType = parameter.Type ?? parameter.FallbackType;
 
         return Parameter(Identifier(parameter.ParameterName))
-            .WithType(ParseTypeName(parameterType.ToDisplayString()));
+            .WithType(ParseTypeName(parameterType));
     }
 
-    private static TypeParameterSyntax GetTypeParameter(ITypeParameterSymbol identifier)
+    private static TypeParameterSyntax GetTypeParameter(string identifierName)
     {
-        return TypeParameter(Identifier(identifier.Name));
+        return TypeParameter(Identifier(identifierName));
     }
 
     private static ArgumentSyntax GetArgument(FieldInfo parameter)
