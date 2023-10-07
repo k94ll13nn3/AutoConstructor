@@ -4,7 +4,6 @@ using Microsoft.CodeAnalysis.CodeFixes;
 using Microsoft.CodeAnalysis.CSharp.Testing;
 using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.CodeAnalysis.Testing;
-using Microsoft.CodeAnalysis.Testing.Verifiers;
 
 namespace AutoConstructor.Tests.Verifiers;
 
@@ -14,7 +13,7 @@ internal static class CSharpCodeFixVerifier<TAnalyzer, TCodeFix>
 {
     public static DiagnosticResult Diagnostic(string diagnosticId)
     {
-        return CSharpCodeFixVerifier<TAnalyzer, TCodeFix, XUnitVerifier>.Diagnostic(diagnosticId);
+        return CSharpCodeFixVerifier<TAnalyzer, TCodeFix, DefaultVerifier>.Diagnostic(diagnosticId);
     }
 
     public static async Task VerifyAnalyzerAsync(string source, params DiagnosticResult[] expected)
@@ -51,7 +50,7 @@ internal static class CSharpCodeFixVerifier<TAnalyzer, TCodeFix>
         return valueWithCode;
     }
 
-    internal sealed class Test : CSharpCodeFixTest<TAnalyzer, TCodeFix, XUnitVerifier>
+    internal sealed class Test : CSharpCodeFixTest<TAnalyzer, TCodeFix, DefaultVerifier>
     {
         public Test()
         {

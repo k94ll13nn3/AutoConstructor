@@ -1309,6 +1309,49 @@ namespace Test
     }
 
     [Fact]
+    public async Task Run_WithInheritanceAlsoGeneratedWithNullables_ShouldGenerateClass()
+    {
+        const string code = @"
+namespace Test
+{
+    [AutoConstructor]
+    internal partial class BaseClass
+    {
+        private readonly string? _t;
+    }
+    [AutoConstructor]
+    internal partial class Test : BaseClass
+    {
+    }
+}";
+        const string generatedTest = @"#nullable enable
+namespace Test
+{
+    partial class Test
+    {
+        public Test(string? t) : base(t)
+        {
+        }
+    }
+}
+";
+
+        const string generatedBase = @"#nullable enable
+namespace Test
+{
+    partial class BaseClass
+    {
+        public BaseClass(string? t)
+        {
+            this._t = t;
+        }
+    }
+}
+";
+        await VerifySourceGenerator.RunAsync(code, new[] { (generatedBase, "Test.BaseClass.g.cs"), (generatedTest, "Test.Test.g.cs") }, nullable: true);
+    }
+
+    [Fact]
     public async Task Run_WithMultipleInheritanceAlsoGenerated_ShouldGenerateClass()
     {
         const string code = @"
