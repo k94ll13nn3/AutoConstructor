@@ -142,7 +142,6 @@ public sealed class AutoConstructorGenerator : IIncrementalGenerator
         if (string.IsNullOrWhiteSpace(constructorDocumentationComment))
         {
             constructorDocumentationComment = "Initializes a new instance of the {0} class.";
-            //constructorDocumentationComment = $"Initializes a new instance of the {{0}} class. // {DateTime.UtcNow}";
         }
 
         var codeGenerator = new CodeGenerator();
