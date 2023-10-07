@@ -200,15 +200,19 @@ internal sealed class CodeGenerator
             .Select(x => x.Any(c => c.Type is not null) ? x.First(c => c.Type is not null) : x.First())
             .ToArray();
 
-        SyntaxToken modifiers = Token(SyntaxKind.PublicKeyword);
+        AttributeListSyntax attribute = GetGeneratedCodeAttributeSyntax();
         if (constructorDocumentationComment is string { Length: > 0 })
         {
-            modifiers = Token(TriviaList(Trivia(GetDocumentation(constructorDocumentationComment, constructorParameters))), SyntaxKind.PublicKeyword, TriviaList());
+            attribute = attribute.WithOpenBracketToken(
+                Token(
+                    TriviaList(Trivia(GetDocumentation(constructorDocumentationComment, constructorParameters))),
+                    SyntaxKind.OpenBracketToken,
+                    TriviaList()));
         }
 
         ConstructorDeclarationSyntax constructor = ConstructorDeclaration(identifier)
-            .AddAttributeLists(GetGeneratedCodeAttributeSyntax())
-            .AddModifiers(modifiers)
+            .AddModifiers(Token(SyntaxKind.PublicKeyword))
+            .AddAttributeLists(attribute)
             .AddParameterListParameters(Array.ConvertAll(constructorParameters, GetParameter))
             .AddBodyStatements(Array.ConvertAll(parameters.Where(p => p.FieldType.HasFlag(FieldType.Initialized)).ToArray(), GetParameterAssignement));
 
