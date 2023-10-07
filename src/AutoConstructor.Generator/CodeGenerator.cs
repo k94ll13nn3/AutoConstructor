@@ -118,19 +118,6 @@ internal sealed class CodeGenerator
         return this;
     }
 
-    public CompilationUnitSyntax GetCompilationUnit()
-    {
-        if (_current is null)
-        {
-            throw new InvalidOperationException("No class was added to the generator.");
-        }
-
-        return CompilationUnit()
-            .AddMembers(_current)
-            .NormalizeWhitespace()
-            .WithTrailingTrivia(CarriageReturnLineFeed);
-    }
-
     public override string ToString()
     {
         if (_current is null)
