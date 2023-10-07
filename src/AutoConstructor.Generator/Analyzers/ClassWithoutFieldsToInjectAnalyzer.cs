@@ -5,7 +5,7 @@ using Microsoft.CodeAnalysis.Diagnostics;
 namespace AutoConstructor.Generator.Analyzers;
 
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
-public class ClassWithoutFieldsToInjectAnalyzer : DiagnosticAnalyzer
+public sealed class ClassWithoutFieldsToInjectAnalyzer : DiagnosticAnalyzer
 {
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => ImmutableArray.Create(DiagnosticDescriptors.ClassWithoutFieldsToInjectRule);
 

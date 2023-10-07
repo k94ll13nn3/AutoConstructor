@@ -1,7 +1,7 @@
-namespace AutoConstructor.Generator;
+namespace AutoConstructor.Generator.Models;
 
 [Flags]
-public enum FieldType
+internal enum FieldType
 {
     None = 0,
     Initialized = 1,

@@ -1,8 +1,9 @@
+using AutoConstructor.Generator.Core;
 using Microsoft.CodeAnalysis;
 
-namespace AutoConstructor.Generator;
+namespace AutoConstructor.Generator.Models;
 
-internal record GeneratorExectutionResult(
+internal sealed record GeneratorExectutionResult(
     MainNamedTypeSymbolInfo? Symbol,
     EquatableArray<FieldInfo> Fields,
     Options Options,

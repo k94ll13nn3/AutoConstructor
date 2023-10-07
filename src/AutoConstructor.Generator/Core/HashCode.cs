@@ -7,7 +7,7 @@ using System.Security.Cryptography;
 #pragma warning disable CS0809, IDE0009, IDE1006, IDE0048
 #nullable enable
 
-namespace AutoConstructor.Generator;
+namespace AutoConstructor.Generator.Core;
 
 /// <summary>
 /// A polyfill type that mirrors some methods from <see cref="HashCode"/> on .NET 6.

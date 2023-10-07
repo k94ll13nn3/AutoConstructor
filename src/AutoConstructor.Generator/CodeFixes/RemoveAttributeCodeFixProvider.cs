@@ -9,20 +9,20 @@ using Microsoft.CodeAnalysis.Text;
 namespace AutoConstructor.Generator.CodeFixes;
 
 [ExportCodeFixProvider(LanguageNames.CSharp, Name = nameof(RemoveAttributeCodeFixProvider)), Shared]
-public class RemoveAttributeCodeFixProvider : CodeFixProvider
+public sealed class RemoveAttributeCodeFixProvider : CodeFixProvider
 {
-    public sealed override ImmutableArray<string> FixableDiagnosticIds => ImmutableArray.Create(
+    public override ImmutableArray<string> FixableDiagnosticIds => ImmutableArray.Create(
         DiagnosticDescriptors.ClassWithoutFieldsToInjectDiagnosticId,
         DiagnosticDescriptors.IgnoreAttributeOnNonProcessedFieldDiagnosticId,
         DiagnosticDescriptors.InjectAttributeOnIgnoredFieldDiagnosticId,
         DiagnosticDescriptors.IgnoreOrInjectAttributeOnClassWithoutAttributeDiagnosticId);
 
-    public sealed override FixAllProvider GetFixAllProvider()
+    public override FixAllProvider GetFixAllProvider()
     {
         return WellKnownFixAllProviders.BatchFixer;
     }
 
-    public sealed override async Task RegisterCodeFixesAsync(CodeFixContext context)
+    public override async Task RegisterCodeFixesAsync(CodeFixContext context)
     {
         SyntaxNode? root = await context.Document.GetSyntaxRootAsync(context.CancellationToken).ConfigureAwait(false);
 

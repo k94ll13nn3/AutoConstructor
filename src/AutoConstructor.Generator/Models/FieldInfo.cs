@@ -1,6 +1,6 @@
-namespace AutoConstructor.Generator;
+namespace AutoConstructor.Generator.Models;
 
-public record FieldInfo
+internal sealed record FieldInfo
 {
     public FieldInfo(
         string? type,

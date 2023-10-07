@@ -1,3 +1,5 @@
+using AutoConstructor.Generator.Core;
+using AutoConstructor.Generator.Models;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -5,11 +7,15 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace AutoConstructor.Generator;
 
-internal class CodeGenerator
+internal sealed class CodeGenerator
 {
     private MemberDeclarationSyntax? _current;
     private bool _addNullableAnnotation;
     private string? _constructorDocumentationComment;
+
+    internal static readonly string GeneratorVersion = (System.Reflection.Assembly.GetExecutingAssembly()
+        .GetCustomAttributes(typeof(System.Reflection.AssemblyFileVersionAttribute), false)
+        .Single() as System.Reflection.AssemblyFileVersionAttribute)!.Version;
 
     public CodeGenerator AddNullableAnnotation()
     {
@@ -299,7 +305,7 @@ internal class CodeGenerator
                 IdentifierName("GeneratedCodeAttribute"));
 
         AttributeSyntax attribute = Attribute(attributeName)
-            .AddArgumentListArguments(GetAttributeArgumentSyntax(nameof(AutoConstructor)), GetAttributeArgumentSyntax("5.0.0.0"));
+            .AddArgumentListArguments(GetAttributeArgumentSyntax(nameof(AutoConstructor)), GetAttributeArgumentSyntax(GeneratorVersion));
 
         return AttributeList(SingletonSeparatedList(attribute));
 

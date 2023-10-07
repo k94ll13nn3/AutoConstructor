@@ -2,6 +2,8 @@ using System.Collections.Immutable;
 using System.Globalization;
 using System.Text;
 using System.Xml;
+using AutoConstructor.Generator.Core;
+using AutoConstructor.Generator.Models;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -11,7 +13,7 @@ using Microsoft.CodeAnalysis.Text;
 namespace AutoConstructor.Generator;
 
 [Generator(LanguageNames.CSharp)]
-public class AutoConstructorGenerator : IIncrementalGenerator
+public sealed class AutoConstructorGenerator : IIncrementalGenerator
 {
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {

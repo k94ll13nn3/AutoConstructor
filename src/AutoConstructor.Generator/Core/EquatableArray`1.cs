@@ -8,7 +8,7 @@ using System.Runtime.CompilerServices;
 
 #nullable enable
 
-namespace AutoConstructor.Generator;
+namespace AutoConstructor.Generator.Core;
 
 /// <summary>
 /// An immutable, equatable array. This is equivalent to <see cref="ImmutableArray{T}"/> but with value equality support.
