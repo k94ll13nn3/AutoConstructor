@@ -201,6 +201,7 @@ internal class CodeGenerator
         }
 
         ConstructorDeclarationSyntax constructor = ConstructorDeclaration(identifier)
+            .AddAttributeLists(GetGeneratedCodeAttributeSyntax())
             .AddModifiers(modifiers)
             .AddParameterListParameters(Array.ConvertAll(constructorParameters, GetParameter))
             .AddBodyStatements(Array.ConvertAll(parameters.Where(p => p.FieldType.HasFlag(FieldType.Initialized)).ToArray(), GetParameterAssignement));
@@ -281,5 +282,30 @@ internal class CodeGenerator
         SyntaxToken nameofIdentifier = Identifier(TriviaList(), SyntaxKind.NameOfKeyword, "nameof", "nameof", TriviaList());
         return InvocationExpression(IdentifierName(nameofIdentifier))
             .AddArgumentListArguments(Argument(IdentifierName(identifier)));
+    }
+
+    private static AttributeListSyntax GetGeneratedCodeAttributeSyntax()
+    {
+        QualifiedNameSyntax attributeName =
+            QualifiedName(
+                QualifiedName(
+                    QualifiedName(
+                        AliasQualifiedName(
+                            IdentifierName(
+                                Token(SyntaxKind.GlobalKeyword)),
+                            IdentifierName("System")),
+                        IdentifierName("CodeDom")),
+                    IdentifierName("Compiler")),
+                IdentifierName("GeneratedCodeAttribute"));
+
+        AttributeSyntax attribute = Attribute(attributeName)
+            .AddArgumentListArguments(GetAttributeArgumentSyntax(nameof(AutoConstructor)), GetAttributeArgumentSyntax("5.0.0.0"));
+
+        return AttributeList(SingletonSeparatedList(attribute));
+
+        static AttributeArgumentSyntax GetAttributeArgumentSyntax(string value)
+        {
+            return AttributeArgument(LiteralExpression(SyntaxKind.StringLiteralExpression, Literal(value)));
+        }
     }
 }

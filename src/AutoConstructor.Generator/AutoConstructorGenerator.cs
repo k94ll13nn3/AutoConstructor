@@ -10,11 +10,9 @@ using Microsoft.CodeAnalysis.Text;
 
 namespace AutoConstructor.Generator;
 
-[Generator]
+[Generator(LanguageNames.CSharp)]
 public class AutoConstructorGenerator : IIncrementalGenerator
 {
-    private static int _counter;
-
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
         // Register the attribute source
@@ -33,11 +31,7 @@ public class AutoConstructorGenerator : IIncrementalGenerator
             .Where(static m => m is not null)
             .Combine(context.AnalyzerConfigOptionsProvider.Select((c, _) => c.GlobalOptions))
             .Combine(context.CompilationProvider)
-            .Select((c, _) =>
-            {
-                (ClassDeclarationSyntax classSyntax, AnalyzerConfigOptions options, Compilation compilation) = (c.Left.Left, c.Left.Right, c.Right);
-                return Execute(compilation, classSyntax, options);
-            });
+            .Select((c, _) => Execute(c.Right, c.Left.Left, c.Left.Right));
 
         context.RegisterSourceOutput(valueProvider, static (context, item) =>
         {
@@ -61,7 +55,7 @@ public class AutoConstructorGenerator : IIncrementalGenerator
 
     private static bool IsSyntaxTargetForGeneration(SyntaxNode node)
     {
-        return node is ClassDeclarationSyntax classDeclarationSyntax && classDeclarationSyntax.Modifiers.Any(SyntaxKind.PartialKeyword);
+        return node is ClassDeclarationSyntax { AttributeLists.Count: > 0 } classDeclarationSyntax && classDeclarationSyntax.Modifiers.Any(SyntaxKind.PartialKeyword);
     }
 
     private static GeneratorExectutionResult? Execute(Compilation compilation, ClassDeclarationSyntax classSyntax, AnalyzerConfigOptions analyzerOptions)
@@ -145,8 +139,8 @@ public class AutoConstructorGenerator : IIncrementalGenerator
         string? constructorDocumentationComment = options.ConstructorDocumentationComment;
         if (string.IsNullOrWhiteSpace(constructorDocumentationComment))
         {
-            constructorDocumentationComment = "Initializes a new instance of the {0} class.";
-            //constructorDocumentationComment = $"Initializes a new instance of the {{0}} class. // Counter: {Interlocked.Increment(ref _counter)}";
+            //constructorDocumentationComment = "Initializes a new instance of the {0} class.";
+            constructorDocumentationComment = $"Initializes a new instance of the {{0}} class. // {DateTime.UtcNow}";
         }
 
         var codeGenerator = new CodeGenerator();
