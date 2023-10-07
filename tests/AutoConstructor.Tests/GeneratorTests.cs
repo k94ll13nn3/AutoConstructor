@@ -1009,7 +1009,7 @@ namespace Test
     }
 
     [Fact]
-    public async Task Run_WithMismatchingTypesWithTwoPartialParts_ShouldReportDiagnosticOnEachPart()
+    public async Task Run_WithMismatchingTypesWithTwoPartialParts_ShouldReportDiagnosticOnFirstPart()
     {
         const string code = @"
 namespace Test
@@ -1028,8 +1028,7 @@ namespace Test
 }";
 
         DiagnosticResult diagnosticResultFirstPart = new DiagnosticResult(DiagnosticDescriptors.MistmatchTypesDiagnosticId, DiagnosticSeverity.Error).WithSpan(4, 5, 9, 6);
-        DiagnosticResult diagnosticResultSecondPart = new DiagnosticResult(DiagnosticDescriptors.MistmatchTypesDiagnosticId, DiagnosticSeverity.Error).WithSpan(11, 5, 14, 6);
-        await VerifySourceGenerator.RunAsync(code, diagnostics: new[] { diagnosticResultFirstPart, diagnosticResultSecondPart });
+        await VerifySourceGenerator.RunAsync(code, diagnostics: new[] { diagnosticResultFirstPart });
     }
 
     [Theory]

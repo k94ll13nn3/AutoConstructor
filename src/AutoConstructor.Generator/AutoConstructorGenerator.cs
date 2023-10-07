@@ -25,34 +25,36 @@ public class AutoConstructorGenerator : IIncrementalGenerator
             i.AddSource(Source.InjectAttributeFullName, SourceText.From(Source.InjectAttributeText, Encoding.UTF8));
         });
 
-        IncrementalValuesProvider<(MainNamedTypeSymbolInfo? symbol, EquatableArray<FieldInfo> fields, Options options, EquatableArray<Diagnostic> diagnostics)> valueProvider = context.SyntaxProvider
+        IncrementalValuesProvider<GeneratorExectutionResult?> valueProvider = context.SyntaxProvider
             .ForAttributeWithMetadataName(
                 Source.AttributeFullName,
                 static (node, _) => IsSyntaxTargetForGeneration(node),
                 static (context, _) => (ClassDeclarationSyntax)context.TargetNode)
             .Where(static m => m is not null)
-            .Collect()
             .Combine(context.AnalyzerConfigOptionsProvider.Select((c, _) => c.GlobalOptions))
             .Combine(context.CompilationProvider)
-            .SelectMany((c, _) =>
+            .Select((c, _) =>
             {
-                (ImmutableArray<ClassDeclarationSyntax> classes, AnalyzerConfigOptions options, Compilation compilation) = (c.Left.Left, c.Left.Right, c.Right);
-                return Execute(compilation, classes, options);
+                (ClassDeclarationSyntax classSyntax, AnalyzerConfigOptions options, Compilation compilation) = (c.Left.Left, c.Left.Right, c.Right);
+                return Execute(compilation, classSyntax, options);
             });
 
         context.RegisterSourceOutput(valueProvider, static (context, item) =>
         {
-            if (!item.diagnostics.IsEmpty)
+            if (item is not null)
             {
-                foreach (Diagnostic diagnostic in item.diagnostics)
+                if (!item.Diagnostics.IsEmpty)
                 {
-                    context.ReportDiagnostic(diagnostic);
+                    foreach (Diagnostic diagnostic in item.Diagnostics)
+                    {
+                        context.ReportDiagnostic(diagnostic);
+                    }
                 }
-            }
-            else
-            {
-                CodeGenerator codeGenerator = GenerateAutoConstructor(item.symbol!, item.fields, item.options);
-                context.AddSource($"{item.symbol!.Filename}.g.cs", codeGenerator.ToString());
+                else
+                {
+                    CodeGenerator codeGenerator = GenerateAutoConstructor(item.Symbol!, item.Fields, item.Options);
+                    context.AddSource($"{item.Symbol!.Filename}.g.cs", codeGenerator.ToString());
+                }
             }
         });
     }
@@ -62,23 +64,8 @@ public class AutoConstructorGenerator : IIncrementalGenerator
         return node is ClassDeclarationSyntax classDeclarationSyntax && classDeclarationSyntax.Modifiers.Any(SyntaxKind.PartialKeyword);
     }
 
-    private static IEnumerable<(MainNamedTypeSymbolInfo? symbol, EquatableArray<FieldInfo> fields, Options options, EquatableArray<Diagnostic> diagnostics)> Execute(Compilation compilation, ImmutableArray<ClassDeclarationSyntax> classes, AnalyzerConfigOptions analyzerOptions)
+    private static GeneratorExectutionResult? Execute(Compilation compilation, ClassDeclarationSyntax classSyntax, AnalyzerConfigOptions analyzerOptions)
     {
-        if (classes.IsDefaultOrEmpty)
-        {
-            yield break;
-        }
-
-        IEnumerable<IGrouping<ISymbol?, ClassDeclarationSyntax>> classesBySymbol = Enumerable.Empty<IGrouping<ISymbol?, ClassDeclarationSyntax>>();
-        try
-        {
-            classesBySymbol = classes.GroupBy(c => compilation.GetSemanticModel(c.SyntaxTree).GetDeclaredSymbol(c), SymbolEqualityComparer.Default);
-        }
-        catch (ArgumentException)
-        {
-            yield break;
-        }
-
         bool generateConstructorDocumentation = false;
         if (analyzerOptions.TryGetValue("build_property.AutoConstructor_GenerateConstructorDocumentation", out string? generateConstructorDocumentationSwitch))
         {
@@ -95,69 +82,61 @@ public class AutoConstructorGenerator : IIncrementalGenerator
 
         Options options = new(generateConstructorDocumentation, constructorDocumentationComment, emitNullChecks);
 
-        foreach (IGrouping<ISymbol?, ClassDeclarationSyntax> groupedClasses in classesBySymbol)
+        INamedTypeSymbol? symbol = compilation.GetSemanticModel(classSyntax.SyntaxTree).GetDeclaredSymbol(classSyntax);
+        if (symbol is null)
         {
-            INamedTypeSymbol? symbol = groupedClasses.Key as INamedTypeSymbol;
-            if (symbol is not null)
-            {
-                string filename = string.Empty;
-
-                if (symbol.ContainingType is not null)
-                {
-                    filename = $"{string.Join(".", symbol.GetContainingTypes().Select(c => c.Name))}.";
-                }
-
-                filename += $"{symbol.Name}";
-
-                if (symbol.TypeArguments.Length > 0)
-                {
-                    filename += string.Concat(symbol.TypeArguments.Select(tp => $".{tp.Name}"));
-                }
-
-                if (!symbol.ContainingNamespace.IsGlobalNamespace)
-                {
-                    filename = $"{symbol.ContainingNamespace.ToDisplayString()}.{filename}";
-                }
-
-                List<FieldInfo> concatenatedFields = GetFieldsFromSymbol(compilation, symbol, emitNullChecks);
-
-                ExtractFieldsFromParent(compilation, symbol, emitNullChecks, concatenatedFields);
-
-                EquatableArray<FieldInfo> fields = concatenatedFields.ToImmutableArray();
-
-                if (fields.IsEmpty)
-                {
-                    // No need to report diagnostic, taken care by the analyzers.
-                    continue;
-                }
-
-                var diagnotics = new List<Diagnostic>();
-
-                if (fields.GroupBy(x => x.ParameterName).Any(g =>
-                    g.Where(c => c.Type is not null).Select(c => c.Type).Count() > 1
-                    || (g.All(c => c.Type is null) && g.Select(c => c.FallbackType).Count() > 1)
-                    ))
-                {
-                    foreach (ClassDeclarationSyntax classDeclaration in groupedClasses)
-                    {
-                        diagnotics.Add(Diagnostic.Create(DiagnosticDescriptors.MistmatchTypesRule, classDeclaration.GetLocation()));
-                    }
-
-                    yield return (null, fields, options, diagnotics.ToImmutableArray());
-                    continue;
-                }
-
-                bool hasParameterlessConstructor =
-                    groupedClasses
-                    .SelectMany(c => c
-                        .ChildNodes()
-                        .Where(n => n is ConstructorDeclarationSyntax constructor && !constructor.Modifiers.Any(m => m.IsKind(SyntaxKind.StaticKeyword))))
-                    .Count() == 1
-                    && symbol.Constructors.Any(d => !d.IsStatic && d.Parameters.Length == 0);
-
-                yield return (new MainNamedTypeSymbolInfo(symbol, hasParameterlessConstructor, filename), fields, options, Array.Empty<Diagnostic>().ToImmutableArray());
-            }
+            return null;
         }
+
+        string filename = string.Empty;
+        if (symbol.ContainingType is not null)
+        {
+            filename = $"{string.Join(".", symbol.GetContainingTypes().Select(c => c.Name))}.";
+        }
+
+        filename += $"{symbol.Name}";
+
+        if (symbol.TypeArguments.Length > 0)
+        {
+            filename += string.Concat(symbol.TypeArguments.Select(tp => $".{tp.Name}"));
+        }
+
+        if (!symbol.ContainingNamespace.IsGlobalNamespace)
+        {
+            filename = $"{symbol.ContainingNamespace.ToDisplayString()}.{filename}";
+        }
+
+        List<FieldInfo> concatenatedFields = GetFieldsFromSymbol(compilation, symbol, emitNullChecks);
+
+        ExtractFieldsFromParent(compilation, symbol, emitNullChecks, concatenatedFields);
+
+        EquatableArray<FieldInfo> fields = concatenatedFields.ToImmutableArray();
+
+        if (fields.IsEmpty)
+        {
+            // No need to report diagnostic, taken care by the analyzers.
+            return null;
+        }
+
+        var diagnotics = new List<Diagnostic>();
+
+        if (fields.GroupBy(x => x.ParameterName).Any(g =>
+            g.Where(c => c.Type is not null).Select(c => c.Type).Count() > 1
+            || (g.All(c => c.Type is null) && g.Select(c => c.FallbackType).Count() > 1)
+            ))
+        {
+            diagnotics.Add(Diagnostic.Create(DiagnosticDescriptors.MistmatchTypesRule, classSyntax.GetLocation()));
+
+            return new(null, fields, options, diagnotics.ToImmutableArray());
+        }
+
+        bool hasParameterlessConstructor =
+            classSyntax
+            .ChildNodes()
+            .Count(n => n is ConstructorDeclarationSyntax constructor && !constructor.Modifiers.Any(m => m.IsKind(SyntaxKind.StaticKeyword))) == 1
+            && symbol.Constructors.Any(d => !d.IsStatic && d.Parameters.Length == 0);
+
+        return new(new MainNamedTypeSymbolInfo(symbol, hasParameterlessConstructor, filename), fields, options, Array.Empty<Diagnostic>().ToImmutableArray());
     }
 
     private static CodeGenerator GenerateAutoConstructor(MainNamedTypeSymbolInfo symbol, EquatableArray<FieldInfo> fields, Options options)
@@ -166,7 +145,8 @@ public class AutoConstructorGenerator : IIncrementalGenerator
         string? constructorDocumentationComment = options.ConstructorDocumentationComment;
         if (string.IsNullOrWhiteSpace(constructorDocumentationComment))
         {
-            constructorDocumentationComment = $"Initializes a new instance of the {{0}} class. // Counter: {Interlocked.Increment(ref _counter)}";
+            constructorDocumentationComment = "Initializes a new instance of the {0} class.";
+            //constructorDocumentationComment = $"Initializes a new instance of the {{0}} class. // Counter: {Interlocked.Increment(ref _counter)}";
         }
 
         var codeGenerator = new CodeGenerator();
@@ -336,7 +316,7 @@ public class AutoConstructorGenerator : IIncrementalGenerator
                     string.Empty,
                     string.Empty,
                     parameter.FallbackType,
-                    false,//IsNullable(parameter.FallbackType),
+                    parameter.Nullable,
                     null,
                     false,
                     FieldType.PassedToBase));
