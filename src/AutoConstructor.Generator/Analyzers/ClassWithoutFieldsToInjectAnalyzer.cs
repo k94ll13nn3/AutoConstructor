@@ -54,10 +54,10 @@ public class ClassWithoutFieldsToInjectAnalyzer : DiagnosticAnalyzer
     {
         INamedTypeSymbol? baseType = symbol.BaseType;
 
-        if (baseType?.BaseType is not null && baseType?.Constructors.Count(d => !d.IsStatic) == 1)
+        if (baseType?.BaseType is not null && baseType.Constructors.Count(d => !d.IsStatic) == 1)
         {
             IMethodSymbol constructor = baseType.Constructors.Single(d => !d.IsStatic);
-            return baseType?.HasAttribute(Source.AttributeFullName, compilation) is true
+            return baseType.HasAttribute(Source.AttributeFullName, compilation)
                 ? SymbolHasFields(compilation, baseType) || ParentHasFields(compilation, baseType)
                 : constructor.Parameters.Length > 0;
         }
