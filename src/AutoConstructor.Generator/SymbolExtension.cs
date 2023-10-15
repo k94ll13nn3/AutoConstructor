@@ -19,30 +19,11 @@ public static class SymbolExtension
             symbol.DeclaringSyntaxReferences.FirstOrDefault()?.GetSyntax() is VariableDeclaratorSyntax { Initializer: not null };
     }
 
-    [Obsolete]
-    public static bool HasAttribute(this ISymbol symbol, string attributeName, Compilation compilation)
-    {
-        _ = symbol ?? throw new ArgumentNullException(nameof(symbol));
-        _ = compilation ?? throw new ArgumentNullException(nameof(compilation));
-
-        return symbol.GetAttribute(attributeName, compilation) is not null;
-    }
-
     public static bool HasAttribute(this ISymbol symbol, string attributeName)
     {
         _ = symbol ?? throw new ArgumentNullException(nameof(symbol));
 
         return symbol.GetAttribute(attributeName) is not null;
-    }
-
-    [Obsolete]
-    public static AttributeData? GetAttribute(this ISymbol symbol, string attributeName, Compilation compilation)
-    {
-        _ = symbol ?? throw new ArgumentNullException(nameof(symbol));
-        _ = compilation ?? throw new ArgumentNullException(nameof(compilation));
-
-        INamedTypeSymbol? attributeSymbol = compilation.GetTypeByMetadataName(attributeName);
-        return symbol.GetAttributes().FirstOrDefault(ad => ad.AttributeClass?.Equals(attributeSymbol, SymbolEqualityComparer.Default) == true);
     }
 
     public static AttributeData? GetAttribute(this ISymbol symbol, string attributeName)

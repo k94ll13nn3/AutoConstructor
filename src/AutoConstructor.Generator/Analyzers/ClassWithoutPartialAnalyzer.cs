@@ -26,7 +26,7 @@ public sealed class ClassWithoutPartialAnalyzer : DiagnosticAnalyzer
         var symbol = (INamedTypeSymbol)context.Symbol;
 
         if (symbol.DeclaringSyntaxReferences[0].GetSyntax() is ClassDeclarationSyntax classDeclarationSyntax
-            && symbol.HasAttribute(Source.AttributeFullName, context.Compilation)
+            && symbol.HasAttribute(Source.AttributeFullName)
             && !classDeclarationSyntax.Modifiers.Any(SyntaxKind.PartialKeyword))
         {
             var diagnostic = Diagnostic.Create(DiagnosticDescriptors.ClassWithoutPartialRule, classDeclarationSyntax.Identifier.GetLocation());

@@ -24,17 +24,16 @@ public sealed class IgnoreOrInjectAttributeOnClassWithoutAttributeAnalyzer : Dia
         var symbol = (INamedTypeSymbol)context.Symbol;
 
         var fields = symbol.GetMembers().OfType<IFieldSymbol>()
-            .Where(x => x.HasAttribute(Source.IgnoreAttributeFullName, context.Compilation) || x.HasAttribute(Source.InjectAttributeFullName, context.Compilation))
+            .Where(x => x.HasAttribute(Source.IgnoreAttributeFullName) || x.HasAttribute(Source.InjectAttributeFullName))
             .ToList();
 
-        if (symbol.GetAttribute(Source.AttributeFullName, context.Compilation) is null
-            && fields.Count > 0)
+        if (symbol.GetAttribute(Source.AttributeFullName) is null && fields.Count > 0)
         {
             foreach (IFieldSymbol field in fields)
             {
                 foreach (string attributeName in new[] { Source.IgnoreAttributeFullName, Source.InjectAttributeFullName })
                 {
-                    if (field.GetAttribute(attributeName, context.Compilation) is AttributeData attr)
+                    if (field.GetAttribute(attributeName) is AttributeData attr)
                     {
                         SyntaxReference? propertyTypeIdentifier = attr.ApplicationSyntaxReference;
                         if (propertyTypeIdentifier is not null)
