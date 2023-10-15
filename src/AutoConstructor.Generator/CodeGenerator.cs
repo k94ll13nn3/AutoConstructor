@@ -13,9 +13,7 @@ internal sealed class CodeGenerator
     private bool _addNullableAnnotation;
     private string? _constructorDocumentationComment;
 
-    internal static readonly string GeneratorVersion = (System.Reflection.Assembly.GetExecutingAssembly()
-        .GetCustomAttributes(typeof(System.Reflection.AssemblyFileVersionAttribute), false)
-        .Single() as System.Reflection.AssemblyFileVersionAttribute)!.Version;
+    internal static readonly string GeneratorVersion = typeof(CodeGenerator).Assembly.GetName().Version!.ToString();
 
     public CodeGenerator AddNullableAnnotation()
     {

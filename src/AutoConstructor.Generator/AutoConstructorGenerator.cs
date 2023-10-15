@@ -194,7 +194,7 @@ public sealed class AutoConstructorGenerator : IIncrementalGenerator
         string parameterName = fieldSymbol.Name.TrimStart('_');
         if (fieldSymbol.AssociatedSymbol is not null)
         {
-            parameterName = char.ToLowerInvariant(fieldSymbol.AssociatedSymbol.Name[0]) + fieldSymbol.AssociatedSymbol.Name.Substring(1);
+            parameterName = char.ToLowerInvariant(fieldSymbol.AssociatedSymbol.Name[0]) + fieldSymbol.AssociatedSymbol.Name[1..];
         }
 
         string initializer = parameterName;
@@ -273,7 +273,7 @@ public sealed class AutoConstructorGenerator : IIncrementalGenerator
             int index = concatenatedFields.FindIndex(p => p.ParameterName == parameter.Name);
             if (index != -1)
             {
-                concatenatedFields[index].FieldType |= FieldType.PassedToBase;
+                concatenatedFields[index] = concatenatedFields[index] with { FieldType = concatenatedFields[index].FieldType | FieldType.PassedToBase };
             }
             else
             {
@@ -298,7 +298,7 @@ public sealed class AutoConstructorGenerator : IIncrementalGenerator
             int index = concatenatedFields.FindIndex(p => p.ParameterName == parameter.ParameterName);
             if (index != -1)
             {
-                concatenatedFields[index].FieldType |= FieldType.PassedToBase;
+                concatenatedFields[index] = concatenatedFields[index] with { FieldType = concatenatedFields[index].FieldType | FieldType.PassedToBase };
             }
             else
             {
