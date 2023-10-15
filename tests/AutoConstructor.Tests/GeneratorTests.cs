@@ -976,7 +976,40 @@ namespace Test
     }
 
     [Fact]
-    public async Task Run_WithMismatchingTypesWithTwoPartialParts_ShouldReportDiagnosticOnEachPart()
+    public async Task Run_MultiplePartialPartsAndAttributesInMultipleParts_ShouldGenerateClass()
+    {
+        const string code = @"
+namespace Test
+{
+    [AutoConstructor]
+    internal partial class Test
+    {
+        private readonly int _i1;
+    }
+
+    internal partial class Test
+    {
+        [AutoConstructorInject(parameterName: ""i1"")]
+        private readonly int _i2;
+    }
+}";
+        const string generated = @"namespace Test
+{
+    partial class Test
+    {
+        public Test(int i1)
+        {
+            this._i1 = i1;
+            this._i2 = i1;
+        }
+    }
+}
+";
+        await VerifySourceGenerator.RunAsync(code, generated);
+    }
+
+    [Fact]
+    public async Task Run_WithMismatchingTypesWithTwoPartialParts_ShouldReportDiagnosticOnFirstPart()
     {
         const string code = @"
 namespace Test
@@ -995,8 +1028,7 @@ namespace Test
 }";
 
         DiagnosticResult diagnosticResultFirstPart = new DiagnosticResult(DiagnosticDescriptors.MistmatchTypesDiagnosticId, DiagnosticSeverity.Error).WithSpan(4, 5, 9, 6);
-        DiagnosticResult diagnosticResultSecondPart = new DiagnosticResult(DiagnosticDescriptors.MistmatchTypesDiagnosticId, DiagnosticSeverity.Error).WithSpan(11, 5, 14, 6);
-        await VerifySourceGenerator.RunAsync(code, diagnostics: new[] { diagnosticResultFirstPart, diagnosticResultSecondPart });
+        await VerifySourceGenerator.RunAsync(code, diagnostics: new[] { diagnosticResultFirstPart });
     }
 
     [Theory]

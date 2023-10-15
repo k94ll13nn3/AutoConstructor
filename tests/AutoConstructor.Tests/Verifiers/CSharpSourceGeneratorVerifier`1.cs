@@ -1,4 +1,5 @@
 using System.Text;
+using System.Text.RegularExpressions;
 using AutoConstructor.Generator;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -8,7 +9,7 @@ using Microsoft.CodeAnalysis.Text;
 
 namespace AutoConstructor.Tests.Verifiers;
 
-internal static class CSharpSourceGeneratorVerifier<TSourceGenerator>
+internal static partial class CSharpSourceGeneratorVerifier<TSourceGenerator>
     where TSourceGenerator : IIncrementalGenerator, new()
 {
     public static Task RunAsync(
@@ -45,6 +46,7 @@ internal static class CSharpSourceGeneratorVerifier<TSourceGenerator>
             LanguageVersion = LanguageVersion.Default,
         };
 
+        string generatedCodeAttribute = @$"[global::System.CodeDom.Compiler.GeneratedCodeAttribute(""{nameof(AutoConstructor)}"", ""{CodeGenerator.GeneratorVersion}"")]";
         foreach ((string? generated, string generatedName) in generatedSources)
         {
             if (generated is string { Length: > 0 })
@@ -58,6 +60,7 @@ internal static class CSharpSourceGeneratorVerifier<TSourceGenerator>
 // </auto-generated>
 //------------------------------------------------------------------------------
 {generated}";
+                generatedWithHeader = BeforeConstructorRegex().Replace(generatedWithHeader, $"$1{generatedCodeAttribute}$1public $2(");
                 test.TestState.GeneratedSources.Add((typeof(AutoConstructorGenerator), generatedName, SourceText.From(generatedWithHeader, Encoding.UTF8)));
             }
         }
@@ -108,4 +111,7 @@ build_property.AutoConstructor_DisableNullChecking = false
             return ((CSharpParseOptions)base.CreateParseOptions()).WithLanguageVersion(LanguageVersion);
         }
     }
+
+    [GeneratedRegex("(\\s+)public (\\w+)\\(")]
+    private static partial Regex BeforeConstructorRegex();
 }

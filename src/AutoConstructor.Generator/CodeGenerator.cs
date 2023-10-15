@@ -1,3 +1,5 @@
+using AutoConstructor.Generator.Core;
+using AutoConstructor.Generator.Models;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -5,11 +7,13 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace AutoConstructor.Generator;
 
-internal class CodeGenerator
+internal sealed class CodeGenerator
 {
     private MemberDeclarationSyntax? _current;
     private bool _addNullableAnnotation;
     private string? _constructorDocumentationComment;
+
+    internal static readonly string GeneratorVersion = typeof(CodeGenerator).Assembly.GetName().Version!.ToString();
 
     public CodeGenerator AddNullableAnnotation()
     {
@@ -33,22 +37,22 @@ internal class CodeGenerator
         return this;
     }
 
-    public CodeGenerator AddNamespace(INamespaceSymbol namespaceSymbol)
+    public CodeGenerator AddNamespace(string namespaceSymbolDisplayString)
     {
         if (_current is not null)
         {
             throw new InvalidOperationException($"Method {nameof(AddNamespace)} must be called first.");
         }
 
-        _current = GetNamespace(namespaceSymbol.ToDisplayString(), _addNullableAnnotation);
+        _current = GetNamespace(namespaceSymbolDisplayString, _addNullableAnnotation);
         return this;
     }
 
-    public CodeGenerator AddClass(INamedTypeSymbol classSymbol)
+    public CodeGenerator AddClass(NamedTypeSymbolInfo classSymbol)
     {
         string identifier = classSymbol.Name;
         bool isStatic = classSymbol.IsStatic;
-        ITypeParameterSymbol[] typeParameterList = classSymbol.TypeParameters.ToArray();
+        EquatableArray<string> typeParameterList = classSymbol.TypeParameters;
 
         ClassDeclarationSyntax classSyntax = GetClass(
             identifier,
@@ -83,12 +87,12 @@ internal class CodeGenerator
         return this;
     }
 
-    public CodeGenerator AddConstructor(FieldInfo[] parameters, bool symbolHasParameterlessConstructor)
+    public CodeGenerator AddConstructor(EquatableArray<FieldInfo> parameters, bool symbolHasParameterlessConstructor, bool emitNullChecks)
     {
         if (_current is ClassDeclarationSyntax classDeclarationSyntax)
         {
             ClassDeclarationSyntax lastClassSyntax = classDeclarationSyntax.DescendantNodesAndSelf().OfType<ClassDeclarationSyntax>().LastOrDefault();
-            _current = classDeclarationSyntax.ReplaceNode(lastClassSyntax, lastClassSyntax.AddMembers(GetConstructor(lastClassSyntax.Identifier, parameters, _constructorDocumentationComment, symbolHasParameterlessConstructor)));
+            _current = classDeclarationSyntax.ReplaceNode(lastClassSyntax, lastClassSyntax.AddMembers(GetConstructor(lastClassSyntax.Identifier, parameters, _constructorDocumentationComment, symbolHasParameterlessConstructor, emitNullChecks)));
         }
         else if (_current is BaseNamespaceDeclarationSyntax namespaceDeclarationSyntax && namespaceDeclarationSyntax.Members.First() is ClassDeclarationSyntax)
         {
@@ -98,7 +102,7 @@ internal class CodeGenerator
                 throw new InvalidOperationException("No class was added to the generator.");
             }
 
-            _current = namespaceDeclarationSyntax.ReplaceNode(lastClassSyntax, lastClassSyntax.AddMembers(GetConstructor(lastClassSyntax.Identifier, parameters, _constructorDocumentationComment, symbolHasParameterlessConstructor)));
+            _current = namespaceDeclarationSyntax.ReplaceNode(lastClassSyntax, lastClassSyntax.AddMembers(GetConstructor(lastClassSyntax.Identifier, parameters, _constructorDocumentationComment, symbolHasParameterlessConstructor, emitNullChecks)));
         }
         else if (_current is null)
         {
@@ -152,7 +156,7 @@ internal class CodeGenerator
             .WithNamespaceKeyword(Token(GetHeaderTrivia(addNullableAnnotation), SyntaxKind.NamespaceKeyword, TriviaList()));
     }
 
-    private static ClassDeclarationSyntax GetClass(string identifier, bool addHeaderTrivia, bool addNullableAnnotation, bool isStatic, ITypeParameterSymbol[] typeParameterList)
+    private static ClassDeclarationSyntax GetClass(string identifier, bool addHeaderTrivia, bool addNullableAnnotation, bool isStatic, EquatableArray<string> typeParameterList)
     {
         SyntaxToken firstModifier = Token(isStatic ? SyntaxKind.StaticKeyword : SyntaxKind.PartialKeyword);
         if (addHeaderTrivia)
@@ -166,31 +170,36 @@ internal class CodeGenerator
             declaration = declaration.AddModifiers(Token(SyntaxKind.PartialKeyword));
         }
 
-        if (typeParameterList.Length > 0)
+        if (!typeParameterList.IsEmpty)
         {
-            declaration = declaration.AddTypeParameterListParameters(Array.ConvertAll(typeParameterList, GetTypeParameter));
+            declaration = declaration.AddTypeParameterListParameters(typeParameterList.Select(GetTypeParameter).ToArray());
         }
 
         return declaration;
     }
 
-    private static ConstructorDeclarationSyntax GetConstructor(SyntaxToken identifier, FieldInfo[] parameters, string? constructorDocumentationComment, bool generateThisInitializer)
+    private static ConstructorDeclarationSyntax GetConstructor(SyntaxToken identifier, EquatableArray<FieldInfo> parameters, string? constructorDocumentationComment, bool generateThisInitializer, bool emitNullChecks)
     {
         FieldInfo[] constructorParameters = parameters
             .GroupBy(x => x.ParameterName)
             .Select(x => x.Any(c => c.Type is not null) ? x.First(c => c.Type is not null) : x.First())
             .ToArray();
 
-        SyntaxToken modifiers = Token(SyntaxKind.PublicKeyword);
+        AttributeListSyntax attribute = GetGeneratedCodeAttributeSyntax();
         if (constructorDocumentationComment is string { Length: > 0 })
         {
-            modifiers = Token(TriviaList(Trivia(GetDocumentation(constructorDocumentationComment, constructorParameters))), SyntaxKind.PublicKeyword, TriviaList());
+            attribute = attribute.WithOpenBracketToken(
+                Token(
+                    TriviaList(Trivia(GetDocumentation(constructorDocumentationComment, constructorParameters))),
+                    SyntaxKind.OpenBracketToken,
+                    TriviaList()));
         }
 
         ConstructorDeclarationSyntax constructor = ConstructorDeclaration(identifier)
-            .AddModifiers(modifiers)
+            .AddModifiers(Token(SyntaxKind.PublicKeyword))
+            .AddAttributeLists(attribute)
             .AddParameterListParameters(Array.ConvertAll(constructorParameters, GetParameter))
-            .AddBodyStatements(Array.ConvertAll(parameters.Where(p => p.FieldType.HasFlag(FieldType.Initialized)).ToArray(), GetParameterAssignement));
+            .AddBodyStatements(Array.ConvertAll(parameters.Where(p => p.FieldType.HasFlag(FieldType.Initialized)).ToArray(), p => GetParameterAssignement(p, emitNullChecks)));
 
         if (Array.Exists(constructorParameters, p => p.FieldType.HasFlag(FieldType.PassedToBase)))
         {
@@ -228,15 +237,15 @@ internal class CodeGenerator
 
     private static ParameterSyntax GetParameter(FieldInfo parameter)
     {
-        ITypeSymbol parameterType = parameter.Type ?? parameter.FallbackType;
+        string parameterType = parameter.Type ?? parameter.FallbackType;
 
         return Parameter(Identifier(parameter.ParameterName))
-            .WithType(ParseTypeName(parameterType.ToDisplayString()));
+            .WithType(ParseTypeName(parameterType));
     }
 
-    private static TypeParameterSyntax GetTypeParameter(ITypeParameterSymbol identifier)
+    private static TypeParameterSyntax GetTypeParameter(string identifierName)
     {
-        return TypeParameter(Identifier(identifier.Name));
+        return TypeParameter(Identifier(identifierName));
     }
 
     private static ArgumentSyntax GetArgument(FieldInfo parameter)
@@ -244,12 +253,12 @@ internal class CodeGenerator
         return Argument(IdentifierName(parameter.ParameterName));
     }
 
-    private static ExpressionStatementSyntax GetParameterAssignement(FieldInfo parameter)
+    private static ExpressionStatementSyntax GetParameterAssignement(FieldInfo parameter, bool emitNullChecks)
     {
         ExpressionSyntax left = MemberAccessExpression(SyntaxKind.SimpleMemberAccessExpression, ThisExpression(), IdentifierName(parameter.FieldName));
         ExpressionSyntax right = IdentifierName(parameter.Initializer);
 
-        if (parameter.EmitArgumentNullException)
+        if (parameter.EmitArgumentNullException && emitNullChecks)
         {
             right =
                 BinaryExpression(
@@ -268,5 +277,30 @@ internal class CodeGenerator
         SyntaxToken nameofIdentifier = Identifier(TriviaList(), SyntaxKind.NameOfKeyword, "nameof", "nameof", TriviaList());
         return InvocationExpression(IdentifierName(nameofIdentifier))
             .AddArgumentListArguments(Argument(IdentifierName(identifier)));
+    }
+
+    private static AttributeListSyntax GetGeneratedCodeAttributeSyntax()
+    {
+        QualifiedNameSyntax attributeName =
+            QualifiedName(
+                QualifiedName(
+                    QualifiedName(
+                        AliasQualifiedName(
+                            IdentifierName(
+                                Token(SyntaxKind.GlobalKeyword)),
+                            IdentifierName("System")),
+                        IdentifierName("CodeDom")),
+                    IdentifierName("Compiler")),
+                IdentifierName("GeneratedCodeAttribute"));
+
+        AttributeSyntax attribute = Attribute(attributeName)
+            .AddArgumentListArguments(GetAttributeArgumentSyntax(nameof(AutoConstructor)), GetAttributeArgumentSyntax(GeneratorVersion));
+
+        return AttributeList(SingletonSeparatedList(attribute));
+
+        static AttributeArgumentSyntax GetAttributeArgumentSyntax(string value)
+        {
+            return AttributeArgument(LiteralExpression(SyntaxKind.StringLiteralExpression, Literal(value)));
+        }
     }
 }

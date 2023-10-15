@@ -5,7 +5,7 @@ using Microsoft.CodeAnalysis.Diagnostics;
 namespace AutoConstructor.Generator.Analyzers;
 
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
-public class ClassWithoutFieldsToInjectAnalyzer : DiagnosticAnalyzer
+public sealed class ClassWithoutFieldsToInjectAnalyzer : DiagnosticAnalyzer
 {
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => ImmutableArray.Create(DiagnosticDescriptors.ClassWithoutFieldsToInjectRule);
 
@@ -23,9 +23,9 @@ public class ClassWithoutFieldsToInjectAnalyzer : DiagnosticAnalyzer
     {
         var symbol = (INamedTypeSymbol)context.Symbol;
 
-        if (symbol.GetAttribute(Source.AttributeFullName, context.Compilation) is AttributeData attr)
+        if (symbol.GetAttribute(Source.AttributeFullName) is AttributeData attr)
         {
-            bool hasFields = SymbolHasFields(context.Compilation, symbol) || ParentHasFields(context.Compilation, symbol);
+            bool hasFields = SymbolHasFields(symbol) || ParentHasFields(context.Compilation, symbol);
             if (!hasFields)
             {
                 SyntaxReference? propertyTypeIdentifier = attr.ApplicationSyntaxReference;
@@ -39,26 +39,26 @@ public class ClassWithoutFieldsToInjectAnalyzer : DiagnosticAnalyzer
         }
     }
 
-    private static bool SymbolHasFields(Compilation compilation, INamedTypeSymbol symbol)
+    private static bool SymbolHasFields(INamedTypeSymbol symbol)
     {
         return symbol.GetMembers()
             .OfType<IFieldSymbol>()
-            .Any(x => x.CanBeInjected(compilation)
+            .Any(x => x.CanBeInjected()
                 && !x.IsStatic
                 && x.IsReadOnly
                 && !x.IsInitialized()
-                && !x.HasAttribute(Source.IgnoreAttributeFullName, compilation));
+                && !x.HasAttribute(Source.IgnoreAttributeFullName));
     }
 
     private static bool ParentHasFields(Compilation compilation, INamedTypeSymbol symbol)
     {
         INamedTypeSymbol? baseType = symbol.BaseType;
 
-        if (baseType?.BaseType is not null && baseType?.Constructors.Count(d => !d.IsStatic) == 1)
+        if (baseType?.BaseType is not null && baseType.Constructors.Count(d => !d.IsStatic) == 1)
         {
             IMethodSymbol constructor = baseType.Constructors.Single(d => !d.IsStatic);
-            return baseType?.HasAttribute(Source.AttributeFullName, compilation) is true
-                ? SymbolHasFields(compilation, baseType) || ParentHasFields(compilation, baseType)
+            return baseType.HasAttribute(Source.AttributeFullName)
+                ? SymbolHasFields(baseType) || ParentHasFields(compilation, baseType)
                 : constructor.Parameters.Length > 0;
         }
 

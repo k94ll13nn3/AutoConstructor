@@ -5,7 +5,7 @@ using Microsoft.CodeAnalysis.Diagnostics;
 namespace AutoConstructor.Generator.Analyzers;
 
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
-public class IgnoreAttributeOnNonProcessedFieldAnalyzer : DiagnosticAnalyzer
+public sealed class IgnoreAttributeOnNonProcessedFieldAnalyzer : DiagnosticAnalyzer
 {
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => ImmutableArray.Create(DiagnosticDescriptors.IgnoreAttributeOnNonProcessedFieldRule);
 
@@ -23,8 +23,8 @@ public class IgnoreAttributeOnNonProcessedFieldAnalyzer : DiagnosticAnalyzer
     {
         var symbol = (IFieldSymbol)context.Symbol;
 
-        if (symbol.GetAttribute(Source.IgnoreAttributeFullName, context.Compilation) is AttributeData attr
-            && (!symbol.CanBeInjected(context.Compilation) || symbol.IsStatic || !symbol.IsReadOnly || symbol.IsInitialized()))
+        if (symbol.GetAttribute(Source.IgnoreAttributeFullName) is AttributeData attr
+            && (!symbol.CanBeInjected() || symbol.IsStatic || !symbol.IsReadOnly || symbol.IsInitialized()))
         {
             SyntaxReference? propertyTypeIdentifier = attr.ApplicationSyntaxReference;
             if (propertyTypeIdentifier is not null)

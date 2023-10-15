@@ -7,7 +7,7 @@ using Microsoft.CodeAnalysis.Diagnostics;
 namespace AutoConstructor.Generator.Analyzers;
 
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
-public class ClassWithoutPartialAnalyzer : DiagnosticAnalyzer
+public sealed class ClassWithoutPartialAnalyzer : DiagnosticAnalyzer
 {
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => ImmutableArray.Create(DiagnosticDescriptors.ClassWithoutPartialRule);
 
@@ -26,7 +26,7 @@ public class ClassWithoutPartialAnalyzer : DiagnosticAnalyzer
         var symbol = (INamedTypeSymbol)context.Symbol;
 
         if (symbol.DeclaringSyntaxReferences[0].GetSyntax() is ClassDeclarationSyntax classDeclarationSyntax
-            && symbol.HasAttribute(Source.AttributeFullName, context.Compilation)
+            && symbol.HasAttribute(Source.AttributeFullName)
             && !classDeclarationSyntax.Modifiers.Any(SyntaxKind.PartialKeyword))
         {
             var diagnostic = Diagnostic.Create(DiagnosticDescriptors.ClassWithoutPartialRule, classDeclarationSyntax.Identifier.GetLocation());

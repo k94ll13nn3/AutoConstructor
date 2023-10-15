@@ -17,6 +17,7 @@ C# source generator that generates a constructor from readonly fields/properties
 |---------|---------------|----------|
 | <=1.3.0 | 16.10+        | 5.0.300+ |
 | >=2.0.0 | 17.0+         | 6.0.100+ |
+| >=5.0.0 | 17.6+         | 7.0.302+ |
 
 ## Basic usage
 
