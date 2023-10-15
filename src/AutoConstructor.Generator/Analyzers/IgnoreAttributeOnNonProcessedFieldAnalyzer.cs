@@ -24,7 +24,7 @@ public sealed class IgnoreAttributeOnNonProcessedFieldAnalyzer : DiagnosticAnaly
         var symbol = (IFieldSymbol)context.Symbol;
 
         if (symbol.GetAttribute(Source.IgnoreAttributeFullName, context.Compilation) is AttributeData attr
-            && (!symbol.CanBeInjected(context.Compilation) || symbol.IsStatic || !symbol.IsReadOnly || symbol.IsInitialized()))
+            && (!symbol.CanBeInjected() || symbol.IsStatic || !symbol.IsReadOnly || symbol.IsInitialized()))
         {
             SyntaxReference? propertyTypeIdentifier = attr.ApplicationSyntaxReference;
             if (propertyTypeIdentifier is not null)

@@ -43,7 +43,7 @@ public sealed class ClassWithoutFieldsToInjectAnalyzer : DiagnosticAnalyzer
     {
         return symbol.GetMembers()
             .OfType<IFieldSymbol>()
-            .Any(x => x.CanBeInjected(compilation)
+            .Any(x => x.CanBeInjected()
                 && !x.IsStatic
                 && x.IsReadOnly
                 && !x.IsInitialized()

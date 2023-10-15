@@ -24,7 +24,7 @@ public sealed class InjectAttributeOnIgnoredFieldAnalyzer : DiagnosticAnalyzer
         var symbol = (IFieldSymbol)context.Symbol;
 
         if (symbol.GetAttribute(Source.InjectAttributeFullName, context.Compilation) is AttributeData attr
-            && (!symbol.CanBeInjected(context.Compilation) || symbol.IsStatic || !symbol.IsReadOnly || symbol.IsInitialized() || symbol.HasAttribute(Source.IgnoreAttributeFullName, context.Compilation)))
+            && (!symbol.CanBeInjected() || symbol.IsStatic || !symbol.IsReadOnly || symbol.IsInitialized() || symbol.HasAttribute(Source.IgnoreAttributeFullName, context.Compilation)))
         {
             SyntaxReference? propertyTypeIdentifier = attr.ApplicationSyntaxReference;
             if (propertyTypeIdentifier is not null)

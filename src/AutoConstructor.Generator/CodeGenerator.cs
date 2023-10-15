@@ -89,12 +89,12 @@ internal sealed class CodeGenerator
         return this;
     }
 
-    public CodeGenerator AddConstructor(EquatableArray<FieldInfo> parameters, bool symbolHasParameterlessConstructor)
+    public CodeGenerator AddConstructor(EquatableArray<FieldInfo> parameters, bool symbolHasParameterlessConstructor, bool emitNullChecks)
     {
         if (_current is ClassDeclarationSyntax classDeclarationSyntax)
         {
             ClassDeclarationSyntax lastClassSyntax = classDeclarationSyntax.DescendantNodesAndSelf().OfType<ClassDeclarationSyntax>().LastOrDefault();
-            _current = classDeclarationSyntax.ReplaceNode(lastClassSyntax, lastClassSyntax.AddMembers(GetConstructor(lastClassSyntax.Identifier, parameters, _constructorDocumentationComment, symbolHasParameterlessConstructor)));
+            _current = classDeclarationSyntax.ReplaceNode(lastClassSyntax, lastClassSyntax.AddMembers(GetConstructor(lastClassSyntax.Identifier, parameters, _constructorDocumentationComment, symbolHasParameterlessConstructor, emitNullChecks)));
         }
         else if (_current is BaseNamespaceDeclarationSyntax namespaceDeclarationSyntax && namespaceDeclarationSyntax.Members.First() is ClassDeclarationSyntax)
         {
@@ -104,7 +104,7 @@ internal sealed class CodeGenerator
                 throw new InvalidOperationException("No class was added to the generator.");
             }
 
-            _current = namespaceDeclarationSyntax.ReplaceNode(lastClassSyntax, lastClassSyntax.AddMembers(GetConstructor(lastClassSyntax.Identifier, parameters, _constructorDocumentationComment, symbolHasParameterlessConstructor)));
+            _current = namespaceDeclarationSyntax.ReplaceNode(lastClassSyntax, lastClassSyntax.AddMembers(GetConstructor(lastClassSyntax.Identifier, parameters, _constructorDocumentationComment, symbolHasParameterlessConstructor, emitNullChecks)));
         }
         else if (_current is null)
         {
@@ -180,7 +180,7 @@ internal sealed class CodeGenerator
         return declaration;
     }
 
-    private static ConstructorDeclarationSyntax GetConstructor(SyntaxToken identifier, EquatableArray<FieldInfo> parameters, string? constructorDocumentationComment, bool generateThisInitializer)
+    private static ConstructorDeclarationSyntax GetConstructor(SyntaxToken identifier, EquatableArray<FieldInfo> parameters, string? constructorDocumentationComment, bool generateThisInitializer, bool emitNullChecks)
     {
         FieldInfo[] constructorParameters = parameters
             .GroupBy(x => x.ParameterName)
@@ -201,7 +201,7 @@ internal sealed class CodeGenerator
             .AddModifiers(Token(SyntaxKind.PublicKeyword))
             .AddAttributeLists(attribute)
             .AddParameterListParameters(Array.ConvertAll(constructorParameters, GetParameter))
-            .AddBodyStatements(Array.ConvertAll(parameters.Where(p => p.FieldType.HasFlag(FieldType.Initialized)).ToArray(), GetParameterAssignement));
+            .AddBodyStatements(Array.ConvertAll(parameters.Where(p => p.FieldType.HasFlag(FieldType.Initialized)).ToArray(), p => GetParameterAssignement(p, emitNullChecks)));
 
         if (Array.Exists(constructorParameters, p => p.FieldType.HasFlag(FieldType.PassedToBase)))
         {
@@ -255,12 +255,12 @@ internal sealed class CodeGenerator
         return Argument(IdentifierName(parameter.ParameterName));
     }
 
-    private static ExpressionStatementSyntax GetParameterAssignement(FieldInfo parameter)
+    private static ExpressionStatementSyntax GetParameterAssignement(FieldInfo parameter, bool emitNullChecks)
     {
         ExpressionSyntax left = MemberAccessExpression(SyntaxKind.SimpleMemberAccessExpression, ThisExpression(), IdentifierName(parameter.FieldName));
         ExpressionSyntax right = IdentifierName(parameter.Initializer);
 
-        if (parameter.EmitArgumentNullException)
+        if (parameter.EmitArgumentNullException && emitNullChecks)
         {
             right =
                 BinaryExpression(

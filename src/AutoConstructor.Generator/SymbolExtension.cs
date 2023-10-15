@@ -19,6 +19,7 @@ public static class SymbolExtension
             symbol.DeclaringSyntaxReferences.FirstOrDefault()?.GetSyntax() is VariableDeclaratorSyntax { Initializer: not null };
     }
 
+    [Obsolete]
     public static bool HasAttribute(this ISymbol symbol, string attributeName, Compilation compilation)
     {
         _ = symbol ?? throw new ArgumentNullException(nameof(symbol));
@@ -27,6 +28,14 @@ public static class SymbolExtension
         return symbol.GetAttribute(attributeName, compilation) is not null;
     }
 
+    public static bool HasAttribute(this ISymbol symbol, string attributeName)
+    {
+        _ = symbol ?? throw new ArgumentNullException(nameof(symbol));
+
+        return symbol.GetAttribute(attributeName) is not null;
+    }
+
+    [Obsolete]
     public static AttributeData? GetAttribute(this ISymbol symbol, string attributeName, Compilation compilation)
     {
         _ = symbol ?? throw new ArgumentNullException(nameof(symbol));
@@ -36,10 +45,16 @@ public static class SymbolExtension
         return symbol.GetAttributes().FirstOrDefault(ad => ad.AttributeClass?.Equals(attributeSymbol, SymbolEqualityComparer.Default) == true);
     }
 
-    public static bool CanBeInjected(this ISymbol symbol, Compilation compilation)
+    public static AttributeData? GetAttribute(this ISymbol symbol, string attributeName)
     {
         _ = symbol ?? throw new ArgumentNullException(nameof(symbol));
-        _ = compilation ?? throw new ArgumentNullException(nameof(compilation));
+
+        return symbol.GetAttributes().FirstOrDefault(ad => ad.AttributeClass?.Name == attributeName);
+    }
+
+    public static bool CanBeInjected(this ISymbol symbol)
+    {
+        _ = symbol ?? throw new ArgumentNullException(nameof(symbol));
 
         return symbol.CanBeReferencedByName
             || (!symbol.CanBeReferencedByName
