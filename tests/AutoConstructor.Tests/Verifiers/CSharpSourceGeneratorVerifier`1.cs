@@ -46,7 +46,7 @@ internal static partial class CSharpSourceGeneratorVerifier<TSourceGenerator>
             LanguageVersion = LanguageVersion.Default,
         };
 
-        string generatedCodeAttribute = @$"[global::System.CodeDom.Compiler.GeneratedCodeAttribute(""{nameof(AutoConstructor)}"", ""{CodeGenerator.GeneratorVersion}"")]";
+        string generatedCodeAttribute = @$"[global::System.CodeDom.Compiler.GeneratedCodeAttribute(""{nameof(AutoConstructor)}"", ""{AutoConstructorGenerator.GeneratorVersion}"")]";
         foreach ((string? generated, string generatedName) in generatedSources)
         {
             if (generated is string { Length: > 0 })
@@ -60,7 +60,10 @@ internal static partial class CSharpSourceGeneratorVerifier<TSourceGenerator>
 // </auto-generated>
 //------------------------------------------------------------------------------
 {generated}";
-                generatedWithHeader = BeforeConstructorRegex().Replace(generatedWithHeader, $"$1{generatedCodeAttribute}$1public $2(");
+                generatedWithHeader = BeforeConstructorRegex()
+                    .Replace(generatedWithHeader, $"$1{generatedCodeAttribute}$1public $2(")
+                    .Replace("\r\n", "\n", StringComparison.OrdinalIgnoreCase)
+                    .Trim();
                 test.TestState.GeneratedSources.Add((typeof(AutoConstructorGenerator), generatedName, SourceText.From(generatedWithHeader, Encoding.UTF8)));
             }
         }
