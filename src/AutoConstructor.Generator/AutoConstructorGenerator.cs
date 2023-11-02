@@ -165,16 +165,14 @@ public sealed class AutoConstructorGenerator : IIncrementalGenerator
         if (!symbol.IsGlobalNamespace)
         {
             writer.WriteLine($"namespace {symbol.ContainingNamespace}");
-            writer.WriteLine("{");
-            writer.IncreaseIndent();
+            writer.StartBlock();
         }
 
         // Add nested classes.
         foreach (NamedTypeSymbolInfo containingType in symbol.ContainingTypes)
         {
             writer.WriteNamedTypeSymbolInfoLine(containingType);
-            writer.WriteLine("{");
-            writer.IncreaseIndent();
+            writer.StartBlock();
         }
 
         // Write class name line.
@@ -241,15 +239,13 @@ public sealed class AutoConstructorGenerator : IIncrementalGenerator
         // Close nested classes.
         foreach (NamedTypeSymbolInfo containingType in symbol.ContainingTypes)
         {
-            writer.DecreaseIndent();
-            writer.WriteLine("}");
+            writer.EndBlock();
         }
 
         // Close namespace.
         if (!symbol.IsGlobalNamespace)
         {
-            writer.DecreaseIndent();
-            writer.WriteLine("}");
+            writer.EndBlock();
         }
 
         return writer.ToString();
