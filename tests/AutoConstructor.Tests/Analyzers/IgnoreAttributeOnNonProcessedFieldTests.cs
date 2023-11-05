@@ -5,7 +5,7 @@ using VerifyIgnoreAttributeOnNonProcessedField = AutoConstructor.Tests.Verifiers
     AutoConstructor.Generator.Analyzers.IgnoreAttributeOnNonProcessedFieldAnalyzer,
     AutoConstructor.Generator.CodeFixes.RemoveAttributeCodeFixProvider>;
 
-namespace AutoConstructor.Tests;
+namespace AutoConstructor.Tests.Analyzers;
 
 public class IgnoreAttributeOnNonProcessedFieldTests
 {

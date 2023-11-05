@@ -5,7 +5,7 @@ using VerifyClassWithoutPartial = AutoConstructor.Tests.Verifiers.CSharpCodeFixV
     AutoConstructor.Generator.Analyzers.ClassWithoutPartialAnalyzer,
     AutoConstructor.Generator.CodeFixes.ClassWithoutPartialCodeFixProvider>;
 
-namespace AutoConstructor.Tests;
+namespace AutoConstructor.Tests.Analyzers;
 
 public class ClassWithoutPartialTests
 {

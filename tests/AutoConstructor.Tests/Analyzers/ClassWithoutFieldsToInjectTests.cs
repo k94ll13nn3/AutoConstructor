@@ -5,7 +5,7 @@ using VerifyClassWithoutFieldsToInject = AutoConstructor.Tests.Verifiers.CSharpC
     AutoConstructor.Generator.Analyzers.ClassWithoutFieldsToInjectAnalyzer,
     AutoConstructor.Generator.CodeFixes.RemoveAttributeCodeFixProvider>;
 
-namespace AutoConstructor.Tests;
+namespace AutoConstructor.Tests.Analyzers;
 
 public class ClassWithoutFieldsToInjectTests
 {

@@ -12,10 +12,11 @@ internal sealed record MainNamedTypeSymbolInfo(
     string ContainingNamespace,
     EquatableArray<NamedTypeSymbolInfo> ContainingTypes,
     bool HasParameterlessConstructor,
-    string Filename)
+    string Filename,
+    string Accessibility)
     : NamedTypeSymbolInfo(Name, IsStatic, TypeParameters)
 {
-    public MainNamedTypeSymbolInfo(INamedTypeSymbol namedTypeSymbol, bool hasParameterlessConstructor, string filename)
+    public MainNamedTypeSymbolInfo(INamedTypeSymbol namedTypeSymbol, bool hasParameterlessConstructor, string filename, string accessibility)
         : this(
             namedTypeSymbol.Name,
             namedTypeSymbol.IsStatic,
@@ -24,7 +25,8 @@ internal sealed record MainNamedTypeSymbolInfo(
             namedTypeSymbol.ContainingNamespace.ToDisplayString(),
             namedTypeSymbol.GetContainingTypes().Select(c => new NamedTypeSymbolInfo(c)).ToImmutableArray(),
             hasParameterlessConstructor,
-            filename)
+            filename,
+            accessibility)
     {
     }
 }

@@ -61,7 +61,7 @@ internal static partial class CSharpSourceGeneratorVerifier<TSourceGenerator>
 //------------------------------------------------------------------------------
 {generated}";
                 generatedWithHeader = BeforeConstructorRegex()
-                    .Replace(generatedWithHeader, $"$1{generatedCodeAttribute}$1public $2(")
+                    .Replace(generatedWithHeader, $"$1{generatedCodeAttribute}$1$2 $3(")
                     .Replace("\r\n", "\n", StringComparison.OrdinalIgnoreCase)
                     .Trim();
                 test.TestState.GeneratedSources.Add((typeof(AutoConstructorGenerator), generatedName, SourceText.From(generatedWithHeader, Encoding.UTF8)));
@@ -115,6 +115,6 @@ build_property.AutoConstructor_DisableNullChecking = false
         }
     }
 
-    [GeneratedRegex("(\\s+)public (\\w+)\\(")]
+    [GeneratedRegex("(\\s+)(public|internal|private|protected|protected internal|private protected) (\\w+)\\(")]
     private static partial Regex BeforeConstructorRegex();
 }

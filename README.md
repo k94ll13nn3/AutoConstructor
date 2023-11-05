@@ -81,6 +81,17 @@ won't make the field injectable.
 When using `AutoConstructorInjectAttribute`, the parameter name can be shared across multiple fields,
 and even use a parameter from another field not annotated with `AutoConstructorInjectAttribute`, but type must match.
 
+### Constructor accessibility
+
+Constructor accessibility can be changed using the optionnal parameter `accessibility` on `AutoConstructorAttribute` (like `[AutoConstructor("internal")]`).
+The default is `public` and it can be set to one of the following values:
+- `public`
+- `private`
+- `protected`
+- `internal`
+- `protected internal`
+- `private protected`
+
 ### Properties injection
 
 Get-only properties (`public int Property { get; }`) are injected by the generator by default.
@@ -296,3 +307,7 @@ public partial class Test
     private readonly string _guid;
 }
 ```
+
+### ACONS07
+
+The accessibility defined in the `AutoConstructor` attribute is not an allowed value.

@@ -15,6 +15,7 @@ namespace AutoConstructor.Generator;
 [Generator(LanguageNames.CSharp)]
 public sealed class AutoConstructorGenerator : IIncrementalGenerator
 {
+    internal static readonly string[] ConstuctorAccessibilities = new[] { "public", "private", "internal", "protected", "protected internal", "private protected" };
     internal static readonly string GeneratorVersion = typeof(AutoConstructorGenerator).Assembly.GetName().Version!.ToString();
 
     public void Initialize(IncrementalGeneratorInitializationContext context)
@@ -131,7 +132,16 @@ public sealed class AutoConstructorGenerator : IIncrementalGenerator
             .Count(n => n is ConstructorDeclarationSyntax constructor && !constructor.Modifiers.Any(m => m.IsKind(SyntaxKind.StaticKeyword))) == 1
             && symbol.Constructors.Any(d => !d.IsStatic && d.Parameters.Length == 0);
 
-        return new(new MainNamedTypeSymbolInfo(symbol, hasParameterlessConstructor, filename), fields, null);
+        string? accessibility = null;
+        AttributeData? attributeData = symbol.GetAttribute(Source.AttributeFullName);
+        if (attributeData?.AttributeConstructor?.Parameters.Length > 0
+            && attributeData.GetParameterValue<string>("accessibility") is string { Length: > 0 } accessibilityValue
+            && ConstuctorAccessibilities.Contains(accessibilityValue))
+        {
+            accessibility = accessibilityValue;
+        }
+
+        return new(new MainNamedTypeSymbolInfo(symbol, hasParameterlessConstructor, filename, accessibility ?? "public"), fields, null);
     }
 
     private static string GenerateAutoConstructor(MainNamedTypeSymbolInfo symbol, EquatableArray<FieldInfo> fields, Options options)
@@ -201,7 +211,7 @@ public sealed class AutoConstructorGenerator : IIncrementalGenerator
 
             // Write constructor signature.
             writer.WriteLine($"""[global::System.CodeDom.Compiler.GeneratedCodeAttribute("{nameof(AutoConstructor)}", "{GeneratorVersion}")]""");
-            writer.Write($"public {symbol.Name}(");
+            writer.Write($"{symbol.Accessibility} {symbol.Name}(");
             writer.Write(string.Join(", ", constructorParameters.Select(p => $"{p.Type ?? p.FallbackType} {p.ParameterName}")));
             writer.Write(")");
 
@@ -293,19 +303,18 @@ public sealed class AutoConstructorGenerator : IIncrementalGenerator
         AttributeData? attributeData = fieldSymbol.GetAttribute(Source.InjectAttributeFullName);
         if (attributeData is not null)
         {
-            ImmutableArray<IParameterSymbol> parameters = attributeData.AttributeConstructor?.Parameters ?? ImmutableArray.Create<IParameterSymbol>();
-            if (GetParameterValue<string>("parameterName", parameters, attributeData.ConstructorArguments) is string { Length: > 0 } parameterNameValue)
+            if (attributeData.GetParameterValue<string>("parameterName") is string { Length: > 0 } parameterNameValue)
             {
                 parameterName = parameterNameValue;
                 initializer = parameterNameValue;
             }
 
-            if (GetParameterValue<string>("initializer", parameters, attributeData.ConstructorArguments) is string { Length: > 0 } initializerValue)
+            if (attributeData.GetParameterValue<string>("initializer") is string { Length: > 0 } initializerValue)
             {
                 initializer = initializerValue;
             }
 
-            injectedType = GetParameterValue<INamedTypeSymbol>("injectedType", parameters, attributeData.ConstructorArguments);
+            injectedType = attributeData.GetParameterValue<INamedTypeSymbol>("injectedType");
         }
 
         return new FieldInfo(
@@ -318,14 +327,6 @@ public sealed class AutoConstructorGenerator : IIncrementalGenerator
             summaryText,
             type.IsReferenceType && type.NullableAnnotation != NullableAnnotation.Annotated,
             FieldType.Initialized);
-    }
-
-    private static T? GetParameterValue<T>(string parameterName, ImmutableArray<IParameterSymbol> parameters, ImmutableArray<TypedConstant> arguments)
-        where T : class
-    {
-        return parameters.ToList().FindIndex(c => c.Name == parameterName) is int index and not -1
-            ? (arguments[index].Value as T)
-            : null;
     }
 
     private static void ExtractFieldsFromParent(INamedTypeSymbol symbol, List<FieldInfo> concatenatedFields)

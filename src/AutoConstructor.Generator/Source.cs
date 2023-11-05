@@ -16,6 +16,12 @@ public static class Source
 [System.AttributeUsage(System.AttributeTargets.Class, Inherited = false, AllowMultiple = false)]
 internal sealed class {AttributeFullName} : System.Attribute
 {{
+    public {AttributeFullName}(string accessibility = null)
+    {{
+        Accessibility = accessibility;
+    }}
+
+    public string Accessibility {{ get; }}
 }}
 ";
 

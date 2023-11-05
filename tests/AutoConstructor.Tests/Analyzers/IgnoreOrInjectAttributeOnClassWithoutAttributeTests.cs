@@ -5,7 +5,7 @@ using VerifyIgnoreOrInjectAttributeOnClassWithoutAttribute = AutoConstructor.Tes
     AutoConstructor.Generator.Analyzers.IgnoreOrInjectAttributeOnClassWithoutAttributeAnalyzer,
     AutoConstructor.Generator.CodeFixes.RemoveAttributeCodeFixProvider>;
 
-namespace AutoConstructor.Tests;
+namespace AutoConstructor.Tests.Analyzers;
 
 public class IgnoreOrInjectAttributeOnClassWithoutAttributeTests
 {
