@@ -307,3 +307,7 @@ public partial class Test
     private readonly string _guid;
 }
 ```
+
+### ACONS07
+
+The accessibility defined in the `AutoConstructor` attribute is not an allowed value.

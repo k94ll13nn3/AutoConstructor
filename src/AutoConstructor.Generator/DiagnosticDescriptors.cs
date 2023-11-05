@@ -19,6 +19,8 @@ public static class DiagnosticDescriptors
 
     public const string MistmatchTypesDiagnosticId = "ACONS06";
 
+    public const string ClassWithWrongConstructorAccessibilityDiagnosticId = "ACONS07";
+
     public static readonly DiagnosticDescriptor ClassWithoutPartialRule = new DiagnosticDescriptor(
         ClassWithoutPartialDiagnosticId,
         "Couldn't generate constructor",
@@ -83,5 +85,16 @@ public static class DiagnosticDescriptors
         true,
         null,
         $"https://github.com/k94ll13nn3/AutoConstructor#{MistmatchTypesDiagnosticId}",
+        WellKnownDiagnosticTags.Build);
+
+    public static readonly DiagnosticDescriptor ClassWithWrongConstructorAccessibilityRule = new DiagnosticDescriptor(
+        ClassWithWrongConstructorAccessibilityDiagnosticId,
+        "Wrong constuctor accessibility",
+        "Unknown constuctor accessibility, allowed values are public, private, protected, internal, protected internal or private protected",
+        "Usage",
+        DiagnosticSeverity.Warning,
+        true,
+        null,
+        $"https://github.com/k94ll13nn3/AutoConstructor#{ClassWithWrongConstructorAccessibilityDiagnosticId}",
         WellKnownDiagnosticTags.Build);
 }

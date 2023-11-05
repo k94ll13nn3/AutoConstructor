@@ -5,7 +5,7 @@ using VerifyInjectAttributeOnIgnoredField = AutoConstructor.Tests.Verifiers.CSha
     AutoConstructor.Generator.Analyzers.InjectAttributeOnIgnoredFieldAnalyzer,
     AutoConstructor.Generator.CodeFixes.RemoveAttributeCodeFixProvider>;
 
-namespace AutoConstructor.Tests;
+namespace AutoConstructor.Tests.Analyzers;
 
 public class InjectAttributeOnIgnoredFieldTests
 {

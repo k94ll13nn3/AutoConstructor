@@ -15,7 +15,7 @@ namespace AutoConstructor.Generator;
 [Generator(LanguageNames.CSharp)]
 public sealed class AutoConstructorGenerator : IIncrementalGenerator
 {
-    private static readonly string[] ConstuctorAccessibilities = new[] { "public", "private", "internal", "protected", "protected internal", "private protected" };
+    internal static readonly string[] ConstuctorAccessibilities = new[] { "public", "private", "internal", "protected", "protected internal", "private protected" };
     internal static readonly string GeneratorVersion = typeof(AutoConstructorGenerator).Assembly.GetName().Version!.ToString();
 
     public void Initialize(IncrementalGeneratorInitializationContext context)
@@ -135,8 +135,7 @@ public sealed class AutoConstructorGenerator : IIncrementalGenerator
         string? accessibility = null;
         AttributeData? attributeData = symbol.GetAttribute(Source.AttributeFullName);
         if (attributeData?.AttributeConstructor?.Parameters.Length > 0
-            && GetParameterValue<string>("accessibility", attributeData.AttributeConstructor.Parameters, attributeData.ConstructorArguments)
-                is string { Length: > 0 } accessibilityValue
+            && attributeData.GetParameterValue<string>("accessibility") is string { Length: > 0 } accessibilityValue
             && ConstuctorAccessibilities.Contains(accessibilityValue))
         {
             accessibility = accessibilityValue;
@@ -304,19 +303,18 @@ public sealed class AutoConstructorGenerator : IIncrementalGenerator
         AttributeData? attributeData = fieldSymbol.GetAttribute(Source.InjectAttributeFullName);
         if (attributeData is not null)
         {
-            ImmutableArray<IParameterSymbol> parameters = attributeData.AttributeConstructor?.Parameters ?? ImmutableArray.Create<IParameterSymbol>();
-            if (GetParameterValue<string>("parameterName", parameters, attributeData.ConstructorArguments) is string { Length: > 0 } parameterNameValue)
+            if (attributeData.GetParameterValue<string>("parameterName") is string { Length: > 0 } parameterNameValue)
             {
                 parameterName = parameterNameValue;
                 initializer = parameterNameValue;
             }
 
-            if (GetParameterValue<string>("initializer", parameters, attributeData.ConstructorArguments) is string { Length: > 0 } initializerValue)
+            if (attributeData.GetParameterValue<string>("initializer") is string { Length: > 0 } initializerValue)
             {
                 initializer = initializerValue;
             }
 
-            injectedType = GetParameterValue<INamedTypeSymbol>("injectedType", parameters, attributeData.ConstructorArguments);
+            injectedType = attributeData.GetParameterValue<INamedTypeSymbol>("injectedType");
         }
 
         return new FieldInfo(
@@ -329,14 +327,6 @@ public sealed class AutoConstructorGenerator : IIncrementalGenerator
             summaryText,
             type.IsReferenceType && type.NullableAnnotation != NullableAnnotation.Annotated,
             FieldType.Initialized);
-    }
-
-    private static T? GetParameterValue<T>(string parameterName, ImmutableArray<IParameterSymbol> parameters, ImmutableArray<TypedConstant> arguments)
-        where T : class
-    {
-        return parameters.ToList().FindIndex(c => c.Name == parameterName) is int index and not -1
-            ? (arguments[index].Value as T)
-            : null;
     }
 
     private static void ExtractFieldsFromParent(INamedTypeSymbol symbol, List<FieldInfo> concatenatedFields)
