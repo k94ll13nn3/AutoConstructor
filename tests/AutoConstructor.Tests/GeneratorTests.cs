@@ -572,7 +572,7 @@ namespace Test
     [AutoConstructor]
     internal partial class Test : TestBase
     {
-        
+
     }
 
     internal partial class TestBase
@@ -1611,6 +1611,41 @@ namespace Test
         }
     }
 }
+";
+        await VerifySourceGenerator.RunAsync(code, generated);
+    }
+
+    [Theory]
+    [InlineData(null, "public")]
+    [InlineData("", "public")]
+    [InlineData("public", "public")]
+    [InlineData("private", "private")]
+    [InlineData("internal", "internal")]
+    [InlineData("protected", "protected")]
+    [InlineData("protected internal", "protected internal")]
+    [InlineData("private protected", "private protected")]
+    [InlineData("wrong value", "public")]
+    public async Task Run_WithConstructorAccessibility_ShouldGenerateClass(string attributeAccessibility, string constructorAccessibility)
+    {
+        string code = $@"
+namespace Test
+{{
+    [AutoConstructor(""{attributeAccessibility}"")]
+    internal partial class Test
+    {{
+        private readonly int _t;
+    }}
+}}";
+        string generated = $@"namespace Test
+{{
+    partial class Test
+    {{
+        {constructorAccessibility} Test(int t)
+        {{
+            this._t = t;
+        }}
+    }}
+}}
 ";
         await VerifySourceGenerator.RunAsync(code, generated);
     }
