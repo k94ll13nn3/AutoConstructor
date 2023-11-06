@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## Unreleased
+
+### Issues
+
+- [#82](https://github.com/k94ll13nn3/AutoConstructor/issues/82): The source generator is completely non incremental
+- [#21](https://github.com/k94ll13nn3/AutoConstructor/issues/21): Allow injection of method call inside the constructor
+
+### Pull Requests
+
+- [#88](https://github.com/k94ll13nn3/AutoConstructor/pull/88): Rework code generation with indented writer (by [k94ll13nn3](https://github.com/k94ll13nn3))
+- [#83](https://github.com/k94ll13nn3/AutoConstructor/pull/83): Update generator to really be incremental (by [k94ll13nn3](https://github.com/k94ll13nn3))
+- [#54](https://github.com/k94ll13nn3/AutoConstructor/pull/54): Add support for constructor access modifier (by [k94ll13nn3](https://github.com/k94ll13nn3))
+- [#27](https://github.com/k94ll13nn3/AutoConstructor/pull/27): Allow injection of method call inside the constructor (by [k94ll13nn3](https://github.com/k94ll13nn3))
+
 ## [4.1.1] - 2023-07-18
 
 ### Fixed
