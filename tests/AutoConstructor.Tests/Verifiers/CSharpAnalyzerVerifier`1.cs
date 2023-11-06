@@ -32,6 +32,7 @@ internal static class CSharpAnalyzerVerifier<TAnalyzer>
         valueWithCode += $"{Source.AttributeText}\n";
         valueWithCode += $"{Source.IgnoreAttributeText}\n";
         valueWithCode += $"{Source.InjectAttributeText}\n";
+        valueWithCode += $"{Source.InitializerAttributeText}\n";
         return valueWithCode;
     }
 

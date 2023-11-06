@@ -16,6 +16,11 @@ internal static class CSharpCodeFixVerifier<TAnalyzer, TCodeFix>
         return CSharpCodeFixVerifier<TAnalyzer, TCodeFix, DefaultVerifier>.Diagnostic(diagnosticId);
     }
 
+    public static DiagnosticResult Diagnostic(DiagnosticDescriptor diagnostic)
+    {
+        return CSharpAnalyzerVerifier<TAnalyzer, DefaultVerifier>.Diagnostic(diagnostic);
+    }
+
     public static async Task VerifyAnalyzerAsync(string source, params DiagnosticResult[] expected)
     {
         var test = new Test
@@ -27,13 +32,13 @@ internal static class CSharpCodeFixVerifier<TAnalyzer, TCodeFix>
         await test.RunAsync(CancellationToken.None);
     }
 
-    public static async Task VerifyCodeFixAsync(string source, DiagnosticResult[] expected, string fixedSource)
+    public static async Task VerifyCodeFixAsync(string source, DiagnosticResult[] expected, string fixedSource, int? numberOfFixAllIterations = null)
     {
         var test = new Test
         {
             TestCode = AppendBaseCode(source),
             FixedCode = AppendBaseCode(fixedSource),
-            NumberOfFixAllIterations = expected.Length,
+            NumberOfFixAllIterations = numberOfFixAllIterations ?? expected.Length,
         };
 
         test.ExpectedDiagnostics.AddRange(expected);
@@ -47,6 +52,7 @@ internal static class CSharpCodeFixVerifier<TAnalyzer, TCodeFix>
         valueWithCode += $"{Source.AttributeText}\n";
         valueWithCode += $"{Source.IgnoreAttributeText}\n";
         valueWithCode += $"{Source.InjectAttributeText}\n";
+        valueWithCode += $"{Source.InitializerAttributeText}\n";
         return valueWithCode;
     }
 

@@ -3,6 +3,7 @@ using System.Globalization;
 using System.Text;
 using System.Xml;
 using AutoConstructor.Generator.Core;
+using AutoConstructor.Generator.Extensions;
 using AutoConstructor.Generator.Models;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -26,6 +27,7 @@ public sealed class AutoConstructorGenerator : IIncrementalGenerator
             i.AddSource(Source.AttributeFullName, SourceText.From(Source.AttributeText, Encoding.UTF8));
             i.AddSource(Source.IgnoreAttributeFullName, SourceText.From(Source.IgnoreAttributeText, Encoding.UTF8));
             i.AddSource(Source.InjectAttributeFullName, SourceText.From(Source.InjectAttributeText, Encoding.UTF8));
+            i.AddSource(Source.InitializerAttributeFullName, SourceText.From(Source.InitializerAttributeText, Encoding.UTF8));
         });
 
         IncrementalValuesProvider<(GeneratorExectutionResult? result, Options options)> valueProvider = context.SyntaxProvider
@@ -141,7 +143,19 @@ public sealed class AutoConstructorGenerator : IIncrementalGenerator
             accessibility = accessibilityValue;
         }
 
-        return new(new MainNamedTypeSymbolInfo(symbol, hasParameterlessConstructor, filename, accessibility ?? "public"), fields, null);
+        string? initializerMethod = symbol.GetMembers()
+            .OfType<IMethodSymbol>()
+            .Where(x => x.HasAttribute(Source.InitializerAttributeFullName))
+            .Select(x => x.Name)
+            .FirstOrDefault();
+
+        MainNamedTypeSymbolInfo mainNamedTypeSymbolInfo = new(
+            symbol,
+            hasParameterlessConstructor,
+            filename,
+            accessibility ?? "public",
+            initializerMethod);
+        return new(mainNamedTypeSymbolInfo, fields, null);
     }
 
     private static string GenerateAutoConstructor(MainNamedTypeSymbolInfo symbol, EquatableArray<FieldInfo> fields, Options options)
@@ -242,6 +256,12 @@ public sealed class AutoConstructorGenerator : IIncrementalGenerator
                         writer.Write($" ?? throw new System.ArgumentNullException(nameof({field.ParameterName}))");
                     }
                     writer.WriteLine(";");
+                }
+
+                if (symbol.InitializerMethodeName is not null)
+                {
+                    writer.WriteLine();
+                    writer.WriteLine($"this.{symbol.InitializerMethodeName}();");
                 }
             }
         }

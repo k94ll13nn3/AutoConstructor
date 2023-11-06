@@ -1,6 +1,6 @@
 using Microsoft.CodeAnalysis;
 
-namespace AutoConstructor.Generator;
+namespace AutoConstructor.Generator.Extensions;
 
 internal static class AttributeDataExtension
 {
@@ -13,7 +13,7 @@ internal static class AttributeDataExtension
         }
 
         return attributeData.AttributeConstructor.Parameters.ToList().FindIndex(c => c.Name == parameterName) is int index and not -1
-            ? (attributeData.ConstructorArguments[index].Value as T)
+            ? attributeData.ConstructorArguments[index].Value as T
             : null;
     }
 }

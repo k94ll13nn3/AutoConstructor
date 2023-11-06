@@ -1,4 +1,5 @@
 using System.Collections.Immutable;
+using AutoConstructor.Generator.Extensions;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;

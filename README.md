@@ -92,6 +92,35 @@ The default is `public` and it can be set to one of the following values:
 - `protected internal`
 - `private protected`
 
+### Initializer method
+
+It is possible to add a method call at the end of the constructor. To do this, the attribute `AutoConstructorInitializer` can be added to
+a parameterless method that returns void. This will generate a call to the method at the end.
+
+```csharp
+[AutoConstructor]
+internal partial class Test
+{
+    private readonly int _t;
+
+    [AutoConstructorInitializer]
+    public void Initializer()
+    {
+    }
+}
+```
+
+will generate
+
+```csharp
+public Test(int t)
+{
+    this._t = t;
+
+    this.Initializer();
+}
+```
+
 ### Properties injection
 
 Get-only properties (`public int Property { get; }`) are injected by the generator by default.
@@ -311,3 +340,15 @@ public partial class Test
 ### ACONS07
 
 The accessibility defined in the `AutoConstructor` attribute is not an allowed value.
+
+### ACONS08
+
+`AutoConstructorInitializer` attribute used on multiple methods.
+
+### ACONS09
+
+`AutoConstructorInitializer` attribute used on a method not returning void.
+
+### ACONS10
+
+`AutoConstructorInitializer` attribute used on a method with parameters.
