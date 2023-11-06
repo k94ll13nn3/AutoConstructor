@@ -1,9 +1,9 @@
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-namespace AutoConstructor.Generator;
+namespace AutoConstructor.Generator.Extensions;
 
-public static class SymbolExtension
+internal static class SymbolExtension
 {
     public static bool IsInitialized(this IFieldSymbol symbol)
     {
@@ -38,8 +38,7 @@ public static class SymbolExtension
         _ = symbol ?? throw new ArgumentNullException(nameof(symbol));
 
         return symbol.CanBeReferencedByName
-            || (!symbol.CanBeReferencedByName
-                && symbol is IFieldSymbol { AssociatedSymbol: not null });
+            || (!symbol.CanBeReferencedByName && symbol is IFieldSymbol { AssociatedSymbol: not null });
     }
 
     public static IEnumerable<INamedTypeSymbol> GetContainingTypes(this INamedTypeSymbol symbol)
@@ -48,7 +47,7 @@ public static class SymbolExtension
 
         if (symbol.ContainingType is not null)
         {
-            foreach (INamedTypeSymbol item in GetContainingTypes(symbol.ContainingType))
+            foreach (INamedTypeSymbol item in symbol.ContainingType.GetContainingTypes())
             {
                 yield return item;
             }

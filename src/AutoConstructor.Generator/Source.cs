@@ -85,15 +85,6 @@ internal sealed class {InjectAttributeFullName} : System.Attribute
 [System.AttributeUsage(System.AttributeTargets.Method, Inherited = false, AllowMultiple = false)]
 internal sealed class {InitializerAttributeFullName} : System.Attribute
 {{
-    public {InitializerAttributeFullName}(string[] parameterNames = null, string[] rawParameterNames = null)
-    {{
-        ParameterNames = parameterNames ?? System.Array.Empty<string>();
-        RawParameterNames = rawParameterNames ?? System.Array.Empty<string>();
-    }}
-
-    public string[] ParameterNames {{ get; }}
-
-    public string[] RawParameterNames {{ get; }}
 }}
 ";
 }

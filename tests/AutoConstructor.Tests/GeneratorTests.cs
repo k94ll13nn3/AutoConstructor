@@ -1649,4 +1649,37 @@ namespace Test
 ";
         await VerifySourceGenerator.RunAsync(code, generated);
     }
+
+    [Fact]
+    public async Task Run_WithInitializerMethod_ShouldGenerateClass()
+    {
+        const string code = @"
+namespace Test
+{
+    [AutoConstructor]
+    internal partial class Test
+    {
+        private readonly int _t;
+
+        [AutoConstructorInitializer]
+        public void Initializer()
+        {
+        }
+    }
+}";
+        const string generated = @"namespace Test
+{
+    partial class Test
+    {
+        public Test(int t)
+        {
+            this._t = t;
+
+            this.Initializer();
+        }
+    }
+}
+";
+        await VerifySourceGenerator.RunAsync(code, generated);
+    }
 }

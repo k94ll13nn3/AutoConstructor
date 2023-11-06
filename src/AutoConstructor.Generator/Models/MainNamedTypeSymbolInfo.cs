@@ -1,5 +1,6 @@
 using System.Collections.Immutable;
 using AutoConstructor.Generator.Core;
+using AutoConstructor.Generator.Extensions;
 using Microsoft.CodeAnalysis;
 
 namespace AutoConstructor.Generator.Models;
@@ -13,10 +14,16 @@ internal sealed record MainNamedTypeSymbolInfo(
     EquatableArray<NamedTypeSymbolInfo> ContainingTypes,
     bool HasParameterlessConstructor,
     string Filename,
-    string Accessibility)
+    string Accessibility,
+    string? InitializerMethodeName)
     : NamedTypeSymbolInfo(Name, IsStatic, TypeParameters)
 {
-    public MainNamedTypeSymbolInfo(INamedTypeSymbol namedTypeSymbol, bool hasParameterlessConstructor, string filename, string accessibility)
+    public MainNamedTypeSymbolInfo(
+        INamedTypeSymbol namedTypeSymbol,
+        bool hasParameterlessConstructor,
+        string filename,
+        string accessibility,
+        string initializerMethodeName)
         : this(
             namedTypeSymbol.Name,
             namedTypeSymbol.IsStatic,
@@ -26,7 +33,8 @@ internal sealed record MainNamedTypeSymbolInfo(
             namedTypeSymbol.GetContainingTypes().Select(c => new NamedTypeSymbolInfo(c)).ToImmutableArray(),
             hasParameterlessConstructor,
             filename,
-            accessibility)
+            accessibility,
+            initializerMethodeName)
     {
     }
 }

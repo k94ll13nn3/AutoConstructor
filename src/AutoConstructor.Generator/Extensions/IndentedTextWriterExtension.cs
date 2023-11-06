@@ -1,7 +1,7 @@
 using AutoConstructor.Generator.Core;
 using AutoConstructor.Generator.Models;
 
-namespace AutoConstructor.Generator;
+namespace AutoConstructor.Generator.Extensions;
 
 internal static class IndentedTextWriterExtension
 {
