@@ -1,8 +1,10 @@
 # AutoConstructor
 
-[![NuGet](https://img.shields.io/nuget/v/AutoConstructor.svg)](https://www.nuget.org/packages/AutoConstructor/)
-[![GitHub release](https://img.shields.io/github/release/k94ll13nn3/AutoConstructor.svg)](https://github.com/k94ll13nn3/AutoConstructor/releases/latest)
-[![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/k94ll13nn3/AutoConstructor/main/LICENSE)
+[![NuGet](https://img.shields.io/nuget/vpre/AutoConstructor?logo=nuget
+)](https://www.nuget.org/packages/AutoConstructor/)
+[![GitHub release](https://img.shields.io/github/release/k94ll13nn3/AutoConstructor.svg?logo=github)](https://github.com/k94ll13nn3/AutoConstructor/releases/latest)
+[![GitHub license](https://img.shields.io/github/license/k94ll13nn3/AutoConstructor
+)](https://raw.githubusercontent.com/k94ll13nn3/AutoConstructor/main/LICENSE)
 ![ci.yml](https://github.com/k94ll13nn3/AutoConstructor/workflows/.github/workflows/ci.yml/badge.svg)
 
 C# source generator that generates a constructor from readonly fields/properties in a class.
