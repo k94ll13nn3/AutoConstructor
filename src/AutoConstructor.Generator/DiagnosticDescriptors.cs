@@ -1,8 +1,5 @@
 using Microsoft.CodeAnalysis;
 
-// Fix for https://github.com/dotnet/roslyn-analyzers/issues/5828.
-#pragma warning disable IDE0090 // Use 'new DiagnosticDescriptor(...)'
-
 namespace AutoConstructor.Generator;
 
 public static class DiagnosticDescriptors
@@ -21,7 +18,13 @@ public static class DiagnosticDescriptors
 
     public const string ClassWithWrongConstructorAccessibilityDiagnosticId = "ACONS07";
 
-    public static readonly DiagnosticDescriptor ClassWithoutPartialRule = new DiagnosticDescriptor(
+    public const string MultipleInitializerMethodsDiagnosticId = "ACONS08";
+
+    public const string InitializerMethodMustReturnVoidDiagnosticId = "ACONS09";
+
+    public const string InitializerMethodMustBeParameterlessDiagnosticId = "ACONS10";
+
+    public static readonly DiagnosticDescriptor ClassWithoutPartialRule = new(
         ClassWithoutPartialDiagnosticId,
         "Couldn't generate constructor",
         $"Type decorated with {Source.AttributeFullName} must be also declared partial",
@@ -32,7 +35,7 @@ public static class DiagnosticDescriptors
         $"https://github.com/k94ll13nn3/AutoConstructor#{ClassWithoutPartialDiagnosticId}",
         WellKnownDiagnosticTags.Build);
 
-    public static readonly DiagnosticDescriptor ClassWithoutFieldsToInjectRule = new DiagnosticDescriptor(
+    public static readonly DiagnosticDescriptor ClassWithoutFieldsToInjectRule = new(
         ClassWithoutFieldsToInjectDiagnosticId,
         $"Remove {Source.AttributeFullName}",
         $"{Source.AttributeFullName} has no effect on a class without fields to inject",
@@ -43,7 +46,7 @@ public static class DiagnosticDescriptors
         $"https://github.com/k94ll13nn3/AutoConstructor#{ClassWithoutFieldsToInjectDiagnosticId}",
         WellKnownDiagnosticTags.Unnecessary);
 
-    public static readonly DiagnosticDescriptor IgnoreAttributeOnNonProcessedFieldRule = new DiagnosticDescriptor(
+    public static readonly DiagnosticDescriptor IgnoreAttributeOnNonProcessedFieldRule = new(
         IgnoreAttributeOnNonProcessedFieldDiagnosticId,
         $"Remove {Source.IgnoreAttributeFullName}",
         $"{Source.IgnoreAttributeFullName} has no effect on a field that cannot be injected",
@@ -54,7 +57,7 @@ public static class DiagnosticDescriptors
         $"https://github.com/k94ll13nn3/AutoConstructor#{IgnoreAttributeOnNonProcessedFieldDiagnosticId}",
         WellKnownDiagnosticTags.Unnecessary);
 
-    public static readonly DiagnosticDescriptor InjectAttributeOnIgnoredFieldRule = new DiagnosticDescriptor(
+    public static readonly DiagnosticDescriptor InjectAttributeOnIgnoredFieldRule = new(
         InjectAttributeOnIgnoredFieldDiagnosticId,
         $"Remove {Source.InjectAttributeFullName}",
         $"{Source.InjectAttributeFullName} has no effect on an ignored field",
@@ -65,7 +68,7 @@ public static class DiagnosticDescriptors
         $"https://github.com/k94ll13nn3/AutoConstructor#{InjectAttributeOnIgnoredFieldDiagnosticId}",
         WellKnownDiagnosticTags.Unnecessary);
 
-    public static readonly DiagnosticDescriptor IgnoreOrInjectAttributeOnClassWithoutAttributeRule = new DiagnosticDescriptor(
+    public static readonly DiagnosticDescriptor IgnoreOrInjectAttributeOnClassWithoutAttributeRule = new(
         IgnoreOrInjectAttributeOnClassWithoutAttributeDiagnosticId,
         $"Remove {Source.InjectAttributeFullName} and {Source.IgnoreAttributeFullName}",
         $"{Source.InjectAttributeFullName} and {Source.IgnoreAttributeFullName} have no effect if the class is not annotated with {Source.AttributeFullName}",
@@ -76,7 +79,7 @@ public static class DiagnosticDescriptors
         $"https://github.com/k94ll13nn3/AutoConstructor#{IgnoreOrInjectAttributeOnClassWithoutAttributeDiagnosticId}",
         WellKnownDiagnosticTags.Unnecessary);
 
-    public static readonly DiagnosticDescriptor MistmatchTypesRule = new DiagnosticDescriptor(
+    public static readonly DiagnosticDescriptor MistmatchTypesRule = new(
         MistmatchTypesDiagnosticId,
         "Couldn't generate constructor",
         "One or more parameter have mismatching types",
@@ -87,7 +90,7 @@ public static class DiagnosticDescriptors
         $"https://github.com/k94ll13nn3/AutoConstructor#{MistmatchTypesDiagnosticId}",
         WellKnownDiagnosticTags.Build);
 
-    public static readonly DiagnosticDescriptor ClassWithWrongConstructorAccessibilityRule = new DiagnosticDescriptor(
+    public static readonly DiagnosticDescriptor ClassWithWrongConstructorAccessibilityRule = new(
         ClassWithWrongConstructorAccessibilityDiagnosticId,
         "Wrong constuctor accessibility",
         "Unknown constuctor accessibility, allowed values are public, private, protected, internal, protected internal or private protected",
@@ -96,5 +99,38 @@ public static class DiagnosticDescriptors
         true,
         null,
         $"https://github.com/k94ll13nn3/AutoConstructor#{ClassWithWrongConstructorAccessibilityDiagnosticId}",
+        WellKnownDiagnosticTags.Build);
+
+    public static readonly DiagnosticDescriptor MultipleInitializerMethodsRule = new(
+        MultipleInitializerMethodsDiagnosticId,
+        $"Multiple {Source.InitializerAttributeFullName}",
+        $"Multiple {Source.InitializerAttributeFullName} methods are defined, only the first one is called, remove the attributes on the others",
+        "Usage",
+        DiagnosticSeverity.Warning,
+        true,
+        null,
+        $"https://github.com/k94ll13nn3/AutoConstructor#{MultipleInitializerMethodsDiagnosticId}",
+        WellKnownDiagnosticTags.Unnecessary);
+
+    public static readonly DiagnosticDescriptor InitializerMethodMustReturnVoidRule = new(
+        InitializerMethodMustReturnVoidDiagnosticId,
+        $"{Source.InitializerAttributeFullName} on method not returning void",
+        $"Method marked with {Source.InitializerAttributeFullName} must return void",
+        "Usage",
+        DiagnosticSeverity.Error,
+        true,
+        null,
+        $"https://github.com/k94ll13nn3/AutoConstructor#{InitializerMethodMustReturnVoidDiagnosticId}",
+        WellKnownDiagnosticTags.Build);
+
+    public static readonly DiagnosticDescriptor InitializerMethodMustBeParameterlessRule = new(
+        InitializerMethodMustBeParameterlessDiagnosticId,
+        $"{Source.InitializerAttributeFullName} on method with parameter",
+        $"Method marked with {Source.InitializerAttributeFullName} must not have parameters",
+        "Usage",
+        DiagnosticSeverity.Error,
+        true,
+        null,
+        $"https://github.com/k94ll13nn3/AutoConstructor#{InitializerMethodMustBeParameterlessDiagnosticId}",
         WellKnownDiagnosticTags.Build);
 }

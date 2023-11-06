@@ -15,7 +15,8 @@ public sealed class RemoveAttributeCodeFixProvider : CodeFixProvider
         DiagnosticDescriptors.ClassWithoutFieldsToInjectDiagnosticId,
         DiagnosticDescriptors.IgnoreAttributeOnNonProcessedFieldDiagnosticId,
         DiagnosticDescriptors.InjectAttributeOnIgnoredFieldDiagnosticId,
-        DiagnosticDescriptors.IgnoreOrInjectAttributeOnClassWithoutAttributeDiagnosticId);
+        DiagnosticDescriptors.IgnoreOrInjectAttributeOnClassWithoutAttributeDiagnosticId,
+        DiagnosticDescriptors.MultipleInitializerMethodsDiagnosticId);
 
     public override FixAllProvider GetFixAllProvider()
     {

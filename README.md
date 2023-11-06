@@ -340,3 +340,15 @@ public partial class Test
 ### ACONS07
 
 The accessibility defined in the `AutoConstructor` attribute is not an allowed value.
+
+### ACONS08
+
+`AutoConstructorInitializer` attribute used on multiple methods.
+
+### ACONS09
+
+`AutoConstructorInitializer` attribute used on a method not returning void.
+
+### ACONS10
+
+`AutoConstructorInitializer` attribute used on a method with parameters.
