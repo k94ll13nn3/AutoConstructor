@@ -5,7 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
-## Unreleased
+## [5.0.0] - 2023-11-07
+
+### Added
+
+- Add new argument to `AutoConstructorAttribute` for specifiying constructor accessibility
+- Add `AutoConstructorInitializer` used to add a call to a method at the end of the constructor
+
+### Changed
+
+- [**Breaking**] Update Roslyn dependencies. Visual Studio 17.6+ and .NET SDK 7.0.302+ are now required
+- Rework code generation
+
+### Fixed
+
+- Fix incrementability of generator
 
 ### Issues
 
@@ -257,6 +271,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 Initial release
 
+[5.0.0]: https://github.com/k94ll13nn3/AutoConstructor/compare/v4.1.1...v5.0.0
 [4.1.1]: https://github.com/k94ll13nn3/AutoConstructor/compare/v4.1.0...v4.1.1
 [4.1.0]: https://github.com/k94ll13nn3/AutoConstructor/compare/v4.0.3...v4.1.0
 [4.0.3]: https://github.com/k94ll13nn3/AutoConstructor/compare/v4.0.2...v4.0.3
