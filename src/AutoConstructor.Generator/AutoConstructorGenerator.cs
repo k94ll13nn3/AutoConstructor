@@ -16,7 +16,7 @@ namespace AutoConstructor.Generator;
 [Generator(LanguageNames.CSharp)]
 public sealed class AutoConstructorGenerator : IIncrementalGenerator
 {
-    internal static readonly string[] ConstuctorAccessibilities = new[] { "public", "private", "internal", "protected", "protected internal", "private protected" };
+    internal static readonly string[] ConstuctorAccessibilities = ["public", "private", "internal", "protected", "protected internal", "private protected"];
     internal static readonly string GeneratorVersion = typeof(AutoConstructorGenerator).Assembly.GetName().Version!.ToString();
 
     public void Initialize(IncrementalGeneratorInitializationContext context)

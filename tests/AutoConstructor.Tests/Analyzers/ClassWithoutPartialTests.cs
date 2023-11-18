@@ -22,9 +22,9 @@ namespace Test
     }
 }";
 
-        DiagnosticResult[] expected = new[] {
+        DiagnosticResult[] expected = [
                 VerifyClassWithoutPartial.Diagnostic(DiagnosticDescriptors.ClassWithoutPartialDiagnosticId).WithLocation(0),
-            };
+        ];
         await VerifyClassWithoutPartial.VerifyAnalyzerAsync(test, expected);
     }
 
@@ -51,9 +51,9 @@ namespace Test
     }
 }";
 
-        DiagnosticResult[] expected = new[] {
+        DiagnosticResult[] expected = [
                 VerifyClassWithoutPartial.Diagnostic(DiagnosticDescriptors.ClassWithoutPartialDiagnosticId).WithLocation(0),
-            };
+        ];
         await VerifyClassWithoutPartial.VerifyCodeFixAsync(test, expected, fixtest);
     }
 }

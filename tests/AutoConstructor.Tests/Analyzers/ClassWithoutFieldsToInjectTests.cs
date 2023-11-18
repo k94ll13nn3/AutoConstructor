@@ -21,9 +21,9 @@ namespace Test
     }
 }";
 
-        DiagnosticResult[] expected = new[] {
+        DiagnosticResult[] expected = [
                 VerifyClassWithoutFieldsToInject.Diagnostic(DiagnosticDescriptors.ClassWithoutFieldsToInjectDiagnosticId).WithLocation(0),
-            };
+        ];
         await VerifyClassWithoutFieldsToInject.VerifyAnalyzerAsync(test, expected);
     }
 
@@ -136,7 +136,7 @@ namespace Test
 }")]
     public async Task Analyzer_ClassWithoutFieldsToInjectButFieldsOnParent_ShouldNotReportDiagnostic(string test)
     {
-        DiagnosticResult[] expected = Array.Empty<DiagnosticResult>();
+        DiagnosticResult[] expected = [];
         await VerifyClassWithoutFieldsToInject.VerifyAnalyzerAsync(test, expected);
     }
 
@@ -157,9 +157,9 @@ namespace Test
 }")]
     public async Task Analyzer_ClassWithoutFieldsToInject_ShouldFixCode(string test, string fixtest)
     {
-        DiagnosticResult[] expected = new[] {
+        DiagnosticResult[] expected = [
                 VerifyClassWithoutFieldsToInject.Diagnostic(DiagnosticDescriptors.ClassWithoutFieldsToInjectDiagnosticId).WithLocation(0),
-            };
+        ];
         await VerifyClassWithoutFieldsToInject.VerifyCodeFixAsync(test, expected, fixtest);
     }
 }

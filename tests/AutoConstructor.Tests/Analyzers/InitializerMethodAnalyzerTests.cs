@@ -37,10 +37,10 @@ namespace Test
     }
 }";
 
-        DiagnosticResult[] expected = new[] {
+        DiagnosticResult[] expected = [
                 VerifyClassWithInitializerMethod.Diagnostic(DiagnosticDescriptors.MultipleInitializerMethodsRule).WithLocation(0),
-                VerifyClassWithInitializerMethod.Diagnostic(DiagnosticDescriptors.MultipleInitializerMethodsRule).WithLocation(1),
-            };
+            VerifyClassWithInitializerMethod.Diagnostic(DiagnosticDescriptors.MultipleInitializerMethodsRule).WithLocation(1),
+        ];
         await VerifyClassWithInitializerMethod.VerifyAnalyzerAsync(test, expected);
     }
 
@@ -63,9 +63,9 @@ namespace Test
     }
 }";
 
-        DiagnosticResult[] expected = new[] {
+        DiagnosticResult[] expected = [
                 VerifyClassWithInitializerMethod.Diagnostic(DiagnosticDescriptors.InitializerMethodMustReturnVoidRule).WithLocation(0),
-            };
+        ];
         await VerifyClassWithInitializerMethod.VerifyAnalyzerAsync(test, expected);
     }
 
@@ -87,9 +87,9 @@ namespace Test
     }
 }";
 
-        DiagnosticResult[] expected = new[] {
+        DiagnosticResult[] expected = [
                 VerifyClassWithInitializerMethod.Diagnostic(DiagnosticDescriptors.InitializerMethodMustBeParameterlessRule).WithLocation(0),
-            };
+        ];
         await VerifyClassWithInitializerMethod.VerifyAnalyzerAsync(test, expected);
     }
 
@@ -143,10 +143,10 @@ namespace Test
         }
     }
 }";
-        DiagnosticResult[] expected = new[] {
+        DiagnosticResult[] expected = [
                 VerifyClassWithInitializerMethod.Diagnostic(DiagnosticDescriptors.MultipleInitializerMethodsRule).WithLocation(0),
-                VerifyClassWithInitializerMethod.Diagnostic(DiagnosticDescriptors.MultipleInitializerMethodsRule).WithLocation(1),
-            };
+            VerifyClassWithInitializerMethod.Diagnostic(DiagnosticDescriptors.MultipleInitializerMethodsRule).WithLocation(1),
+        ];
         await VerifyClassWithInitializerMethod.VerifyCodeFixAsync(test, expected, fixtest, 1);
     }
 }

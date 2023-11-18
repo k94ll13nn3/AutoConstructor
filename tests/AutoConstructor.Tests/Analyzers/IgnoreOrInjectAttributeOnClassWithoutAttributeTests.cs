@@ -30,9 +30,9 @@ namespace Test
 }")]
     public async Task Analyzer_IgnoreOrInjectAttributeOnClassWithoutAttribute_ShouldReportDiagnostic(string test)
     {
-        DiagnosticResult[] expected = new[] {
+        DiagnosticResult[] expected = [
                 VerifyIgnoreOrInjectAttributeOnClassWithoutAttribute.Diagnostic(DiagnosticDescriptors.IgnoreOrInjectAttributeOnClassWithoutAttributeDiagnosticId).WithLocation(0),
-            };
+        ];
         await VerifyIgnoreOrInjectAttributeOnClassWithoutAttribute.VerifyAnalyzerAsync(test, expected);
     }
 
@@ -71,9 +71,9 @@ namespace Test
 }")]
     public async Task Analyzer_IgnoreOrInjectAttributeOnClassWithoutAttribute_ShouldFixCode(string test, string fixtest)
     {
-        DiagnosticResult[] expected = new[] {
+        DiagnosticResult[] expected = [
                 VerifyIgnoreOrInjectAttributeOnClassWithoutAttribute.Diagnostic(DiagnosticDescriptors.IgnoreOrInjectAttributeOnClassWithoutAttributeDiagnosticId).WithLocation(0),
-            };
+        ];
         await VerifyIgnoreOrInjectAttributeOnClassWithoutAttribute.VerifyCodeFixAsync(test, expected, fixtest);
     }
 
@@ -100,10 +100,10 @@ namespace Test
     }
 }";
 
-        DiagnosticResult[] expected = new[] {
+        DiagnosticResult[] expected = [
                 VerifyIgnoreOrInjectAttributeOnClassWithoutAttribute.Diagnostic(DiagnosticDescriptors.IgnoreOrInjectAttributeOnClassWithoutAttributeDiagnosticId).WithLocation(0),
-                VerifyIgnoreOrInjectAttributeOnClassWithoutAttribute.Diagnostic(DiagnosticDescriptors.IgnoreOrInjectAttributeOnClassWithoutAttributeDiagnosticId).WithLocation(1),
-            };
+            VerifyIgnoreOrInjectAttributeOnClassWithoutAttribute.Diagnostic(DiagnosticDescriptors.IgnoreOrInjectAttributeOnClassWithoutAttributeDiagnosticId).WithLocation(1),
+        ];
         await VerifyIgnoreOrInjectAttributeOnClassWithoutAttribute.VerifyCodeFixAsync(test, expected, fixtest);
     }
 }

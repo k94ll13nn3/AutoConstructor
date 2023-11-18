@@ -21,9 +21,9 @@ namespace Test
     }
 }";
 
-        DiagnosticResult[] expected = new[] {
+        DiagnosticResult[] expected = [
                 VerifyClassWithWrongConstructorAccessibility.Diagnostic(DiagnosticDescriptors.ClassWithWrongConstructorAccessibilityDiagnosticId).WithLocation(0),
-            };
+        ];
         await VerifyClassWithWrongConstructorAccessibility.VerifyAnalyzerAsync(test, expected);
     }
 
@@ -40,6 +40,6 @@ namespace Test
     }
 }";
 
-        await VerifyClassWithWrongConstructorAccessibility.VerifyAnalyzerAsync(test, Array.Empty<DiagnosticResult>());
+        await VerifyClassWithWrongConstructorAccessibility.VerifyAnalyzerAsync(test, []);
     }
 }

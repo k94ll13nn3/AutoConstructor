@@ -107,7 +107,7 @@ namespace Test
         Assert.Equal(combineStepReason, result.TrackedSteps["Combine"].Single().Outputs[0].Reason);
     }
 
-    private static Compilation CreateCompilation(SyntaxTree syntaxTree)
+    private static CSharpCompilation CreateCompilation(SyntaxTree syntaxTree)
     {
         return CSharpCompilation.Create("compilation",
                 new[] { syntaxTree },

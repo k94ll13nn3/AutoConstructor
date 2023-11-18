@@ -23,9 +23,9 @@ namespace Test
     }
 }";
 
-        DiagnosticResult[] expected = new[] {
+        DiagnosticResult[] expected = [
                 VerifyIgnoreAttributeOnNonProcessedField.Diagnostic(DiagnosticDescriptors.IgnoreAttributeOnNonProcessedFieldDiagnosticId).WithLocation(0),
-            };
+        ];
         await VerifyIgnoreAttributeOnNonProcessedField.VerifyAnalyzerAsync(test, expected);
     }
 
@@ -50,9 +50,9 @@ namespace Test
 }")]
     public async Task Analyzer_IgnoreAttributeOnNonProcessedField_ShouldFixCode(string test, string fixtest)
     {
-        DiagnosticResult[] expected = new[] {
+        DiagnosticResult[] expected = [
                 VerifyIgnoreAttributeOnNonProcessedField.Diagnostic(DiagnosticDescriptors.IgnoreAttributeOnNonProcessedFieldDiagnosticId).WithLocation(0),
-            };
+        ];
         await VerifyIgnoreAttributeOnNonProcessedField.VerifyCodeFixAsync(test, expected, fixtest);
     }
 }

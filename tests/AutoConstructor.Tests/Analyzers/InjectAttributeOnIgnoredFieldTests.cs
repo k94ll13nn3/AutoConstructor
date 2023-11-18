@@ -23,9 +23,9 @@ namespace Test
     }
 }";
 
-        DiagnosticResult[] expected = new[] {
+        DiagnosticResult[] expected = [
                 VerifyInjectAttributeOnIgnoredField.Diagnostic(DiagnosticDescriptors.InjectAttributeOnIgnoredFieldDiagnosticId).WithLocation(0),
-            };
+        ];
         await VerifyInjectAttributeOnIgnoredField.VerifyAnalyzerAsync(test, expected);
     }
 
@@ -50,9 +50,9 @@ namespace Test
 }")]
     public async Task Analyzer_InjectAttributeOnIgnoredField_ShouldFixCode(string test, string fixtest)
     {
-        DiagnosticResult[] expected = new[] {
+        DiagnosticResult[] expected = [
                 VerifyInjectAttributeOnIgnoredField.Diagnostic(DiagnosticDescriptors.InjectAttributeOnIgnoredFieldDiagnosticId).WithLocation(0),
-            };
+        ];
         await VerifyInjectAttributeOnIgnoredField.VerifyCodeFixAsync(test, expected, fixtest);
     }
 }
