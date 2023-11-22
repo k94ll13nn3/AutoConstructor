@@ -224,14 +224,14 @@ public sealed class AutoConstructorGenerator : IIncrementalGenerator
             // Write constructor signature.
             writer.WriteLine($"""[global::System.CodeDom.Compiler.GeneratedCodeAttribute("{nameof(AutoConstructor)}", "{GeneratorVersion}")]""");
             writer.Write($"{symbol.Accessibility} {symbol.Name}(");
-            writer.Write(string.Join(", ", constructorParameters.Select(p => $"{p.Type ?? p.FallbackType} {p.ParameterName}")));
+            writer.Write(string.Join(", ", constructorParameters.Select(p => $"{p.Type ?? p.FallbackType} {p.SanitizedParameterName}")));
             writer.Write(")");
 
             // Write base call if any of the parameters is of type PassedToBase
             if (Array.Exists(constructorParameters, p => p.FieldType.HasFlag(FieldType.PassedToBase)))
             {
                 writer.Write(" : base(");
-                writer.Write(string.Join(", ", constructorParameters.Where(p => p.FieldType.HasFlag(FieldType.PassedToBase)).Select(p => p.ParameterName)));
+                writer.Write(string.Join(", ", constructorParameters.Where(p => p.FieldType.HasFlag(FieldType.PassedToBase)).Select(p => p.SanitizedParameterName)));
                 writer.Write(")");
             }
             // Write this call if the symbol has a parameterless constructor
@@ -248,10 +248,10 @@ public sealed class AutoConstructorGenerator : IIncrementalGenerator
             {
                 foreach (FieldInfo field in fields.Where(f => f.FieldType.HasFlag(FieldType.Initialized)))
                 {
-                    writer.Write($"this.{field.FieldName} = {field.Initializer}");
+                    writer.Write($"this.{field.FieldName.SanitizeReservedKeyword()} = {field.Initializer.SanitizeReservedKeyword()}");
                     if (options.EmitNullChecks && field.EmitArgumentNullException)
                     {
-                        writer.Write($" ?? throw new System.ArgumentNullException(nameof({field.ParameterName}))");
+                        writer.Write($" ?? throw new System.ArgumentNullException(nameof({field.SanitizedParameterName}))");
                     }
                     writer.WriteLine(";");
                 }

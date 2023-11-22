@@ -1,3 +1,5 @@
+using AutoConstructor.Generator.Extensions;
+
 namespace AutoConstructor.Generator.Models;
 
 internal sealed record FieldInfo(
@@ -9,4 +11,7 @@ internal sealed record FieldInfo(
     bool Nullable,
     string? Comment,
     bool EmitArgumentNullException,
-    FieldType FieldType);
+    FieldType FieldType)
+{
+    public string SanitizedParameterName => ParameterName.SanitizeReservedKeyword();
+}

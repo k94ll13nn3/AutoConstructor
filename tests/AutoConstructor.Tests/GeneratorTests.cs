@@ -1715,4 +1715,50 @@ namespace Test
 ";
         await VerifySourceGenerator.RunAsync(code, generated);
     }
+
+    [Fact]
+    public async Task Run_WithReservedNamesAsParameters_ShouldGenerateClass()
+    {
+        const string code = @"
+namespace Test
+{
+    [AutoConstructor]
+    internal partial class Test : BaseClass
+    {
+        private readonly int _base;
+        private readonly int _if;
+        private readonly int _public;
+        private readonly int _true;
+        [AutoConstructorInject(parameterName: ""struct"")]
+        private readonly string _myStruct;
+        private readonly int @class;
+    }
+
+    internal class BaseClass
+    {
+        private readonly int _private;
+        public BaseClass(int @private)
+        {
+            this._private = @private;
+        }
+    }
+}";
+        const string generated = @"namespace Test
+{
+    partial class Test
+    {
+        public Test(int @base, int @if, int @public, int @true, string @struct, int @class, int @private) : base(@private)
+        {
+            this._base = @base;
+            this._if = @if;
+            this._public = @public;
+            this._true = @true;
+            this._myStruct = @struct ?? throw new System.ArgumentNullException(nameof(@struct));
+            this.@class = @class;
+        }
+    }
+}
+";
+        await VerifySourceGenerator.RunAsync(code, generated);
+    }
 }
