@@ -152,8 +152,7 @@ public sealed class AutoConstructorGenerator : IIncrementalGenerator
             hasParameterlessConstructor,
             filename,
             accessibility ?? "public",
-            initializerMethod?.Name,
-            initializerMethod?.IsStatic ?? false);
+            initializerMethod is null ? null : new(initializerMethod.IsStatic, initializerMethod.Name));
         return new(mainNamedTypeSymbolInfo, fields, null);
     }
 
@@ -185,9 +184,9 @@ public sealed class AutoConstructorGenerator : IIncrementalGenerator
         }
 
         // Add namespace
-        if (!symbol.IsGlobalNamespace)
+        if (!symbol.Namespace.IsGlobal)
         {
-            writer.WriteLine($"namespace {symbol.ContainingNamespace}");
+            writer.WriteLine($"namespace {symbol.Namespace.Name}");
             writer.StartBlock();
         }
 
@@ -257,10 +256,10 @@ public sealed class AutoConstructorGenerator : IIncrementalGenerator
                     writer.WriteLine(";");
                 }
 
-                if (symbol.InitializerMethodName is not null)
+                if (symbol.InitializerMethod is not null)
                 {
                     writer.WriteLine();
-                    writer.WriteLine($"{(!symbol.InitializerMethodIsStatic ? "this." : "")}{symbol.InitializerMethodName}();");
+                    writer.WriteLine($"{(!symbol.InitializerMethod.IsStatic ? "this." : "")}{symbol.InitializerMethod.Name}();");
                 }
             }
         }
@@ -272,7 +271,7 @@ public sealed class AutoConstructorGenerator : IIncrementalGenerator
         }
 
         // Close namespace.
-        if (!symbol.IsGlobalNamespace)
+        if (!symbol.Namespace.IsGlobal)
         {
             writer.EndBlock();
         }

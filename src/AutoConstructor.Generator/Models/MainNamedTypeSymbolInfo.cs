@@ -9,14 +9,12 @@ internal sealed record MainNamedTypeSymbolInfo(
     string Name,
     bool IsStatic,
     EquatableArray<string> TypeParameters,
-    bool IsGlobalNamespace,
-    string ContainingNamespace,
+    NamespaceInfo Namespace,
     EquatableArray<NamedTypeSymbolInfo> ContainingTypes,
     bool HasParameterlessConstructor,
     string Filename,
     string Accessibility,
-    string? InitializerMethodName,
-    bool InitializerMethodIsStatic)
+    InitializerMethodInfo? InitializerMethod)
     : NamedTypeSymbolInfo(Name, IsStatic, TypeParameters)
 {
     public MainNamedTypeSymbolInfo(
@@ -24,20 +22,17 @@ internal sealed record MainNamedTypeSymbolInfo(
         bool hasParameterlessConstructor,
         string filename,
         string accessibility,
-        string? initializerMethodeName,
-        bool initializerMethodIsStatic)
+        InitializerMethodInfo? initializerMethod)
         : this(
             namedTypeSymbol.Name,
             namedTypeSymbol.IsStatic,
             namedTypeSymbol.TypeParameters.Select(t => t.Name).ToImmutableArray(),
-            namedTypeSymbol.ContainingNamespace.IsGlobalNamespace,
-            namedTypeSymbol.ContainingNamespace.ToDisplayString(),
+            new(namedTypeSymbol.ContainingNamespace.IsGlobalNamespace, namedTypeSymbol.ContainingNamespace.ToDisplayString()),
             namedTypeSymbol.GetContainingTypes().Select(c => new NamedTypeSymbolInfo(c)).ToImmutableArray(),
             hasParameterlessConstructor,
             filename,
             accessibility,
-            initializerMethodeName,
-            initializerMethodIsStatic)
+            initializerMethod)
     {
     }
 }
