@@ -88,24 +88,6 @@ public sealed class AutoConstructorGenerator : IIncrementalGenerator
             return null;
         }
 
-        string filename = string.Empty;
-        if (symbol.ContainingType is not null)
-        {
-            filename = $"{string.Join(".", symbol.GetContainingTypes().Select(c => c.Name))}.";
-        }
-
-        filename += $"{symbol.Name}";
-
-        if (symbol.TypeArguments.Length > 0)
-        {
-            filename += string.Concat(symbol.TypeArguments.Select(tp => $".{tp.Name}"));
-        }
-
-        if (!symbol.ContainingNamespace.IsGlobalNamespace)
-        {
-            filename = $"{symbol.ContainingNamespace.ToDisplayString()}.{filename}";
-        }
-
         List<FieldInfo> concatenatedFields = GetFieldsFromSymbol(symbol);
 
         ExtractFieldsFromParent(symbol, concatenatedFields);
@@ -118,14 +100,21 @@ public sealed class AutoConstructorGenerator : IIncrementalGenerator
             return null;
         }
 
-        if (fields.GroupBy(x => x.ParameterName).Any(g =>
-            g.Where(c => c.Type is not null).Select(c => c.Type).Count() > 1
-            || (g.All(c => c.Type is null) && g.Select(c => c.FallbackType).Count() > 1)
-
-            ))
+        foreach (IGrouping<string, FieldInfo> fieldGroup in fields.GroupBy(x => x.ParameterName))
         {
-            Location location = classSyntax.GetLocation();
-            return new(null, fields, new(location.SourceTree!.FilePath, location.SourceSpan, location.GetLineSpan().Span));
+            string?[] types = fieldGroup.Where(c => c.Type is not null).Select(c => c.Type).Distinct().ToArray();
+
+            // Get all fields defined with AutoConstructorInject, without a type specified and without an initializer (or just the parameter name as Initializer).
+            // It's because thoses fields have a type depending on the initializer, and it cannot be computed.
+            string[] fallbackTypesOfFieldsWithoutInitializer = fieldGroup.Where(c => c.Type is null && c.Initializer == c.ParameterName).Select(c => c.FallbackType).Distinct().ToArray();
+
+            if (types.Length > 1
+                || fallbackTypesOfFieldsWithoutInitializer.Length > 1
+                || (fallbackTypesOfFieldsWithoutInitializer.Length > 0 && types.Length > 0 && fallbackTypesOfFieldsWithoutInitializer[0] != types[0]))
+            {
+                Location location = classSyntax.GetLocation();
+                return new(null, fields, new(location.SourceTree!.FilePath, location.SourceSpan, location.GetLineSpan().Span));
+            }
         }
 
         bool hasParameterlessConstructor =
@@ -150,7 +139,7 @@ public sealed class AutoConstructorGenerator : IIncrementalGenerator
         MainNamedTypeSymbolInfo mainNamedTypeSymbolInfo = new(
             symbol,
             hasParameterlessConstructor,
-            filename,
+            symbol.GenerateFilename(),
             accessibility ?? "public",
             initializerMethod is null ? null : new(initializerMethod.IsStatic, initializerMethod.Name));
         return new(mainNamedTypeSymbolInfo, fields, null);

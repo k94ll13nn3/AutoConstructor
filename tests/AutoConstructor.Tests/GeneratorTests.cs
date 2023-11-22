@@ -457,6 +457,30 @@ namespace Test
     }
 
     [Fact]
+    public async Task Run_WithMismatchingTypesAndFallbackTypes_ShouldNotGenerateClass()
+    {
+        const string code = @"
+namespace Test
+{
+    [AutoConstructor]
+    internal partial class Test
+    {
+        [AutoConstructorInject(null, ""t"", null)]
+        private readonly int _a;
+        [AutoConstructorInject(null, ""t"", typeof(string))]
+        private readonly int _b;
+        [AutoConstructorInject(null, ""t"", null)]
+        private readonly int _c;
+        [AutoConstructorInject(null, ""t"", typeof(string))]
+        private readonly int _d;
+    }
+}";
+
+        DiagnosticResult diagnosticResult = new DiagnosticResult(DiagnosticDescriptors.MistmatchTypesDiagnosticId, DiagnosticSeverity.Error).WithSpan(4, 5, 15, 6);
+        await VerifySourceGenerator.RunAsync(code, diagnostics: new[] { diagnosticResult });
+    }
+
+    [Fact]
     public async Task Run_WithMismatchingFallbackTypes_ShouldNotGenerateClass()
     {
         const string code = @"
@@ -1755,6 +1779,42 @@ namespace Test
             this._true = @true;
             this._myStruct = @struct ?? throw new System.ArgumentNullException(nameof(@struct));
             this.@class = @class;
+        }
+    }
+}
+";
+        await VerifySourceGenerator.RunAsync(code, generated);
+    }
+
+    [Fact]
+    public async Task Run_WithMultipleInjectWithSameParameterName_ShouldGenerateClass()
+    {
+        const string code = @"
+namespace Test
+{
+    [AutoConstructor]
+    internal partial class Test
+    {
+        [AutoConstructorInject(""t.Length"", ""t"", null)]
+        private readonly int _a;
+        [AutoConstructorInject(null, ""t"", typeof(string))]
+        private readonly string _b;
+        [AutoConstructorInject(null, ""t"", null)]
+        private readonly string _c;
+        [AutoConstructorInject(null, ""t"", typeof(string))]
+        private readonly string _d;
+    }
+}";
+        const string generated = @"namespace Test
+{
+    partial class Test
+    {
+        public Test(string t)
+        {
+            this._a = t.Length;
+            this._b = t ?? throw new System.ArgumentNullException(nameof(t));
+            this._c = t ?? throw new System.ArgumentNullException(nameof(t));
+            this._d = t ?? throw new System.ArgumentNullException(nameof(t));
         }
     }
 }

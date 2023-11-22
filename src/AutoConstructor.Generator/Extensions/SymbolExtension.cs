@@ -55,4 +55,27 @@ internal static class SymbolExtension
             yield return symbol.ContainingType;
         }
     }
+
+    public static string GenerateFilename(this INamedTypeSymbol symbol)
+    {
+        string filename = string.Empty;
+        if (symbol.ContainingType is not null)
+        {
+            filename = $"{string.Join(".", symbol.GetContainingTypes().Select(c => c.Name))}.";
+        }
+
+        filename += $"{symbol.Name}";
+
+        if (symbol.TypeArguments.Length > 0)
+        {
+            filename += string.Concat(symbol.TypeArguments.Select(tp => $".{tp.Name}"));
+        }
+
+        if (!symbol.ContainingNamespace.IsGlobalNamespace)
+        {
+            filename = $"{symbol.ContainingNamespace.ToDisplayString()}.{filename}";
+        }
+
+        return filename;
+    }
 }
