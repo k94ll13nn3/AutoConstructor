@@ -143,18 +143,17 @@ public sealed class AutoConstructorGenerator : IIncrementalGenerator
             accessibility = accessibilityValue;
         }
 
-        string? initializerMethod = symbol.GetMembers()
+        IMethodSymbol? initializerMethod = symbol.GetMembers()
             .OfType<IMethodSymbol>()
-            .Where(x => x.HasAttribute(Source.InitializerAttributeFullName))
-            .Select(x => x.Name)
-            .FirstOrDefault();
+            .FirstOrDefault(x => x.HasAttribute(Source.InitializerAttributeFullName));
 
         MainNamedTypeSymbolInfo mainNamedTypeSymbolInfo = new(
             symbol,
             hasParameterlessConstructor,
             filename,
             accessibility ?? "public",
-            initializerMethod);
+            initializerMethod?.Name,
+            initializerMethod?.IsStatic ?? false);
         return new(mainNamedTypeSymbolInfo, fields, null);
     }
 
@@ -258,10 +257,10 @@ public sealed class AutoConstructorGenerator : IIncrementalGenerator
                     writer.WriteLine(";");
                 }
 
-                if (symbol.InitializerMethodeName is not null)
+                if (symbol.InitializerMethodName is not null)
                 {
                     writer.WriteLine();
-                    writer.WriteLine($"this.{symbol.InitializerMethodeName}();");
+                    writer.WriteLine($"{(!symbol.InitializerMethodIsStatic ? "this." : "")}{symbol.InitializerMethodName}();");
                 }
             }
         }

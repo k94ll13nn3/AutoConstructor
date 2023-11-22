@@ -15,7 +15,8 @@ internal sealed record MainNamedTypeSymbolInfo(
     bool HasParameterlessConstructor,
     string Filename,
     string Accessibility,
-    string? InitializerMethodeName)
+    string? InitializerMethodName,
+    bool InitializerMethodIsStatic)
     : NamedTypeSymbolInfo(Name, IsStatic, TypeParameters)
 {
     public MainNamedTypeSymbolInfo(
@@ -23,7 +24,8 @@ internal sealed record MainNamedTypeSymbolInfo(
         bool hasParameterlessConstructor,
         string filename,
         string accessibility,
-        string initializerMethodeName)
+        string? initializerMethodeName,
+        bool initializerMethodIsStatic)
         : this(
             namedTypeSymbol.Name,
             namedTypeSymbol.IsStatic,
@@ -34,7 +36,8 @@ internal sealed record MainNamedTypeSymbolInfo(
             hasParameterlessConstructor,
             filename,
             accessibility,
-            initializerMethodeName)
+            initializerMethodeName,
+            initializerMethodIsStatic)
     {
     }
 }
