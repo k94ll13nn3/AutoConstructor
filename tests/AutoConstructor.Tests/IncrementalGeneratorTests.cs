@@ -32,6 +32,32 @@ namespace Test
 
 ", IncrementalStepRunReason.Cached, IncrementalStepRunReason.Unchanged, IncrementalStepRunReason.Cached)]
     [InlineData(@"
+namespace Nested
+{
+    internal partial class Outer<T1>
+    {
+        [AutoConstructor]
+        internal partial class Inner<T2>
+        {
+            private readonly T1 _t1;
+            private readonly T2 _t2;
+        }
+    }
+}", @"
+namespace Nested
+{
+    internal partial class Outer<T1>
+    {
+        [AutoConstructor]
+        internal partial class Inner<T2>
+        {
+            // Some comment
+            private readonly T1 _t1;
+            private readonly T2 _t2;
+        }
+    }
+}", IncrementalStepRunReason.Cached, IncrementalStepRunReason.Unchanged, IncrementalStepRunReason.Cached)]
+    [InlineData(@"
 namespace Test
 {
     [AutoConstructor]
