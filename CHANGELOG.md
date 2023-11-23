@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [5.1.0] - 2023-11-23
+
+### Changed
+
+- Add support for struct types and different type kind nesting (by @Sergio0694)
+
+### Pull Requests
+
+- [#89](https://github.com/k94ll13nn3/AutoConstructor/pull/89): Add support for struct types and different type kind nesting (by [Sergio0694](https://github.com/Sergio0694))
+
 ## [5.0.1] - 2023-11-22
 
 ### Fixed
@@ -279,6 +289,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 Initial release
 
+[5.1.0]: https://github.com/k94ll13nn3/AutoConstructor/compare/v5.0.1...v5.1.0
 [5.0.1]: https://github.com/k94ll13nn3/AutoConstructor/compare/v5.0.0...v5.0.1
 [5.0.0]: https://github.com/k94ll13nn3/AutoConstructor/compare/v4.1.1...v5.0.0
 [4.1.1]: https://github.com/k94ll13nn3/AutoConstructor/compare/v4.1.0...v4.1.1
