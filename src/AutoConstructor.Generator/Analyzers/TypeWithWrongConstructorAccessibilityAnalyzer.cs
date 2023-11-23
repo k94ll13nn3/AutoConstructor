@@ -7,9 +7,9 @@ using Microsoft.CodeAnalysis.Diagnostics;
 namespace AutoConstructor.Generator.Analyzers;
 
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
-public sealed class ClassWithWrongConstructorAccessibilityAnalyzer : DiagnosticAnalyzer
+public sealed class TypeWithWrongConstructorAccessibilityAnalyzer : DiagnosticAnalyzer
 {
-    public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => ImmutableArray.Create(DiagnosticDescriptors.ClassWithWrongConstructorAccessibilityRule);
+    public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => ImmutableArray.Create(DiagnosticDescriptors.TypeWithWrongConstructorAccessibilityRule);
 
     public override void Initialize(AnalysisContext context)
     {
@@ -25,13 +25,13 @@ public sealed class ClassWithWrongConstructorAccessibilityAnalyzer : DiagnosticA
     {
         var symbol = (INamedTypeSymbol)context.Symbol;
 
-        if (symbol.DeclaringSyntaxReferences[0].GetSyntax() is ClassDeclarationSyntax classDeclarationSyntax
+        if (symbol.DeclaringSyntaxReferences[0].GetSyntax() is TypeDeclarationSyntax typeDeclarationSyntax
             && symbol.GetAttribute(Source.AttributeFullName) is AttributeData attribute
             && attribute.AttributeConstructor?.Parameters.Length > 0
             && attribute.GetParameterValue<string>("accessibility") is string { Length: > 0 } accessibilityValue
             && !AutoConstructorGenerator.ConstuctorAccessibilities.Contains(accessibilityValue))
         {
-            var diagnostic = Diagnostic.Create(DiagnosticDescriptors.ClassWithWrongConstructorAccessibilityRule, classDeclarationSyntax.Identifier.GetLocation());
+            var diagnostic = Diagnostic.Create(DiagnosticDescriptors.TypeWithWrongConstructorAccessibilityRule, typeDeclarationSyntax.Identifier.GetLocation());
             context.ReportDiagnostic(diagnostic);
         }
     }

@@ -8,9 +8,9 @@ using Microsoft.CodeAnalysis.Diagnostics;
 namespace AutoConstructor.Generator.Analyzers;
 
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
-public sealed class ClassWithoutPartialAnalyzer : DiagnosticAnalyzer
+public sealed class TypeWithoutPartialAnalyzer : DiagnosticAnalyzer
 {
-    public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => ImmutableArray.Create(DiagnosticDescriptors.ClassWithoutPartialRule);
+    public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => ImmutableArray.Create(DiagnosticDescriptors.TypeWithoutPartialRule);
 
     public override void Initialize(AnalysisContext context)
     {
@@ -26,11 +26,11 @@ public sealed class ClassWithoutPartialAnalyzer : DiagnosticAnalyzer
     {
         var symbol = (INamedTypeSymbol)context.Symbol;
 
-        if (symbol.DeclaringSyntaxReferences[0].GetSyntax() is ClassDeclarationSyntax classDeclarationSyntax
+        if (symbol.DeclaringSyntaxReferences[0].GetSyntax() is TypeDeclarationSyntax typeDeclarationSyntax
             && symbol.HasAttribute(Source.AttributeFullName)
-            && !classDeclarationSyntax.Modifiers.Any(SyntaxKind.PartialKeyword))
+            && !typeDeclarationSyntax.Modifiers.Any(SyntaxKind.PartialKeyword))
         {
-            var diagnostic = Diagnostic.Create(DiagnosticDescriptors.ClassWithoutPartialRule, classDeclarationSyntax.Identifier.GetLocation());
+            var diagnostic = Diagnostic.Create(DiagnosticDescriptors.TypeWithoutPartialRule, typeDeclarationSyntax.Identifier.GetLocation());
             context.ReportDiagnostic(diagnostic);
         }
     }

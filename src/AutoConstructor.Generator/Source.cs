@@ -13,7 +13,7 @@ public static class Source
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-[System.AttributeUsage(System.AttributeTargets.Class, Inherited = false, AllowMultiple = false)]
+[System.AttributeUsage(System.AttributeTargets.Class | System.AttributeTargets.Struct, Inherited = false, AllowMultiple = false)]
 internal sealed class {AttributeFullName} : System.Attribute
 {{
     public {AttributeFullName}(string accessibility = null)

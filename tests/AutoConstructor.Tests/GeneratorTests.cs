@@ -35,6 +35,32 @@ namespace Test
         await VerifySourceGenerator.RunAsync(code, generated);
     }
 
+    [Fact]
+    public async Task Run_WithAttributeAndPartial_ShouldGenerateStruct()
+    {
+        const string code = @"
+namespace Test
+{
+    [AutoConstructor]
+    internal partial struct Test
+    {
+        private readonly int _t;
+    }
+}";
+        const string generated = @"namespace Test
+{
+    partial struct Test
+    {
+        public Test(int t)
+        {
+            this._t = t;
+        }
+    }
+}
+";
+        await VerifySourceGenerator.RunAsync(code, generated);
+    }
+
     [Theory]
     [InlineData(@"
 namespace Test
@@ -178,7 +204,27 @@ namespace Test
     }
 }
 ")]
-    public async Task Run_WithInjectAttribute_ShouldGenerateClass(string code, string generated)
+    [InlineData(@"
+namespace Test
+{
+    [AutoConstructor]
+    internal partial struct Test
+    {
+        [AutoConstructorInject(parameterName: ""guid"")]
+        private readonly string _guidString;
+    }
+}", @"namespace Test
+{
+    partial struct Test
+    {
+        public Test(string guid)
+        {
+            this._guidString = guid ?? throw new System.ArgumentNullException(nameof(guid));
+        }
+    }
+}
+")]
+    public async Task Run_WithInjectAttribute_ShouldGenerateType(string code, string generated)
     {
         await VerifySourceGenerator.RunAsync(code, generated);
     }
@@ -220,7 +266,16 @@ namespace Test
         private int _ignore;
     }
 }")]
-    public async Task Run_NoFieldsToInject_ShouldNotGenerateClass(string code)
+    [InlineData(@"
+namespace Test
+{
+    [AutoConstructor]
+    internal partial struct Test
+    {
+        private int _ignore;
+    }
+}")]
+    public async Task Run_NoFieldsToInject_ShouldNotGenerateType(string code)
     {
         await VerifySourceGenerator.RunAsync(code);
     }
@@ -233,6 +288,22 @@ namespace Test
 {
     [AutoConstructor]
     internal class Test
+    {
+        private readonly int _t;
+    }
+}";
+
+        await VerifySourceGenerator.RunAsync(code);
+    }
+
+    [Fact]
+    public async Task Run_WithAttributeAndWithoutPartial_ShouldNotGenerateStruct()
+    {
+        const string code = @"
+namespace Test
+{
+    [AutoConstructor]
+    internal struct Test
     {
         private readonly int _t;
     }
@@ -1820,5 +1891,43 @@ namespace Test
 }
 ";
         await VerifySourceGenerator.RunAsync(code, generated);
+    }
+
+    [Fact]
+    public async Task Run_NestedTypeWithinDifferentTypeKinds_ShouldGenerateClass()
+    {
+        const string code = @"
+namespace Test
+{
+    internal partial class A
+    {
+        public partial interface B
+        {
+            [AutoConstructor]
+            public partial struct C
+            {
+                private readonly int _t;
+            }
+        }
+    }
+}";
+        const string generated = @"namespace Test
+{
+    partial class A
+    {
+        partial interface B
+        {
+            partial struct C
+            {
+                public C(int t)
+                {
+                    this._t = t;
+                }
+            }
+        }
+    }
+}
+";
+        await VerifySourceGenerator.RunAsync(code, generated, generatedName: "Test.A.B.C.g.cs");
     }
 }

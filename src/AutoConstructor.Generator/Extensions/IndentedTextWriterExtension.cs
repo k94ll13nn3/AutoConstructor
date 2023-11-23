@@ -1,5 +1,8 @@
 using AutoConstructor.Generator.Core;
 using AutoConstructor.Generator.Models;
+using Microsoft.CodeAnalysis;
+
+#pragma warning disable IDE0072
 
 namespace AutoConstructor.Generator.Extensions;
 
@@ -12,7 +15,15 @@ internal static class IndentedTextWriterExtension
             writer.Write("static ");
         }
 
-        writer.Write($"partial class {symbol.Name}");
+        writer.Write("partial ");
+        writer.Write(symbol.Kind switch
+        {
+            TypeKind.Struct => "struct",
+            TypeKind.Interface => "interface",
+            _ => "class"
+        });
+        writer.Write(" ");
+        writer.Write(symbol.Name);
 
         if (!symbol.TypeParameters.IsEmpty)
         {

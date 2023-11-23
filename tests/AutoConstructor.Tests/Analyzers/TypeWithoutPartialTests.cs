@@ -2,12 +2,12 @@ using AutoConstructor.Generator;
 using Microsoft.CodeAnalysis.Testing;
 using Xunit;
 using VerifyClassWithoutPartial = AutoConstructor.Tests.Verifiers.CSharpCodeFixVerifier<
-    AutoConstructor.Generator.Analyzers.ClassWithoutPartialAnalyzer,
+    AutoConstructor.Generator.Analyzers.TypeWithoutPartialAnalyzer,
     AutoConstructor.Generator.CodeFixes.ClassWithoutPartialCodeFixProvider>;
 
 namespace AutoConstructor.Tests.Analyzers;
 
-public class ClassWithoutPartialTests
+public class TypeWithoutPartialTests
 {
     [Fact]
     public async Task Analyzer_ClassWithoutPartial_ShouldReportDiagnostic()
@@ -23,7 +23,7 @@ namespace Test
 }";
 
         DiagnosticResult[] expected = [
-                VerifyClassWithoutPartial.Diagnostic(DiagnosticDescriptors.ClassWithoutPartialDiagnosticId).WithLocation(0),
+                VerifyClassWithoutPartial.Diagnostic(DiagnosticDescriptors.TypeWithoutPartialDiagnosticId).WithLocation(0),
         ];
         await VerifyClassWithoutPartial.VerifyAnalyzerAsync(test, expected);
     }
@@ -52,7 +52,7 @@ namespace Test
 }";
 
         DiagnosticResult[] expected = [
-                VerifyClassWithoutPartial.Diagnostic(DiagnosticDescriptors.ClassWithoutPartialDiagnosticId).WithLocation(0),
+                VerifyClassWithoutPartial.Diagnostic(DiagnosticDescriptors.TypeWithoutPartialDiagnosticId).WithLocation(0),
         ];
         await VerifyClassWithoutPartial.VerifyCodeFixAsync(test, expected, fixtest);
     }

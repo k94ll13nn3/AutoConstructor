@@ -2,11 +2,11 @@ using AutoConstructor.Generator;
 using Microsoft.CodeAnalysis.Testing;
 using Xunit;
 using VerifyClassWithWrongConstructorAccessibility = AutoConstructor.Tests.Verifiers.CSharpAnalyzerVerifier<
-    AutoConstructor.Generator.Analyzers.ClassWithWrongConstructorAccessibilityAnalyzer>;
+    AutoConstructor.Generator.Analyzers.TypeWithWrongConstructorAccessibilityAnalyzer>;
 
 namespace AutoConstructor.Tests.Analyzers;
 
-public class ClassWithWrongConstructorAccessibilityTests
+public class TypeWithWrongConstructorAccessibilityTests
 {
     [Fact]
     public async Task Analyzer_ClassWithWrongConstructorAccessibility_ShouldReportDiagnostic()
@@ -22,7 +22,7 @@ namespace Test
 }";
 
         DiagnosticResult[] expected = [
-                VerifyClassWithWrongConstructorAccessibility.Diagnostic(DiagnosticDescriptors.ClassWithWrongConstructorAccessibilityDiagnosticId).WithLocation(0),
+                VerifyClassWithWrongConstructorAccessibility.Diagnostic(DiagnosticDescriptors.TypeWithWrongConstructorAccessibilityDiagnosticId).WithLocation(0),
         ];
         await VerifyClassWithWrongConstructorAccessibility.VerifyAnalyzerAsync(test, expected);
     }

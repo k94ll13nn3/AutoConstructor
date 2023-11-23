@@ -4,9 +4,9 @@ namespace AutoConstructor.Generator;
 
 public static class DiagnosticDescriptors
 {
-    public const string ClassWithoutPartialDiagnosticId = "ACONS01";
+    public const string TypeWithoutPartialDiagnosticId = "ACONS01";
 
-    public const string ClassWithoutFieldsToInjectDiagnosticId = "ACONS02";
+    public const string TypeWithoutFieldsToInjectDiagnosticId = "ACONS02";
 
     public const string IgnoreAttributeOnNonProcessedFieldDiagnosticId = "ACONS03";
 
@@ -16,7 +16,7 @@ public static class DiagnosticDescriptors
 
     public const string MistmatchTypesDiagnosticId = "ACONS06";
 
-    public const string ClassWithWrongConstructorAccessibilityDiagnosticId = "ACONS07";
+    public const string TypeWithWrongConstructorAccessibilityDiagnosticId = "ACONS07";
 
     public const string MultipleInitializerMethodsDiagnosticId = "ACONS08";
 
@@ -24,26 +24,26 @@ public static class DiagnosticDescriptors
 
     public const string InitializerMethodMustBeParameterlessDiagnosticId = "ACONS10";
 
-    public static readonly DiagnosticDescriptor ClassWithoutPartialRule = new(
-        ClassWithoutPartialDiagnosticId,
+    public static readonly DiagnosticDescriptor TypeWithoutPartialRule = new(
+        TypeWithoutPartialDiagnosticId,
         "Couldn't generate constructor",
         $"Type decorated with {Source.AttributeFullName} must be also declared partial",
         "Usage",
         DiagnosticSeverity.Warning,
         true,
         null,
-        $"https://github.com/k94ll13nn3/AutoConstructor#{ClassWithoutPartialDiagnosticId}",
+        $"https://github.com/k94ll13nn3/AutoConstructor#{TypeWithoutPartialDiagnosticId}",
         WellKnownDiagnosticTags.Build);
 
-    public static readonly DiagnosticDescriptor ClassWithoutFieldsToInjectRule = new(
-        ClassWithoutFieldsToInjectDiagnosticId,
+    public static readonly DiagnosticDescriptor TypeWithoutFieldsToInjectRule = new(
+        TypeWithoutFieldsToInjectDiagnosticId,
         $"Remove {Source.AttributeFullName}",
         $"{Source.AttributeFullName} has no effect on a class without fields to inject",
         "Usage",
         DiagnosticSeverity.Warning,
         true,
         null,
-        $"https://github.com/k94ll13nn3/AutoConstructor#{ClassWithoutFieldsToInjectDiagnosticId}",
+        $"https://github.com/k94ll13nn3/AutoConstructor#{TypeWithoutFieldsToInjectDiagnosticId}",
         WellKnownDiagnosticTags.Unnecessary);
 
     public static readonly DiagnosticDescriptor IgnoreAttributeOnNonProcessedFieldRule = new(
@@ -90,15 +90,15 @@ public static class DiagnosticDescriptors
         $"https://github.com/k94ll13nn3/AutoConstructor#{MistmatchTypesDiagnosticId}",
         WellKnownDiagnosticTags.Build);
 
-    public static readonly DiagnosticDescriptor ClassWithWrongConstructorAccessibilityRule = new(
-        ClassWithWrongConstructorAccessibilityDiagnosticId,
+    public static readonly DiagnosticDescriptor TypeWithWrongConstructorAccessibilityRule = new(
+        TypeWithWrongConstructorAccessibilityDiagnosticId,
         "Wrong constuctor accessibility",
         "Unknown constuctor accessibility, allowed values are public, private, protected, internal, protected internal or private protected",
         "Usage",
         DiagnosticSeverity.Warning,
         true,
         null,
-        $"https://github.com/k94ll13nn3/AutoConstructor#{ClassWithWrongConstructorAccessibilityDiagnosticId}",
+        $"https://github.com/k94ll13nn3/AutoConstructor#{TypeWithWrongConstructorAccessibilityDiagnosticId}",
         WellKnownDiagnosticTags.Build);
 
     public static readonly DiagnosticDescriptor MultipleInitializerMethodsRule = new(
