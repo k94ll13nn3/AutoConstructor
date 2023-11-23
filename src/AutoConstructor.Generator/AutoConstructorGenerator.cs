@@ -152,7 +152,7 @@ public sealed class AutoConstructorGenerator : IIncrementalGenerator
         string? constructorDocumentationComment = options.ConstructorDocumentationComment;
         if (string.IsNullOrWhiteSpace(constructorDocumentationComment))
         {
-            constructorDocumentationComment = "Initializes a new instance of the {0} class.";
+            constructorDocumentationComment = $"Initializes a new instance of the {{0}} {(symbol.Kind is TypeKind.Struct ? "struct" : "class")}.";
         }
 
         var writer = new IndentedTextWriter();
@@ -180,7 +180,7 @@ public sealed class AutoConstructorGenerator : IIncrementalGenerator
             writer.StartBlock();
         }
 
-        // Add nested classes.
+        // Add nested types.
         foreach (NamedTypeSymbolInfo containingType in symbol.ContainingTypes)
         {
             writer.WriteNamedTypeSymbolInfoLine(containingType);
@@ -190,7 +190,7 @@ public sealed class AutoConstructorGenerator : IIncrementalGenerator
         // Write type name line.
         writer.WriteNamedTypeSymbolInfoLine(symbol);
 
-        // Write class content.
+        // Write type content.
         using (writer.WriteBlock())
         {
             // Get all constuctor parameters from fields. 
@@ -254,7 +254,7 @@ public sealed class AutoConstructorGenerator : IIncrementalGenerator
             }
         }
 
-        // Close nested classes.
+        // Close nested types.
         foreach (NamedTypeSymbolInfo containingType in symbol.ContainingTypes)
         {
             writer.EndBlock();

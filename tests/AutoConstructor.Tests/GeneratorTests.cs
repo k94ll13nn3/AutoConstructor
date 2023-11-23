@@ -451,16 +451,17 @@ namespace Test
     }
 
     [Theory]
-    [InlineData(false, "")]
-    [InlineData(true, "Class {0} comment")]
-    [InlineData(true, "")]
-    public async Task Run_WithMsbuildConfigGenerateDocumentationWithCustomComment_ShouldGenerateClass(bool hasCustomComment, string commentConfig)
+    [InlineData(false, "", true)]
+    [InlineData(true, "Class {0} comment", true)]
+    [InlineData(true, "", true)]
+    [InlineData(false, "", false)]
+    public async Task Run_WithMsbuildConfigGenerateDocumentationWithCustomComment_ShouldGenerateType(bool hasCustomComment, string commentConfig, bool isClass)
     {
-        const string code = @"
+        string code = $$"""
 namespace Test
 {
     [AutoConstructor]
-    internal partial class Test
+    internal partial {{(isClass ? "class" : "struct")}} Test
     {
         /// <summary>
         /// Some field.
@@ -468,16 +469,17 @@ namespace Test
         private readonly string _t1;
         private readonly string _t2;
     }
-}";
+}
+""";
 
         string comment = string.Format(CultureInfo.InvariantCulture, commentConfig, "Test");
         if (string.IsNullOrWhiteSpace(comment))
         {
-            comment = "Initializes a new instance of the Test class.";
+            comment = $"Initializes a new instance of the Test {(isClass ? "class" : "struct")}.";
         }
         string generated = $@"namespace Test
 {{
-    partial class Test
+    partial {(isClass ? "class" : "struct")} Test
     {{
         /// <summary>
         /// {comment}
@@ -1929,5 +1931,38 @@ namespace Test
 }
 ";
         await VerifySourceGenerator.RunAsync(code, generated, generatedName: "Test.A.B.C.g.cs");
+    }
+
+    [Fact]
+    public async Task Run_WithInitializerMethod_ShouldGenerateStruct()
+    {
+        const string code = @"
+namespace Test
+{
+    [AutoConstructor]
+    internal partial struct Test
+    {
+        private readonly int _t;
+
+        [AutoConstructorInitializer]
+        public void Initializer()
+        {
+        }
+    }
+}";
+        const string generated = @"namespace Test
+{
+    partial struct Test
+    {
+        public Test(int t)
+        {
+            this._t = t;
+
+            this.Initializer();
+        }
+    }
+}
+";
+        await VerifySourceGenerator.RunAsync(code, generated);
     }
 }

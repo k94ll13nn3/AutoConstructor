@@ -7,7 +7,7 @@
 )](https://raw.githubusercontent.com/k94ll13nn3/AutoConstructor/main/LICENSE)
 ![ci.yml](https://github.com/k94ll13nn3/AutoConstructor/workflows/.github/workflows/ci.yml/badge.svg)
 
-C# source generator that generates a constructor from readonly fields/properties in a class.
+C# source generator that generates a constructor from readonly fields/properties in a class or struct.
 
 ## Installation
 
@@ -63,8 +63,8 @@ A sample containing more cases is available at the end of this README.
 
 For any class where the generator will be used:
 
-- Mark the class as `partial`
-- Use `AutoConstructorAttribute` on the class
+- Mark the class or struct as `partial`
+- Use `AutoConstructorAttribute` on the class or struct
 
 By default, all `readonly` non-`static` fields without initialization will be used. They will be injected with the same name without any leading `_`.
 

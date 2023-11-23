@@ -29,7 +29,7 @@ public sealed class InitializerMethodAnalyzer : DiagnosticAnalyzer
     {
         var symbol = (INamedTypeSymbol)context.Symbol;
 
-        if (symbol.DeclaringSyntaxReferences[0].GetSyntax() is ClassDeclarationSyntax && symbol.HasAttribute(Source.AttributeFullName))
+        if (symbol.DeclaringSyntaxReferences[0].GetSyntax() is TypeDeclarationSyntax && symbol.HasAttribute(Source.AttributeFullName))
         {
             var initializerMethods = symbol.GetMembers()
                 .OfType<IMethodSymbol>()

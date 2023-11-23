@@ -12,7 +12,7 @@ public static class DiagnosticDescriptors
 
     public const string InjectAttributeOnIgnoredFieldDiagnosticId = "ACONS04";
 
-    public const string IgnoreOrInjectAttributeOnClassWithoutAttributeDiagnosticId = "ACONS05";
+    public const string IgnoreOrInjectAttributeOnTypeWithoutAttributeDiagnosticId = "ACONS05";
 
     public const string MistmatchTypesDiagnosticId = "ACONS06";
 
@@ -38,7 +38,7 @@ public static class DiagnosticDescriptors
     public static readonly DiagnosticDescriptor TypeWithoutFieldsToInjectRule = new(
         TypeWithoutFieldsToInjectDiagnosticId,
         $"Remove {Source.AttributeFullName}",
-        $"{Source.AttributeFullName} has no effect on a class without fields to inject",
+        $"{Source.AttributeFullName} has no effect on a type without fields to inject",
         "Usage",
         DiagnosticSeverity.Warning,
         true,
@@ -68,15 +68,15 @@ public static class DiagnosticDescriptors
         $"https://github.com/k94ll13nn3/AutoConstructor#{InjectAttributeOnIgnoredFieldDiagnosticId}",
         WellKnownDiagnosticTags.Unnecessary);
 
-    public static readonly DiagnosticDescriptor IgnoreOrInjectAttributeOnClassWithoutAttributeRule = new(
-        IgnoreOrInjectAttributeOnClassWithoutAttributeDiagnosticId,
+    public static readonly DiagnosticDescriptor IgnoreOrInjectAttributeOnTypeWithoutAttributeRule = new(
+        IgnoreOrInjectAttributeOnTypeWithoutAttributeDiagnosticId,
         $"Remove {Source.InjectAttributeFullName} and {Source.IgnoreAttributeFullName}",
-        $"{Source.InjectAttributeFullName} and {Source.IgnoreAttributeFullName} have no effect if the class is not annotated with {Source.AttributeFullName}",
+        $"{Source.InjectAttributeFullName} and {Source.IgnoreAttributeFullName} have no effect if the type is not annotated with {Source.AttributeFullName}",
         "Usage",
         DiagnosticSeverity.Warning,
         true,
         null,
-        $"https://github.com/k94ll13nn3/AutoConstructor#{IgnoreOrInjectAttributeOnClassWithoutAttributeDiagnosticId}",
+        $"https://github.com/k94ll13nn3/AutoConstructor#{IgnoreOrInjectAttributeOnTypeWithoutAttributeDiagnosticId}",
         WellKnownDiagnosticTags.Unnecessary);
 
     public static readonly DiagnosticDescriptor MistmatchTypesRule = new(
