@@ -6,6 +6,7 @@ using Microsoft.CodeAnalysis;
 namespace AutoConstructor.Generator.Models;
 
 internal sealed record MainNamedTypeSymbolInfo(
+    TypeKind Kind,
     string Name,
     bool IsStatic,
     EquatableArray<string> TypeParameters,
@@ -15,7 +16,7 @@ internal sealed record MainNamedTypeSymbolInfo(
     string Filename,
     string Accessibility,
     InitializerMethodInfo? InitializerMethod)
-    : NamedTypeSymbolInfo(Name, IsStatic, TypeParameters)
+    : NamedTypeSymbolInfo(Kind, Name, IsStatic, TypeParameters)
 {
     public MainNamedTypeSymbolInfo(
         INamedTypeSymbol namedTypeSymbol,
@@ -24,6 +25,7 @@ internal sealed record MainNamedTypeSymbolInfo(
         string accessibility,
         InitializerMethodInfo? initializerMethod)
         : this(
+            namedTypeSymbol.TypeKind,
             namedTypeSymbol.Name,
             namedTypeSymbol.IsStatic,
             namedTypeSymbol.TypeParameters.Select(t => t.Name).ToImmutableArray(),

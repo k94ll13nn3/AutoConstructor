@@ -34,7 +34,7 @@ public sealed class AutoConstructorGenerator : IIncrementalGenerator
             .ForAttributeWithMetadataName(
                 Source.AttributeFullName,
                 static (node, _) => IsSyntaxTargetForGeneration(node),
-                static (context, _) => Execute(context, (ClassDeclarationSyntax)context.TargetNode))
+                static (context, _) => Execute(context, (TypeDeclarationSyntax)context.TargetNode))
             .WithTrackingName("Execute")
             .Where(static m => m is not null)
             .Combine(context.AnalyzerConfigOptionsProvider.Select((c, _) => ParseOptions(c.GlobalOptions)))
@@ -59,7 +59,9 @@ public sealed class AutoConstructorGenerator : IIncrementalGenerator
 
     private static bool IsSyntaxTargetForGeneration(SyntaxNode node)
     {
-        return node is ClassDeclarationSyntax { AttributeLists.Count: > 0 } classDeclarationSyntax && classDeclarationSyntax.Modifiers.Any(SyntaxKind.PartialKeyword);
+        return
+            (node is ClassDeclarationSyntax { AttributeLists.Count: > 0 } classDeclarationSyntax && classDeclarationSyntax.Modifiers.Any(SyntaxKind.PartialKeyword)) ||
+            (node is StructDeclarationSyntax { AttributeLists.Count: > 0 } structDeclarationSyntax && structDeclarationSyntax.Modifiers.Any(SyntaxKind.PartialKeyword));
     }
 
     private static Options ParseOptions(AnalyzerConfigOptions analyzerOptions)
@@ -81,7 +83,7 @@ public sealed class AutoConstructorGenerator : IIncrementalGenerator
         return new(generateConstructorDocumentation, constructorDocumentationComment, emitNullChecks);
     }
 
-    private static GeneratorExectutionResult? Execute(GeneratorAttributeSyntaxContext context, ClassDeclarationSyntax classSyntax)
+    private static GeneratorExectutionResult? Execute(GeneratorAttributeSyntaxContext context, TypeDeclarationSyntax typeSyntax)
     {
         if (context.TargetSymbol is not INamedTypeSymbol symbol)
         {
@@ -112,13 +114,13 @@ public sealed class AutoConstructorGenerator : IIncrementalGenerator
                 || fallbackTypesOfFieldsWithoutInitializer.Length > 1
                 || (fallbackTypesOfFieldsWithoutInitializer.Length > 0 && types.Length > 0 && fallbackTypesOfFieldsWithoutInitializer[0] != types[0]))
             {
-                Location location = classSyntax.GetLocation();
+                Location location = typeSyntax.GetLocation();
                 return new(null, fields, new(location.SourceTree!.FilePath, location.SourceSpan, location.GetLineSpan().Span));
             }
         }
 
         bool hasParameterlessConstructor =
-            classSyntax
+            typeSyntax
             .ChildNodes()
             .Count(n => n is ConstructorDeclarationSyntax constructor && !constructor.Modifiers.Any(m => m.IsKind(SyntaxKind.StaticKeyword))) == 1
             && symbol.Constructors.Any(d => !d.IsStatic && d.Parameters.Length == 0);
@@ -186,7 +188,7 @@ public sealed class AutoConstructorGenerator : IIncrementalGenerator
             writer.StartBlock();
         }
 
-        // Write class name line.
+        // Write type name line.
         writer.WriteNamedTypeSymbolInfoLine(symbol);
 
         // Write class content.
