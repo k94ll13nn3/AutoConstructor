@@ -59,9 +59,8 @@ public sealed class AutoConstructorGenerator : IIncrementalGenerator
 
     private static bool IsSyntaxTargetForGeneration(SyntaxNode node)
     {
-        return
-            (node is ClassDeclarationSyntax { AttributeLists.Count: > 0 } classDeclarationSyntax && classDeclarationSyntax.Modifiers.Any(SyntaxKind.PartialKeyword)) ||
-            (node is StructDeclarationSyntax { AttributeLists.Count: > 0 } structDeclarationSyntax && structDeclarationSyntax.Modifiers.Any(SyntaxKind.PartialKeyword));
+        // We don't need to filter for class/struct here, as FAWMN is already doing that extra work for us
+        return node is TypeDeclarationSyntax { AttributeLists.Count: > 0 } typeDeclarationSyntax && typeDeclarationSyntax.Modifiers.Any(SyntaxKind.PartialKeyword);
     }
 
     private static Options ParseOptions(AnalyzerConfigOptions analyzerOptions)

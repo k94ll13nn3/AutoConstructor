@@ -12,7 +12,7 @@ namespace AutoConstructor.Generator.CodeFixes;
 public sealed class RemoveAttributeCodeFixProvider : CodeFixProvider
 {
     public override ImmutableArray<string> FixableDiagnosticIds => ImmutableArray.Create(
-        DiagnosticDescriptors.ClassWithoutFieldsToInjectDiagnosticId,
+        DiagnosticDescriptors.TypeWithoutFieldsToInjectDiagnosticId,
         DiagnosticDescriptors.IgnoreAttributeOnNonProcessedFieldDiagnosticId,
         DiagnosticDescriptors.InjectAttributeOnIgnoredFieldDiagnosticId,
         DiagnosticDescriptors.IgnoreOrInjectAttributeOnClassWithoutAttributeDiagnosticId,

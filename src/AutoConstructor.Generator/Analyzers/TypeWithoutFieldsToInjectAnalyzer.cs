@@ -6,9 +6,9 @@ using Microsoft.CodeAnalysis.Diagnostics;
 namespace AutoConstructor.Generator.Analyzers;
 
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
-public sealed class ClassWithoutFieldsToInjectAnalyzer : DiagnosticAnalyzer
+public sealed class TypeWithoutFieldsToInjectAnalyzer : DiagnosticAnalyzer
 {
-    public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => ImmutableArray.Create(DiagnosticDescriptors.ClassWithoutFieldsToInjectRule);
+    public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => ImmutableArray.Create(DiagnosticDescriptors.TypeWithoutFieldsToInjectRule);
 
     public override void Initialize(AnalysisContext context)
     {
@@ -33,7 +33,7 @@ public sealed class ClassWithoutFieldsToInjectAnalyzer : DiagnosticAnalyzer
                 if (propertyTypeIdentifier is not null)
                 {
                     var location = Location.Create(propertyTypeIdentifier.SyntaxTree, propertyTypeIdentifier.Span);
-                    var diagnostic = Diagnostic.Create(DiagnosticDescriptors.ClassWithoutFieldsToInjectRule, location);
+                    var diagnostic = Diagnostic.Create(DiagnosticDescriptors.TypeWithoutFieldsToInjectRule, location);
                     context.ReportDiagnostic(diagnostic);
                 }
             }

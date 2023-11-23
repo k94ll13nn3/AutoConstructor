@@ -2,12 +2,12 @@ using AutoConstructor.Generator;
 using Microsoft.CodeAnalysis.Testing;
 using Xunit;
 using VerifyClassWithoutFieldsToInject = AutoConstructor.Tests.Verifiers.CSharpCodeFixVerifier<
-    AutoConstructor.Generator.Analyzers.ClassWithoutFieldsToInjectAnalyzer,
+    AutoConstructor.Generator.Analyzers.TypeWithoutFieldsToInjectAnalyzer,
     AutoConstructor.Generator.CodeFixes.RemoveAttributeCodeFixProvider>;
 
 namespace AutoConstructor.Tests.Analyzers;
 
-public class ClassWithoutFieldsToInjectTests
+public class TypeWithoutFieldsToInjectTests
 {
     [Fact]
     public async Task Analyzer_ClassWithoutFieldsToInject_ShouldReportDiagnostic()
@@ -22,7 +22,7 @@ namespace Test
 }";
 
         DiagnosticResult[] expected = [
-                VerifyClassWithoutFieldsToInject.Diagnostic(DiagnosticDescriptors.ClassWithoutFieldsToInjectDiagnosticId).WithLocation(0),
+                VerifyClassWithoutFieldsToInject.Diagnostic(DiagnosticDescriptors.TypeWithoutFieldsToInjectDiagnosticId).WithLocation(0),
         ];
         await VerifyClassWithoutFieldsToInject.VerifyAnalyzerAsync(test, expected);
     }
@@ -158,7 +158,7 @@ namespace Test
     public async Task Analyzer_ClassWithoutFieldsToInject_ShouldFixCode(string test, string fixtest)
     {
         DiagnosticResult[] expected = [
-                VerifyClassWithoutFieldsToInject.Diagnostic(DiagnosticDescriptors.ClassWithoutFieldsToInjectDiagnosticId).WithLocation(0),
+                VerifyClassWithoutFieldsToInject.Diagnostic(DiagnosticDescriptors.TypeWithoutFieldsToInjectDiagnosticId).WithLocation(0),
         ];
         await VerifyClassWithoutFieldsToInject.VerifyCodeFixAsync(test, expected, fixtest);
     }

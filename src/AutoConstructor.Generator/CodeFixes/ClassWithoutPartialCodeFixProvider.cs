@@ -12,7 +12,7 @@ namespace AutoConstructor.Generator.CodeFixes;
 [ExportCodeFixProvider(LanguageNames.CSharp, Name = nameof(ClassWithoutPartialCodeFixProvider)), Shared]
 public sealed class ClassWithoutPartialCodeFixProvider : CodeFixProvider
 {
-    public override ImmutableArray<string> FixableDiagnosticIds => ImmutableArray.Create(DiagnosticDescriptors.ClassWithoutPartialDiagnosticId);
+    public override ImmutableArray<string> FixableDiagnosticIds => ImmutableArray.Create(DiagnosticDescriptors.TypeWithoutPartialDiagnosticId);
 
     public override FixAllProvider GetFixAllProvider()
     {
