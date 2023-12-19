@@ -1722,7 +1722,7 @@ namespace Test
     [InlineData("protected internal", "protected internal")]
     [InlineData("private protected", "private protected")]
     [InlineData("wrong value", "public")]
-    public async Task Run_WithConstructorAccessibility_ShouldGenerateClass(string attributeAccessibility, string constructorAccessibility)
+    public async Task Run_WithConstructorAccessibility_ShouldGenerateClass(string? attributeAccessibility, string constructorAccessibility)
     {
         string code = $@"
 namespace Test

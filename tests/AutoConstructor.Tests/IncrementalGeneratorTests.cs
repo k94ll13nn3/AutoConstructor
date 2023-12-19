@@ -127,8 +127,9 @@ namespace Test
         GeneratorRunResult result = driver.GetRunResult().Results.Single();
         IEnumerable<(object Value, IncrementalStepRunReason Reason)> sourceOuputs =
             result.TrackedOutputSteps.SelectMany(outputStep => outputStep.Value).SelectMany(output => output.Outputs);
-        Assert.Collection(sourceOuputs, output => Assert.Equal(sourceStepReason, output.Reason));
 
+        (_, IncrementalStepRunReason Reason) = Assert.Single(sourceOuputs);
+        Assert.Equal(sourceStepReason, Reason);
         Assert.Equal(executeStepReason, result.TrackedSteps["Execute"].Single().Outputs[0].Reason);
         Assert.Equal(combineStepReason, result.TrackedSteps["Combine"].Single().Outputs[0].Reason);
     }
