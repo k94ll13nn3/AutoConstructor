@@ -40,6 +40,6 @@ namespace Test
     }
 }";
 
-        await VerifyClassWithWrongConstructorAccessibility.VerifyAnalyzerAsync(test, []);
+        await VerifyClassWithWrongConstructorAccessibility.VerifyAnalyzerAsync(test);
     }
 }
