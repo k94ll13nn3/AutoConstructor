@@ -29,10 +29,22 @@ internal static class CSharpAnalyzerVerifier<TAnalyzer>
     {
         // Appends the attributes from the generator to the code to be compiled.
         string valueWithCode = value;
-        valueWithCode += $"{Source.AttributeText}\n";
-        valueWithCode += $"{Source.IgnoreAttributeText}\n";
-        valueWithCode += $"{Source.InjectAttributeText}\n";
-        valueWithCode += $"{Source.InitializerAttributeText}\n";
+        valueWithCode += $"""
+            {Source.AttributeText}
+
+            """;
+        valueWithCode += $"""
+            {Source.IgnoreAttributeText}
+
+            """;
+        valueWithCode += $"""
+            {Source.InjectAttributeText}
+
+            """;
+        valueWithCode += $"""
+            {Source.InitializerAttributeText}
+
+            """;
         return valueWithCode;
     }
 

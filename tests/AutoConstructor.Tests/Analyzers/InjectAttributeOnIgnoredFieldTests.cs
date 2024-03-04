@@ -12,16 +12,18 @@ public class InjectAttributeOnIgnoredFieldTests
     [Fact]
     public async Task Analyzer_InjectAttributeOnIgnoredField_ShouldReportDiagnostic()
     {
-        const string test = @"
-namespace Test
-{
-    [AutoConstructor]
-    internal class Test
-    {
-        [{|#0:AutoConstructorInject(""a"", ""a"", typeof(int))|}]
-        private readonly int _t = 1;
-    }
-}";
+        const string test = """
+
+            namespace Test
+            {
+                [AutoConstructor]
+                internal class Test
+                {
+                    [{|#0:AutoConstructorInject("a", "a", typeof(int))|}]
+                    private readonly int _t = 1;
+                }
+            }
+            """;
 
         DiagnosticResult[] expected = [
                 VerifyInjectAttributeOnIgnoredField.Diagnostic(DiagnosticDescriptors.InjectAttributeOnIgnoredFieldDiagnosticId).WithLocation(0),
@@ -30,24 +32,28 @@ namespace Test
     }
 
     [Theory]
-    [InlineData(@"
-namespace Test
-{
-    [AutoConstructor]
-    internal partial class Test
-    {
-        [{|#0:AutoConstructorInject(""a"", ""a"", typeof(int))|}]
-        private readonly int _t = 1;
-    }
-}", @"
-namespace Test
-{
-    [AutoConstructor]
-    internal partial class Test
-    {
-        private readonly int _t = 1;
-    }
-}")]
+    [InlineData("""
+
+        namespace Test
+        {
+            [AutoConstructor]
+            internal partial class Test
+            {
+                [{|#0:AutoConstructorInject("a", "a", typeof(int))|}]
+                private readonly int _t = 1;
+            }
+        }
+        """, """
+
+        namespace Test
+        {
+            [AutoConstructor]
+            internal partial class Test
+            {
+                private readonly int _t = 1;
+            }
+        }
+        """)]
     public async Task Analyzer_InjectAttributeOnIgnoredField_ShouldFixCode(string test, string fixtest)
     {
         DiagnosticResult[] expected = [

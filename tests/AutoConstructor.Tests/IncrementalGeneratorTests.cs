@@ -9,97 +9,113 @@ namespace AutoConstructor.Tests;
 public class IncrementalGeneratorTests
 {
     [Theory]
-    [InlineData(@"
-namespace Test
-{
-    [AutoConstructor]
-    internal partial class Test
-    {
-        private readonly int _t;
-    }
-}
+    [InlineData("""
 
-", @"
-namespace Test
-{
-    [AutoConstructor]
-    internal partial class Test
-    {
-        // Test
-        private readonly int _t;
-    }
-}
-
-", IncrementalStepRunReason.Cached, IncrementalStepRunReason.Unchanged, IncrementalStepRunReason.Cached)]
-    [InlineData(@"
-namespace Nested
-{
-    internal partial class Outer<T1>
-    {
-        [AutoConstructor]
-        internal partial class Inner<T2>
+        namespace Test
         {
-            private readonly T1 _t1;
-            private readonly T2 _t2;
+            [AutoConstructor]
+            internal partial class Test
+            {
+                private readonly int _t;
+            }
         }
-    }
-}", @"
-namespace Nested
-{
-    internal partial class Outer<T1>
-    {
-        [AutoConstructor]
-        internal partial class Inner<T2>
+
+
+        """, """
+
+        namespace Test
         {
-            // Some comment
-            private readonly T1 _t1;
-            private readonly T2 _t2;
+            [AutoConstructor]
+            internal partial class Test
+            {
+                // Test
+                private readonly int _t;
+            }
         }
-    }
-}", IncrementalStepRunReason.Cached, IncrementalStepRunReason.Unchanged, IncrementalStepRunReason.Cached)]
-    [InlineData(@"
-namespace Test
-{
-    [AutoConstructor]
-    internal partial class Test
-    {
-        private readonly int _t;
-    }
-}
 
-", @"
-namespace Test
-{
-    [AutoConstructor]
-    internal partial class Test
-    {
-        private readonly int _toto;
-    }
-}
 
-", IncrementalStepRunReason.New, IncrementalStepRunReason.Modified, IncrementalStepRunReason.Modified)]
-    [InlineData(@"
-namespace Test
-{
-    [AutoConstructor]
-    internal partial class Test
-    {
-        private readonly int _t;
-    }
-}
+        """, IncrementalStepRunReason.Cached, IncrementalStepRunReason.Unchanged, IncrementalStepRunReason.Cached)]
+    [InlineData("""
 
-", @"
-namespace Test
-{
-    [AutoConstructor]
-    internal partial class Test
-    {
-        private readonly int _t;
-        private readonly int _toto = 2;
-    }
-}
+        namespace Nested
+        {
+            internal partial class Outer<T1>
+            {
+                [AutoConstructor]
+                internal partial class Inner<T2>
+                {
+                    private readonly T1 _t1;
+                    private readonly T2 _t2;
+                }
+            }
+        }
+        """, """
 
-", IncrementalStepRunReason.Cached, IncrementalStepRunReason.Unchanged, IncrementalStepRunReason.Cached)]
+        namespace Nested
+        {
+            internal partial class Outer<T1>
+            {
+                [AutoConstructor]
+                internal partial class Inner<T2>
+                {
+                    // Some comment
+                    private readonly T1 _t1;
+                    private readonly T2 _t2;
+                }
+            }
+        }
+        """, IncrementalStepRunReason.Cached, IncrementalStepRunReason.Unchanged, IncrementalStepRunReason.Cached)]
+    [InlineData("""
+
+        namespace Test
+        {
+            [AutoConstructor]
+            internal partial class Test
+            {
+                private readonly int _t;
+            }
+        }
+
+
+        """, """
+
+        namespace Test
+        {
+            [AutoConstructor]
+            internal partial class Test
+            {
+                private readonly int _toto;
+            }
+        }
+
+
+        """, IncrementalStepRunReason.New, IncrementalStepRunReason.Modified, IncrementalStepRunReason.Modified)]
+    [InlineData("""
+
+        namespace Test
+        {
+            [AutoConstructor]
+            internal partial class Test
+            {
+                private readonly int _t;
+            }
+        }
+
+
+        """, """
+
+        namespace Test
+        {
+            [AutoConstructor]
+            internal partial class Test
+            {
+                private readonly int _t;
+                private readonly int _toto = 2;
+            }
+        }
+
+
+        """, IncrementalStepRunReason.Cached, IncrementalStepRunReason.Unchanged, IncrementalStepRunReason.Cached)]
     public void CheckGeneratorIsIncremental(
         string source,
         string sourceUpdated,
@@ -114,7 +130,7 @@ namespace Test
         ISourceGenerator sourceGenerator = new AutoConstructorGenerator().AsSourceGenerator();
 
         GeneratorDriver driver = CSharpGeneratorDriver.Create(
-            generators: new ISourceGenerator[] { sourceGenerator },
+            generators: [sourceGenerator],
             driverOptions: new GeneratorDriverOptions(default, trackIncrementalGeneratorSteps: true));
 
         // Run the generator
@@ -137,7 +153,7 @@ namespace Test
     private static CSharpCompilation CreateCompilation(SyntaxTree syntaxTree)
     {
         return CSharpCompilation.Create("compilation",
-                new[] { syntaxTree },
+                [syntaxTree],
                 new[] { MetadataReference.CreateFromFile(typeof(Binder).GetTypeInfo().Assembly.Location) },
                 new CSharpCompilationOptions(OutputKind.ConsoleApplication));
     }
@@ -146,9 +162,18 @@ namespace Test
     {
         // Appends the attributes from the generator to the code to be compiled.
         string valueWithCode = value;
-        valueWithCode += $"{Source.AttributeText}\n";
-        valueWithCode += $"{Source.IgnoreAttributeText}\n";
-        valueWithCode += $"{Source.InjectAttributeText}\n";
+        valueWithCode += $"""
+            {Source.AttributeText}
+
+            """;
+        valueWithCode += $"""
+            {Source.IgnoreAttributeText}
+
+            """;
+        valueWithCode += $"""
+            {Source.InjectAttributeText}
+
+            """;
         return valueWithCode;
     }
 }
