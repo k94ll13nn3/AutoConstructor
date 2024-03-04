@@ -12,17 +12,15 @@ public class TypeWithoutPartialTests
     [Fact]
     public async Task Analyzer_ClassWithoutPartial_ShouldReportDiagnostic()
     {
-        const string test = """
-
-            namespace Test
-            {
-                [AutoConstructor]
-                internal class {|#0:Test|}
-                {
-                    private readonly int _t;
-                }
-            }
-            """;
+        const string test = @"
+namespace Test
+{
+    [AutoConstructor]
+    internal class {|#0:Test|}
+    {
+        private readonly int _t;
+    }
+}";
 
         DiagnosticResult[] expected = [
                 VerifyClassWithoutPartial.Diagnostic(DiagnosticDescriptors.TypeWithoutPartialDiagnosticId).WithLocation(0),
@@ -33,17 +31,15 @@ public class TypeWithoutPartialTests
     [Fact]
     public async Task Analyzer_StructWithoutPartial_ShouldReportDiagnostic()
     {
-        const string test = """
-
-            namespace Test
-            {
-                [AutoConstructor]
-                internal struct {|#0:Test|}
-                {
-                    private readonly int _t;
-                }
-            }
-            """;
+        const string test = @"
+namespace Test
+{
+    [AutoConstructor]
+    internal struct {|#0:Test|}
+    {
+        private readonly int _t;
+    }
+}";
 
         DiagnosticResult[] expected = [
                 VerifyClassWithoutPartial.Diagnostic(DiagnosticDescriptors.TypeWithoutPartialDiagnosticId).WithLocation(0),
@@ -54,29 +50,25 @@ public class TypeWithoutPartialTests
     [Fact]
     public async Task CodeFix_ClassWithoutPartial_ShouldFixCode()
     {
-        const string test = """
+        const string test = @"
+namespace Test
+{
+    [AutoConstructor]
+    internal class {|#0:Test|}
+    {
+        private readonly int _t;
+    }
+}";
 
-            namespace Test
-            {
-                [AutoConstructor]
-                internal class {|#0:Test|}
-                {
-                    private readonly int _t;
-                }
-            }
-            """;
-
-        const string fixtest = """
-
-            namespace Test
-            {
-                [AutoConstructor]
-                internal partial class Test
-                {
-                    private readonly int _t;
-                }
-            }
-            """;
+        const string fixtest = @"
+namespace Test
+{
+    [AutoConstructor]
+    internal partial class Test
+    {
+        private readonly int _t;
+    }
+}";
 
         DiagnosticResult[] expected = [
                 VerifyClassWithoutPartial.Diagnostic(DiagnosticDescriptors.TypeWithoutPartialDiagnosticId).WithLocation(0),
@@ -87,29 +79,25 @@ public class TypeWithoutPartialTests
     [Fact]
     public async Task CodeFix_StructWithoutPartial_ShouldFixCode()
     {
-        const string test = """
+        const string test = @"
+namespace Test
+{
+    [AutoConstructor]
+    internal struct {|#0:Test|}
+    {
+        private readonly int _t;
+    }
+}";
 
-            namespace Test
-            {
-                [AutoConstructor]
-                internal struct {|#0:Test|}
-                {
-                    private readonly int _t;
-                }
-            }
-            """;
-
-        const string fixtest = """
-
-            namespace Test
-            {
-                [AutoConstructor]
-                internal partial struct Test
-                {
-                    private readonly int _t;
-                }
-            }
-            """;
+        const string fixtest = @"
+namespace Test
+{
+    [AutoConstructor]
+    internal partial struct Test
+    {
+        private readonly int _t;
+    }
+}";
 
         DiagnosticResult[] expected = [
                 VerifyClassWithoutPartial.Diagnostic(DiagnosticDescriptors.TypeWithoutPartialDiagnosticId).WithLocation(0),

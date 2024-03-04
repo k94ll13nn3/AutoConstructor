@@ -11,17 +11,15 @@ public class TypeWithWrongConstructorAccessibilityTests
     [Fact]
     public async Task Analyzer_ClassWithWrongConstructorAccessibility_ShouldReportDiagnostic()
     {
-        const string test = """
-
-            namespace Test
-            {
-                [AutoConstructor("wring value")]
-                internal class {|#0:Test|}
-                {
-                    private readonly int _t;
-                }
-            }
-            """;
+        const string test = @"
+namespace Test
+{
+    [AutoConstructor(""wring value"")]
+    internal class {|#0:Test|}
+    {
+        private readonly int _t;
+    }
+}";
 
         DiagnosticResult[] expected = [
                 VerifyClassWithWrongConstructorAccessibility.Diagnostic(DiagnosticDescriptors.TypeWithWrongConstructorAccessibilityDiagnosticId).WithLocation(0),
@@ -32,17 +30,15 @@ public class TypeWithWrongConstructorAccessibilityTests
     [Fact]
     public async Task Analyzer_ClassWithGoodConstructorAccessibility_ShouldNotReportDiagnostic()
     {
-        const string test = """
-
-            namespace Test
-            {
-                [AutoConstructor("public")]
-                internal class {|#0:Test|}
-                {
-                    private readonly int _t;
-                }
-            }
-            """;
+        const string test = @"
+namespace Test
+{
+    [AutoConstructor(""public"")]
+    internal class {|#0:Test|}
+    {
+        private readonly int _t;
+    }
+}";
 
         await VerifyClassWithWrongConstructorAccessibility.VerifyAnalyzerAsync(test);
     }

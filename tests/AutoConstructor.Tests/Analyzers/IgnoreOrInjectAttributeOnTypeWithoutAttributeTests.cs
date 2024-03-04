@@ -10,43 +10,37 @@ namespace AutoConstructor.Tests.Analyzers;
 public class IgnoreOrInjectAttributeOnTypeWithoutAttributeTests
 {
     [Theory]
-    [InlineData("""
+    [InlineData(@"
+namespace Test
+{
+    internal class Test
+    {
+        [{|#0:AutoConstructorInject(""a"", ""a"", typeof(int))|}]
+        private readonly int _t = 1;
+    }
+}")]
+    [InlineData(@"
+namespace Test
+{
+    internal class Test
+    {
+        [{|#0:AutoConstructorIgnore|}]
+        private readonly int _t = 1;
+    }
+}")]
+    [InlineData(@"
+namespace Test
+{
+    internal struct Test
+    {
+        [{|#0:AutoConstructorInject(""a"", ""a"", typeof(int))|}]
+        private readonly int _t = 1;
 
-        namespace Test
+        public Test()
         {
-            internal class Test
-            {
-                [{|#0:AutoConstructorInject("a", "a", typeof(int))|}]
-                private readonly int _t = 1;
-            }
         }
-        """)]
-    [InlineData("""
-
-        namespace Test
-        {
-            internal class Test
-            {
-                [{|#0:AutoConstructorIgnore|}]
-                private readonly int _t = 1;
-            }
-        }
-        """)]
-    [InlineData("""
-
-        namespace Test
-        {
-            internal struct Test
-            {
-                [{|#0:AutoConstructorInject("a", "a", typeof(int))|}]
-                private readonly int _t = 1;
-
-                public Test()
-                {
-                }
-            }
-        }
-        """)]
+    }
+}")]
     public async Task Analyzer_IgnoreOrInjectAttributeOnTypeWithoutAttribute_ShouldReportDiagnostic(string test)
     {
         DiagnosticResult[] expected = [
@@ -56,74 +50,62 @@ public class IgnoreOrInjectAttributeOnTypeWithoutAttributeTests
     }
 
     [Theory]
-    [InlineData("""
+    [InlineData(@"
+namespace Test
+{
+    internal class Test
+    {
+        [{|#0:AutoConstructorInject(""a"", ""a"", typeof(int))|}]
+        private readonly int _t = 1;
+    }
+}", @"
+namespace Test
+{
+    internal class Test
+    {
+        private readonly int _t = 1;
+    }
+}")]
+    [InlineData(@"
+namespace Test
+{
+    internal class Test
+    {
+        [{|#0:AutoConstructorIgnore|}]
+        private readonly int _t = 1;
+    }
+}", @"
+namespace Test
+{
+    internal class Test
+    {
+        private readonly int _t = 1;
+    }
+}")]
+    [InlineData(@"
+namespace Test
+{
+    internal struct Test
+    {
+        [{|#0:AutoConstructorIgnore|}]
+        private readonly int _t = 1;
 
-        namespace Test
+        public Test()
         {
-            internal class Test
-            {
-                [{|#0:AutoConstructorInject("a", "a", typeof(int))|}]
-                private readonly int _t = 1;
-            }
         }
-        """, """
+    }
+}", @"
+namespace Test
+{
+    internal struct Test
+    {
+        private readonly int _t = 1;
 
-        namespace Test
+        public Test()
         {
-            internal class Test
-            {
-                private readonly int _t = 1;
-            }
         }
-        """)]
-    [InlineData("""
-
-        namespace Test
-        {
-            internal class Test
-            {
-                [{|#0:AutoConstructorIgnore|}]
-                private readonly int _t = 1;
-            }
-        }
-        """, """
-
-        namespace Test
-        {
-            internal class Test
-            {
-                private readonly int _t = 1;
-            }
-        }
-        """)]
-    [InlineData("""
-
-        namespace Test
-        {
-            internal struct Test
-            {
-                [{|#0:AutoConstructorIgnore|}]
-                private readonly int _t = 1;
-
-                public Test()
-                {
-                }
-            }
-        }
-        """, """
-
-        namespace Test
-        {
-            internal struct Test
-            {
-                private readonly int _t = 1;
-
-                public Test()
-                {
-                }
-            }
-        }
-        """)]
+    }
+}")]
     public async Task Analyzer_IgnoreOrInjectAttributeOnTypeWithoutAttribute_ShouldFixCode(string test, string fixtest)
     {
         DiagnosticResult[] expected = [
@@ -135,29 +117,25 @@ public class IgnoreOrInjectAttributeOnTypeWithoutAttributeTests
     [Fact]
     public async Task Analyzer_BothAttributesOnClassWithoutAttribute_ShouldReportDiagnosticAndFixCode()
     {
-        const string test = """
+        const string test = @"
+namespace Test
+{
+    internal class Test
+    {
+        [{|#0:AutoConstructorIgnore|}]
+        [{|#1:AutoConstructorInject(""a"", ""a"", typeof(int))|}]
+        private readonly int _t = 1;
+    }
+}";
 
-            namespace Test
-            {
-                internal class Test
-                {
-                    [{|#0:AutoConstructorIgnore|}]
-                    [{|#1:AutoConstructorInject("a", "a", typeof(int))|}]
-                    private readonly int _t = 1;
-                }
-            }
-            """;
-
-        const string fixtest = """
-
-            namespace Test
-            {
-                internal class Test
-                {
-                    private readonly int _t = 1;
-                }
-            }
-            """;
+        const string fixtest = @"
+namespace Test
+{
+    internal class Test
+    {
+        private readonly int _t = 1;
+    }
+}";
 
         DiagnosticResult[] expected = [
                 VerifyIgnoreOrInjectAttributeOnTestWithoutAttribute.Diagnostic(DiagnosticDescriptors.IgnoreOrInjectAttributeOnTypeWithoutAttributeDiagnosticId).WithLocation(0),
