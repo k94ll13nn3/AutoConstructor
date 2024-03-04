@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [5.2.1] - 2024-03-04
+
+### Fixed
+
+-  Fix detection of base constructor if parent class defined in another assembly and is using `AutoConstructor`
+
+### Issues
+
+- [#106](https://github.com/k94ll13nn3/AutoConstructor/issues/106): Upgrading from version 4.1.1 to 5.2.0 broke AutoConstructor on subtypes
+
 ## [5.2.0] - 2023-12-19
 
 ### Changed
@@ -299,6 +309,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 Initial release
 
+[5.2.1]: https://github.com/k94ll13nn3/AutoConstructor/compare/v5.2.0...v5.2.1
 [5.2.0]: https://github.com/k94ll13nn3/AutoConstructor/compare/v5.1.0...v5.2.0
 [5.1.0]: https://github.com/k94ll13nn3/AutoConstructor/compare/v5.0.1...v5.1.0
 [5.0.1]: https://github.com/k94ll13nn3/AutoConstructor/compare/v5.0.0...v5.0.1
