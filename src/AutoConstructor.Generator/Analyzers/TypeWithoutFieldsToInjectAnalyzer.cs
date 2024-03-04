@@ -58,7 +58,7 @@ public sealed class TypeWithoutFieldsToInjectAnalyzer : DiagnosticAnalyzer
         if (baseType?.BaseType is not null && baseType.Constructors.Count(d => !d.IsStatic) == 1)
         {
             IMethodSymbol constructor = baseType.Constructors.Single(d => !d.IsStatic);
-            return baseType.HasAttribute(Source.AttributeFullName)
+            return (SymbolEqualityComparer.Default.Equals(baseType.ContainingAssembly, symbol.ContainingAssembly) && baseType.HasAttribute(Source.AttributeFullName))
                 ? SymbolHasFields(baseType) || ParentHasFields(compilation, baseType)
                 : constructor.Parameters.Length > 0;
         }

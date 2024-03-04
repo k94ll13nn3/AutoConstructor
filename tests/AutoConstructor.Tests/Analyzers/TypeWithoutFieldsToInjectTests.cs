@@ -136,8 +136,7 @@ namespace Test
 }")]
     public async Task Analyzer_ClassWithoutFieldsToInjectButFieldsOnParent_ShouldNotReportDiagnostic(string test)
     {
-        DiagnosticResult[] expected = [];
-        await VerifyClassWithoutFieldsToInject.VerifyAnalyzerAsync(test, expected);
+        await VerifyClassWithoutFieldsToInject.VerifyAnalyzerAsync(test, []);
     }
 
     [Theory]
@@ -161,5 +160,42 @@ namespace Test
                 VerifyClassWithoutFieldsToInject.Diagnostic(DiagnosticDescriptors.TypeWithoutFieldsToInjectDiagnosticId).WithLocation(0),
         ];
         await VerifyClassWithoutFieldsToInject.VerifyCodeFixAsync(test, expected, fixtest);
+    }
+
+    [Fact]
+    public async Task Fix_Issue106_ShouldNotReportDiagnostic()
+    {
+        // ACONS02 is expected here but is not the tested case.
+        const string additionnalSource = $@"
+namespace Test2
+{{
+    {Source.AttributeText}
+
+    [{{|#0:AutoConstructor|}}]
+    public partial class ParentClass
+    {{
+        public ParentClass(int dependency)
+        {{
+        }}
+    }}
+}}";
+
+        const string test = @"
+using Test2;
+namespace Test
+{
+    [AutoConstructor]
+    public partial class Test : ParentClass
+    {
+        public Test(int dependency) : base(dependency)
+        {
+        }
+    }
+}";
+        DiagnosticResult[] expected = [
+            VerifyClassWithoutFieldsToInject.Diagnostic(DiagnosticDescriptors.TypeWithoutFieldsToInjectDiagnosticId).WithLocation(0),
+        ];
+
+        await VerifyClassWithoutFieldsToInject.VerifyAnalyzerAsync(test, expected, additionnalSource);
     }
 }

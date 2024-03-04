@@ -345,7 +345,10 @@ public sealed class AutoConstructorGenerator : IIncrementalGenerator
         if (baseType?.BaseType is not null && baseType.Constructors.Count(d => !d.IsStatic) == 1)
         {
             IMethodSymbol constructor = baseType.Constructors.Single(d => !d.IsStatic);
-            if (baseType.HasAttribute(Source.AttributeFullName))
+
+            // If symbol is in same assembly, the generated constructor is not visible as it might not be yet generated.
+            // If not is the same assembly, is does not matter if the constructor was generated or not.
+            if (SymbolEqualityComparer.Default.Equals(baseType.ContainingAssembly, symbol.ContainingAssembly) && baseType.HasAttribute(Source.AttributeFullName))
             {
                 ExtractFieldsFromGeneratedParent(concatenatedFields, baseType);
             }

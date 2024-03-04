@@ -21,12 +21,25 @@ internal static class CSharpCodeFixVerifier<TAnalyzer, TCodeFix>
         return CSharpAnalyzerVerifier<TAnalyzer, DefaultVerifier>.Diagnostic(diagnostic);
     }
 
-    public static async Task VerifyAnalyzerAsync(string source, params DiagnosticResult[] expected)
+    public static async Task VerifyAnalyzerAsync(string source, DiagnosticResult[] expected, string? additionalProjectsSource = null)
     {
         var test = new Test
         {
-            TestCode = AppendBaseCode(source),
+            TestState =
+            {
+                Sources = { AppendBaseCode(source) },
+                AdditionalProjects =
+                {
+                    ["DependencyProject"] = { },
+                },
+            },
         };
+
+        if (additionalProjectsSource is not null)
+        {
+            test.TestState.AdditionalProjectReferences.Add("DependencyProject");
+            test.TestState.AdditionalProjects["DependencyProject"].Sources.Add(additionalProjectsSource);
+        }
 
         test.ExpectedDiagnostics.AddRange(expected);
         await test.RunAsync(CancellationToken.None);

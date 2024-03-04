@@ -1965,4 +1965,81 @@ namespace Test
 ";
         await VerifySourceGenerator.RunAsync(code, generated);
     }
+
+    [Fact]
+    public async Task Fix_Issue106_WorkingCase()
+    {
+        const string additionnalSource = @"
+namespace Test2
+{
+    public partial class ParentClass
+    {
+        private int Dependency { get; }
+public ParentClass(int dependency)
+{
+    Dependency = dependency;
+}
+    }
+}";
+
+        const string code = @"
+using Test2;
+namespace Test
+{
+    [AutoConstructor]
+    public partial class Test : ParentClass
+    {
+    }
+}";
+        const string generated = @"namespace Test
+{
+    partial class Test
+    {
+        public Test(int dependency) : base(dependency)
+        {
+        }
+    }
+}
+";
+        await VerifySourceGenerator.RunAsync(code, generated, additionalProjectsSource: additionnalSource);
+    }
+
+    [Fact]
+    public async Task Fix_Issue106_NotWorkingCase()
+    {
+        const string additionnalSource = $@"
+namespace Test2
+{{
+    {Source.AttributeText}
+
+    [AutoConstructor]
+    public partial class ParentClass
+    {{
+        public ParentClass(int dependency)
+        {{
+        }}
+    }}
+}}";
+
+        const string code = @"
+using Test2;
+namespace Test
+{
+    [AutoConstructor]
+    public partial class Test : ParentClass
+    {
+    }
+}";
+        const string generated = @"namespace Test
+{
+    partial class Test
+    {
+        public Test(int dependency) : base(dependency)
+        {
+        }
+    }
+}
+";
+        await VerifySourceGenerator.RunAsync(code, generated, additionalProjectsSource: additionnalSource);
+    }
 }

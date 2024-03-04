@@ -18,9 +18,10 @@ internal static partial class CSharpSourceGeneratorVerifier<TSourceGenerator>
         string generatedName = "Test.Test.g.cs",
         bool nullable = false,
         IEnumerable<DiagnosticResult>? diagnostics = null,
-        string? configFileContent = null)
+        string? configFileContent = null,
+        string? additionalProjectsSource = null)
     {
-        return RunAsync(code, new[] { (generated, generatedName) }, nullable, diagnostics, configFileContent);
+        return RunAsync(code, new[] { (generated, generatedName) }, nullable, diagnostics, configFileContent, additionalProjectsSource);
     }
 
     public static async Task RunAsync(
@@ -28,7 +29,8 @@ internal static partial class CSharpSourceGeneratorVerifier<TSourceGenerator>
         (string, string)[] generatedSources,
         bool nullable = false,
         IEnumerable<DiagnosticResult>? diagnostics = null,
-        string? configFileContent = null)
+        string? configFileContent = null,
+        string? additionalProjectsSource = null)
     {
         var test = new CSharpSourceGeneratorVerifier<TSourceGenerator>.Test()
         {
@@ -41,11 +43,21 @@ internal static partial class CSharpSourceGeneratorVerifier<TSourceGenerator>
                         (typeof(AutoConstructorGenerator), "AutoConstructorIgnoreAttribute.cs", SourceText.From(Source.IgnoreAttributeText, Encoding.UTF8)),
                         (typeof(AutoConstructorGenerator), "AutoConstructorInjectAttribute.cs", SourceText.From(Source.InjectAttributeText, Encoding.UTF8)),
                         (typeof(AutoConstructorGenerator), "AutoConstructorInitializerAttribute.cs", SourceText.From(Source.InitializerAttributeText, Encoding.UTF8)),
-                    }
+                    },
+                    AdditionalProjects =
+                    {
+                        ["DependencyProject"] = { },
+                    },
                 },
             EnableNullable = nullable,
             LanguageVersion = LanguageVersion.Default,
         };
+
+        if (additionalProjectsSource is not null)
+        {
+            test.TestState.AdditionalProjectReferences.Add("DependencyProject");
+            test.TestState.AdditionalProjects["DependencyProject"].Sources.Add(additionalProjectsSource);
+        }
 
         string generatedCodeAttribute = @$"[global::System.CodeDom.Compiler.GeneratedCodeAttribute(""{nameof(AutoConstructor)}"", ""{AutoConstructorGenerator.GeneratorVersion}"")]";
         foreach ((string? generated, string generatedName) in generatedSources)
