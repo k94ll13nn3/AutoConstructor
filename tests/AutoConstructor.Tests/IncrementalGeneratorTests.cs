@@ -114,7 +114,7 @@ namespace Test
         ISourceGenerator sourceGenerator = new AutoConstructorGenerator().AsSourceGenerator();
 
         GeneratorDriver driver = CSharpGeneratorDriver.Create(
-            generators: new ISourceGenerator[] { sourceGenerator },
+            generators: [sourceGenerator],
             driverOptions: new GeneratorDriverOptions(default, trackIncrementalGeneratorSteps: true));
 
         // Run the generator
@@ -137,7 +137,7 @@ namespace Test
     private static CSharpCompilation CreateCompilation(SyntaxTree syntaxTree)
     {
         return CSharpCompilation.Create("compilation",
-                new[] { syntaxTree },
+                [syntaxTree],
                 new[] { MetadataReference.CreateFromFile(typeof(Binder).GetTypeInfo().Assembly.Location) },
                 new CSharpCompilationOptions(OutputKind.ConsoleApplication));
     }
