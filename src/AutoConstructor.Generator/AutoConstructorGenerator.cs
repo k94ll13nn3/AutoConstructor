@@ -79,7 +79,13 @@ public sealed class AutoConstructorGenerator : IIncrementalGenerator
             emitNullChecks = disableNullCheckingSwitch.Equals("false", StringComparison.OrdinalIgnoreCase);
         }
 
-        return new(generateConstructorDocumentation, constructorDocumentationComment, emitNullChecks);
+        bool emitThisCalls = true;
+        if (analyzerOptions.TryGetValue("build_property.AutoConstructor_GenerateThisCalls", out string? enableThisCallsSwitch))
+        {
+            emitThisCalls = enableThisCallsSwitch.Equals("true", StringComparison.OrdinalIgnoreCase);
+        }
+
+        return new(generateConstructorDocumentation, constructorDocumentationComment, emitNullChecks, emitThisCalls);
     }
 
     private static GeneratorExectutionResult? Execute(GeneratorAttributeSyntaxContext context, TypeDeclarationSyntax typeSyntax)
@@ -225,7 +231,7 @@ public sealed class AutoConstructorGenerator : IIncrementalGenerator
                 writer.Write(")");
             }
             // Write this call if the symbol has a parameterless constructor
-            else if (symbol.HasParameterlessConstructor)
+            else if (options.EmitThisCalls && symbol.HasParameterlessConstructor)
             {
                 writer.Write(" : this()");
             }

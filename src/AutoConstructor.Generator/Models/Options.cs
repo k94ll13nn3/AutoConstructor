@@ -1,3 +1,7 @@
 namespace AutoConstructor.Generator.Models;
 
-internal sealed record Options(bool GenerateConstructorDocumentation, string? ConstructorDocumentationComment, bool EmitNullChecks);
+internal sealed record Options(
+    bool GenerateConstructorDocumentation,
+    string? ConstructorDocumentationComment,
+    bool EmitNullChecks,
+    bool EmitThisCalls);

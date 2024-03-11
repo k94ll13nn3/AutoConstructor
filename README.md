@@ -147,6 +147,16 @@ To enable this behavior, set `AutoConstructor_DisableNullChecking` to `false` in
 <AutoConstructor_DisableNullChecking>false</AutoConstructor_DisableNullChecking>
 ```
 
+### Generating `this()` calls
+
+By default, if a parameterless constructor is available on the class (other than the implicit one), a call
+to `this()` is generated with the generated constructor
+To disable this behavior, set `AutoConstructor_GenerateThisCalls` to `false` in the project file:
+
+``` xml
+<AutoConstructor_GenerateThisCalls>false</AutoConstructor_GenerateThisCalls>
+```
+
 ### Generating XML documentation comment
 
 By default, no XML documentation comment will be generated for the constructor.

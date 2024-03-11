@@ -2042,4 +2042,38 @@ namespace Test
 ";
         await VerifySourceGenerator.RunAsync(code, generated, additionalProjectsSource: additionnalSource);
     }
+
+    [Theory]
+    [InlineData(null)]
+    [InlineData(true)]
+    [InlineData(false)]
+    public async Task Run_WithMsbuildConfigGenerateThisCalls_ShouldGenerateClass(bool? generateThisCalls)
+    {
+        const string code = @"
+namespace Test
+{
+    [AutoConstructor]
+    internal partial class Test
+    {
+        private readonly int _t;
+        public Test(){
+            System.Console.WriteLine(""Hello world!"");
+        }
+    }
+}";
+        string generated = $@"namespace Test
+{{
+    partial class Test
+    {{
+        public Test(int t){(generateThisCalls is null or true ? " : this()" : "")}
+        {{
+            this._t = t;
+        }}
+    }}
+}}
+";
+
+        string configFileContent = generateThisCalls is null ? "" : $"build_property.AutoConstructor_GenerateThisCalls = {generateThisCalls}";
+        await VerifySourceGenerator.RunAsync(code, generated, configFileContent: configFileContent);
+    }
 }
