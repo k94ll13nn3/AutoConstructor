@@ -82,7 +82,7 @@ public sealed class AutoConstructorGenerator : IIncrementalGenerator
         bool emitThisCalls = true;
         if (analyzerOptions.TryGetValue("build_property.AutoConstructor_GenerateThisCalls", out string? enableThisCallsSwitch))
         {
-            emitThisCalls = enableThisCallsSwitch.Equals("true", StringComparison.OrdinalIgnoreCase);
+            emitThisCalls = !enableThisCallsSwitch.Equals("false", StringComparison.OrdinalIgnoreCase);
         }
 
         return new(generateConstructorDocumentation, constructorDocumentationComment, emitNullChecks, emitThisCalls);
