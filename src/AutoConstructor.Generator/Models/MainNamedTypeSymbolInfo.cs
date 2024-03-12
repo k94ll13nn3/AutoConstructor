@@ -16,7 +16,7 @@ internal sealed record MainNamedTypeSymbolInfo(
     string Filename,
     string Accessibility,
     InitializerMethodInfo? InitializerMethod,
-    bool GeneratePrincipalBaseAttribute)
+    bool GenerateDefaultBaseAttribute)
     : NamedTypeSymbolInfo(Kind, Name, IsStatic, TypeParameters)
 {
     public MainNamedTypeSymbolInfo(
@@ -25,7 +25,7 @@ internal sealed record MainNamedTypeSymbolInfo(
         string filename,
         string accessibility,
         InitializerMethodInfo? initializerMethod,
-        bool generatePrincipalBaseAttribute)
+        bool generateDefaultBaseAttribute)
         : this(
             namedTypeSymbol.TypeKind,
             namedTypeSymbol.Name,
@@ -37,7 +37,7 @@ internal sealed record MainNamedTypeSymbolInfo(
             filename,
             accessibility,
             initializerMethod,
-            generatePrincipalBaseAttribute)
+            generateDefaultBaseAttribute)
     {
     }
 }

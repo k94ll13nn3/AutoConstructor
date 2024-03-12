@@ -2085,7 +2085,7 @@ namespace Test
     {
         private readonly int _t;
 
-        [AutoConstructorPrincipalBase]
+        [AutoConstructorDefaultBase]
         public BaseClass(int t)
         {
             this._t = t;
@@ -2123,7 +2123,7 @@ namespace Test
             this._t = t;
         }
 
-        [AutoConstructorPrincipalBase]
+        [AutoConstructorDefaultBase]
         public BaseClass()
         {
         }
@@ -2156,12 +2156,12 @@ namespace Test
             this._t = t;
         }
 
-        [AutoConstructorPrincipalBase]
+        [AutoConstructorDefaultBase]
         public BaseClass()
         {
         }
 
-        [AutoConstructorPrincipalBase]
+        [AutoConstructorDefaultBase]
         public BaseClass(int a, int b)
         {
         }
@@ -2189,7 +2189,7 @@ namespace Test
     {
         private readonly int _t;
 
-        [AutoConstructorPrincipalBase]
+        [AutoConstructorDefaultBase]
         public BaseClass(int t1, int t3)
         {
             this._t = t1 + t3;
@@ -2220,18 +2220,18 @@ namespace Test
     }
 }
 ")]
-    public async Task Run_WithInheritanceAndPrincipalBaseAttribute_ShouldGenerateClassWithGoodBaseCall(string code, string generated)
+    public async Task Run_WithInheritanceAndDefaultBaseAttribute_ShouldGenerateClassWithGoodBaseCall(string code, string generated)
     {
         await VerifySourceGenerator.RunAsync(code, generated);
     }
 
     [Fact]
-    public async Task Run_WithInheritanceAndPrincipalBaseAttributeInjectedWithGeneratedBaseConstructor_ShouldGenerateClassWithGoodBaseCall()
+    public async Task Run_WithInheritanceAndDefaultBaseAttributeInjectedWithGeneratedBaseConstructor_ShouldGenerateClassWithGoodBaseCall()
     {
         const string code = @"
 namespace Test
 {
-    [AutoConstructor(addPrincipalBaseAttribute: true)]
+    [AutoConstructor(addDefaultBaseAttribute: true)]
     internal partial class BaseClass
     {
         private readonly int _t;
@@ -2266,7 +2266,7 @@ namespace Test
 {
     partial class BaseClass
     {
-        [AutoConstructorPrincipalBase]
+        [AutoConstructorDefaultBase]
         public BaseClass(int t)
         {
             this._t = t;

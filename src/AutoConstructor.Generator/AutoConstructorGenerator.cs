@@ -28,7 +28,7 @@ public sealed class AutoConstructorGenerator : IIncrementalGenerator
             i.AddSource(Source.IgnoreAttributeFullName, SourceText.From(Source.IgnoreAttributeText, Encoding.UTF8));
             i.AddSource(Source.InjectAttributeFullName, SourceText.From(Source.InjectAttributeText, Encoding.UTF8));
             i.AddSource(Source.InitializerAttributeFullName, SourceText.From(Source.InitializerAttributeText, Encoding.UTF8));
-            i.AddSource(Source.PrincipalBaseAttributeFullName, SourceText.From(Source.PrincipalBaseAttributeText, Encoding.UTF8));
+            i.AddSource(Source.DefaultBaseAttributeFullName, SourceText.From(Source.DefaultBaseAttributeText, Encoding.UTF8));
         });
 
         IncrementalValuesProvider<(GeneratorExectutionResult? result, Options options)> valueProvider = context.SyntaxProvider
@@ -140,8 +140,8 @@ public sealed class AutoConstructorGenerator : IIncrementalGenerator
             accessibility = accessibilityValue;
         }
 
-        bool generatedPrincipalBaseAttribute = attributeData?.AttributeConstructor?.Parameters.Length > 0
-            && attributeData.GetBoolParameterValue("addPrincipalBaseAttribute");
+        bool generatedDefaultBaseAttribute = attributeData?.AttributeConstructor?.Parameters.Length > 0
+            && attributeData.GetBoolParameterValue("addDefaultBaseAttribute");
 
         IMethodSymbol? initializerMethod = symbol.GetMembers()
             .OfType<IMethodSymbol>()
@@ -153,7 +153,7 @@ public sealed class AutoConstructorGenerator : IIncrementalGenerator
             symbol.GenerateFilename(),
             accessibility ?? "public",
             initializerMethod is null ? null : new(initializerMethod.IsStatic, initializerMethod.Name),
-            generatedPrincipalBaseAttribute);
+            generatedDefaultBaseAttribute);
         return new(mainNamedTypeSymbolInfo, fields, null);
     }
 
@@ -223,9 +223,9 @@ public sealed class AutoConstructorGenerator : IIncrementalGenerator
             }
 
             // Write attributes.
-            if (symbol.GeneratePrincipalBaseAttribute)
+            if (symbol.GenerateDefaultBaseAttribute)
             {
-                writer.WriteLine("[AutoConstructorPrincipalBase]");
+                writer.WriteLine("[AutoConstructorDefaultBase]");
             }
 
             writer.WriteLine($"""[global::System.CodeDom.Compiler.GeneratedCodeAttribute("{nameof(AutoConstructor)}", "{GeneratorVersion}")]""");
@@ -363,7 +363,7 @@ public sealed class AutoConstructorGenerator : IIncrementalGenerator
         if (baseType?.BaseType is not null)
         {
             // Check if there is a defined preferedBaseConstructor
-            IMethodSymbol? preferedBaseConstructor = baseType.Constructors.FirstOrDefault(d => d.HasAttribute(Source.PrincipalBaseAttributeFullName));
+            IMethodSymbol? preferedBaseConstructor = baseType.Constructors.FirstOrDefault(d => d.HasAttribute(Source.DefaultBaseAttributeFullName));
             if (preferedBaseConstructor is not null)
             {
                 ExtractFieldsFromConstructedParent(concatenatedFields, preferedBaseConstructor);
@@ -373,7 +373,7 @@ public sealed class AutoConstructorGenerator : IIncrementalGenerator
             else if (SymbolEqualityComparer.Default.Equals(baseType.ContainingAssembly, symbol.ContainingAssembly) && baseType.HasAttribute(Source.AttributeFullName))
             {
                 AttributeData? attributeData = baseType.GetAttribute(Source.AttributeFullName);
-                if (attributeData?.GetBoolParameterValue("addPrincipalBaseAttribute") is true)
+                if (attributeData?.GetBoolParameterValue("addDefaultBaseAttribute") is true)
                 {
                     ExtractFieldsFromGeneratedParent(concatenatedFields, baseType);
                 }
