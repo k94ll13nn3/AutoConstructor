@@ -28,6 +28,7 @@ public sealed class AutoConstructorGenerator : IIncrementalGenerator
             i.AddSource(Source.IgnoreAttributeFullName, SourceText.From(Source.IgnoreAttributeText, Encoding.UTF8));
             i.AddSource(Source.InjectAttributeFullName, SourceText.From(Source.InjectAttributeText, Encoding.UTF8));
             i.AddSource(Source.InitializerAttributeFullName, SourceText.From(Source.InitializerAttributeText, Encoding.UTF8));
+            i.AddSource(Source.PrincipalBaseAttributeFullName, SourceText.From(Source.PrincipalBaseAttributeText, Encoding.UTF8));
         });
 
         IncrementalValuesProvider<(GeneratorExectutionResult? result, Options options)> valueProvider = context.SyntaxProvider
@@ -139,6 +140,9 @@ public sealed class AutoConstructorGenerator : IIncrementalGenerator
             accessibility = accessibilityValue;
         }
 
+        bool generatedPrincipalBaseAttribute = attributeData?.AttributeConstructor?.Parameters.Length > 0
+            && attributeData.GetBoolParameterValue("addPrincipalBaseAttribute");
+
         IMethodSymbol? initializerMethod = symbol.GetMembers()
             .OfType<IMethodSymbol>()
             .FirstOrDefault(x => x.HasAttribute(Source.InitializerAttributeFullName));
@@ -148,7 +152,8 @@ public sealed class AutoConstructorGenerator : IIncrementalGenerator
             hasParameterlessConstructor,
             symbol.GenerateFilename(),
             accessibility ?? "public",
-            initializerMethod is null ? null : new(initializerMethod.IsStatic, initializerMethod.Name));
+            initializerMethod is null ? null : new(initializerMethod.IsStatic, initializerMethod.Name),
+            generatedPrincipalBaseAttribute);
         return new(mainNamedTypeSymbolInfo, fields, null);
     }
 
@@ -217,8 +222,15 @@ public sealed class AutoConstructorGenerator : IIncrementalGenerator
                 }
             }
 
-            // Write constructor signature.
+            // Write attributes.
+            if (symbol.GeneratePrincipalBaseAttribute)
+            {
+                writer.WriteLine("[AutoConstructorPrincipalBase]");
+            }
+
             writer.WriteLine($"""[global::System.CodeDom.Compiler.GeneratedCodeAttribute("{nameof(AutoConstructor)}", "{GeneratorVersion}")]""");
+
+            // Write constructor signature.
             writer.Write($"{symbol.Accessibility} {symbol.Name}(");
             writer.Write(string.Join(", ", constructorParameters.Select(p => $"{p.Type ?? p.FallbackType} {p.SanitizedParameterName}")));
             writer.Write(")");
@@ -347,19 +359,33 @@ public sealed class AutoConstructorGenerator : IIncrementalGenerator
     {
         INamedTypeSymbol? baseType = symbol.BaseType;
 
-        // Check if base type is not object (ie. its base type is null) and that there is only one constructor.
-        if (baseType?.BaseType is not null && baseType.Constructors.Count(d => !d.IsStatic) == 1)
+        // Check if base type is not object (ie. its base type is null)
+        if (baseType?.BaseType is not null)
         {
-            IMethodSymbol constructor = baseType.Constructors.Single(d => !d.IsStatic);
-
+            // Check if there is a defined preferedBaseConstructor
+            IMethodSymbol? preferedBaseConstructor = baseType.Constructors.FirstOrDefault(d => d.HasAttribute(Source.PrincipalBaseAttributeFullName));
+            if (preferedBaseConstructor is not null)
+            {
+                ExtractFieldsFromConstructedParent(concatenatedFields, preferedBaseConstructor);
+            }
             // If symbol is in same assembly, the generated constructor is not visible as it might not be yet generated.
             // If not is the same assembly, is does not matter if the constructor was generated or not.
-            if (SymbolEqualityComparer.Default.Equals(baseType.ContainingAssembly, symbol.ContainingAssembly) && baseType.HasAttribute(Source.AttributeFullName))
+            else if (SymbolEqualityComparer.Default.Equals(baseType.ContainingAssembly, symbol.ContainingAssembly) && baseType.HasAttribute(Source.AttributeFullName))
             {
-                ExtractFieldsFromGeneratedParent(concatenatedFields, baseType);
+                AttributeData? attributeData = baseType.GetAttribute(Source.AttributeFullName);
+                if (attributeData?.GetBoolParameterValue("addPrincipalBaseAttribute") is true)
+                {
+                    ExtractFieldsFromGeneratedParent(concatenatedFields, baseType);
+                }
+                else if (baseType.Constructors.Count(d => !d.IsStatic) == 1)
+                {
+                    ExtractFieldsFromGeneratedParent(concatenatedFields, baseType);
+                }
             }
-            else
+            // Check if there is only one constructor.
+            else if (baseType.Constructors.Count(d => !d.IsStatic) == 1)
             {
+                IMethodSymbol constructor = baseType.Constructors.Single(d => !d.IsStatic);
                 ExtractFieldsFromConstructedParent(concatenatedFields, constructor);
             }
         }

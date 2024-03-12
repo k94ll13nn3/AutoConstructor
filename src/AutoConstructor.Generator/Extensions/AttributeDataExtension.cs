@@ -16,4 +16,19 @@ internal static class AttributeDataExtension
             ? attributeData.ConstructorArguments[index].Value as T
             : null;
     }
+
+    public static bool GetBoolParameterValue(this AttributeData attributeData, string parameterName)
+    {
+        if (attributeData.AttributeConstructor is null)
+        {
+            throw new InvalidOperationException("Missing constructor");
+        }
+
+        if (attributeData.AttributeConstructor.Parameters.ToList().FindIndex(c => c.Name == parameterName) is not (int index and not -1))
+        {
+            return default;
+        }
+
+        return attributeData.ConstructorArguments[index].Value is true;
+    }
 }

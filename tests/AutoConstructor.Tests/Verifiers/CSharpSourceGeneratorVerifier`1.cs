@@ -39,10 +39,11 @@ internal static partial class CSharpSourceGeneratorVerifier<TSourceGenerator>
                     Sources = { code },
                     GeneratedSources =
                     {
-                        (typeof(AutoConstructorGenerator), "AutoConstructorAttribute.cs", SourceText.From(Source.AttributeText, Encoding.UTF8)),
-                        (typeof(AutoConstructorGenerator), "AutoConstructorIgnoreAttribute.cs", SourceText.From(Source.IgnoreAttributeText, Encoding.UTF8)),
-                        (typeof(AutoConstructorGenerator), "AutoConstructorInjectAttribute.cs", SourceText.From(Source.InjectAttributeText, Encoding.UTF8)),
-                        (typeof(AutoConstructorGenerator), "AutoConstructorInitializerAttribute.cs", SourceText.From(Source.InitializerAttributeText, Encoding.UTF8)),
+                        (typeof(AutoConstructorGenerator), $"{Source.AttributeFullName}.cs", SourceText.From(Source.AttributeText, Encoding.UTF8)),
+                        (typeof(AutoConstructorGenerator), $"{Source.IgnoreAttributeFullName}.cs", SourceText.From(Source.IgnoreAttributeText, Encoding.UTF8)),
+                        (typeof(AutoConstructorGenerator), $"{Source.InjectAttributeFullName}.cs", SourceText.From(Source.InjectAttributeText, Encoding.UTF8)),
+                        (typeof(AutoConstructorGenerator), $"{Source.InitializerAttributeFullName}.cs", SourceText.From(Source.InitializerAttributeText, Encoding.UTF8)),
+                        (typeof(AutoConstructorGenerator), $"{Source.PrincipalBaseAttributeFullName}.cs", SourceText.From(Source.PrincipalBaseAttributeText, Encoding.UTF8)),
                     },
                     AdditionalProjects =
                     {

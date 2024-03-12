@@ -2076,4 +2076,204 @@ namespace Test
         string configFileContent = generateThisCalls is null ? "" : $"build_property.AutoConstructor_GenerateThisCalls = {generateThisCalls}";
         await VerifySourceGenerator.RunAsync(code, generated, configFileContent: configFileContent);
     }
+
+    [Theory]
+    [InlineData(@"
+namespace Test
+{
+    internal class BaseClass
+    {
+        private readonly int _t;
+
+        [AutoConstructorPrincipalBase]
+        public BaseClass(int t)
+        {
+            this._t = t;
+        }
+
+        public BaseClass()
+        {
+        }
+    }
+    [AutoConstructor]
+    internal partial class Test : BaseClass
+    {
+        private readonly int _t2;
+    }
+}", @"namespace Test
+{
+    partial class Test
+    {
+        public Test(int t2, int t) : base(t)
+        {
+            this._t2 = t2;
+        }
+    }
+}
+")]
+    [InlineData(@"
+namespace Test
+{
+    internal class BaseClass
+    {
+        private readonly int _t;
+
+        public BaseClass(int t)
+        {
+            this._t = t;
+        }
+
+        [AutoConstructorPrincipalBase]
+        public BaseClass()
+        {
+        }
+    }
+    [AutoConstructor]
+    internal partial class Test : BaseClass
+    {
+        private readonly int _t2;
+    }
+}", @"namespace Test
+{
+    partial class Test
+    {
+        public Test(int t2)
+        {
+            this._t2 = t2;
+        }
+    }
+}
+")]
+    [InlineData(@"
+namespace Test
+{
+    internal class BaseClass
+    {
+        private readonly int _t;
+
+        public BaseClass(int t)
+        {
+            this._t = t;
+        }
+
+        [AutoConstructorPrincipalBase]
+        public BaseClass()
+        {
+        }
+
+        [AutoConstructorPrincipalBase]
+        public BaseClass(int a, int b)
+        {
+        }
+    }
+    [AutoConstructor]
+    internal partial class Test : BaseClass
+    {
+        private readonly int _t2;
+    }
+}", @"namespace Test
+{
+    partial class Test
+    {
+        public Test(int t2)
+        {
+            this._t2 = t2;
+        }
+    }
+}
+")]
+    [InlineData(@"
+namespace Test
+{
+    internal class BaseClass
+    {
+        private readonly int _t;
+
+        [AutoConstructorPrincipalBase]
+        public BaseClass(int t1, int t3)
+        {
+            this._t = t1 + t3;
+        }
+
+        public BaseClass(int t)
+        {
+            this._t = t;
+        }
+
+        public BaseClass()
+        {
+        }
+    }
+    [AutoConstructor]
+    internal partial class Test : BaseClass
+    {
+        private readonly int _t2;
+    }
+}", @"namespace Test
+{
+    partial class Test
+    {
+        public Test(int t2, int t1, int t3) : base(t1, t3)
+        {
+            this._t2 = t2;
+        }
+    }
+}
+")]
+    public async Task Run_WithInheritanceAndPrincipalBaseAttribute_ShouldGenerateClassWithGoodBaseCall(string code, string generated)
+    {
+        await VerifySourceGenerator.RunAsync(code, generated);
+    }
+
+    [Fact]
+    public async Task Run_WithInheritanceAndPrincipalBaseAttributeInjectedWithGeneratedBaseConstructor_ShouldGenerateClassWithGoodBaseCall()
+    {
+        const string code = @"
+namespace Test
+{
+    [AutoConstructor(addPrincipalBaseAttribute: true)]
+    internal partial class BaseClass
+    {
+        private readonly int _t;
+
+        public BaseClass()
+        {
+        }
+
+        public BaseClass(string s)
+        {
+        }
+    }
+    [AutoConstructor]
+    internal partial class Test : BaseClass
+    {
+        private readonly int _t1;
+    }
+}";
+        const string generatedTest = @"namespace Test
+{
+    partial class Test
+    {
+        public Test(int t1, int t) : base(t)
+        {
+            this._t1 = t1;
+        }
+    }
+}
+";
+
+        const string generatedBase = @"namespace Test
+{
+    partial class BaseClass
+    {
+        [AutoConstructorPrincipalBase]
+        public BaseClass(int t)
+        {
+            this._t = t;
+        }
+    }
+}
+";
+        await VerifySourceGenerator.RunAsync(code, new[] { (generatedBase, "Test.BaseClass.g.cs"), (generatedTest, "Test.Test.g.cs") });
+    }
 }
