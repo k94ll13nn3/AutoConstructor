@@ -134,6 +134,53 @@ namespace Test
         }
     }
 }")]
+    [InlineData(@"
+namespace Test
+{
+    internal class BaseClass
+    {
+        private readonly int _t;
+
+        public BaseClass()
+        {
+        }
+
+        public BaseClass(int t)
+        {
+            this._t = t;
+        }
+
+        [AutoConstructorDefaultBase]
+        public BaseClass(int a, int b)
+        {
+        }
+    }
+    [AutoConstructor]
+    internal partial class Test : BaseClass
+    {
+    }
+}")]
+    [InlineData(@"
+namespace Test
+{
+    [AutoConstructor(addDefaultBaseAttribute: true)]
+    internal partial class BaseClass
+    {
+        private readonly int _t;
+
+        public BaseClass()
+        {
+        }
+
+        public BaseClass(string s)
+        {
+        }
+    }
+    [AutoConstructor]
+    internal partial class Test : BaseClass
+    {
+    }
+}")]
     public async Task Analyzer_ClassWithoutFieldsToInjectButFieldsOnParent_ShouldNotReportDiagnostic(string test)
     {
         await VerifyClassWithoutFieldsToInject.VerifyAnalyzerAsync(test, []);

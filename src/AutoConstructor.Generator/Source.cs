@@ -26,7 +26,7 @@ public static class Source
         ///     private readonly IService _service;
         /// }
         /// </example>
-        /// <seealso href="https://github.com/k94ll13nn3/AutoConstructor?tab=readme-ov-file#basic-usage"/>
+        /// <seealso href="https://github.com/k94ll13nn3/AutoConstructor#basic-usage"/>
         [System.AttributeUsage(System.AttributeTargets.Class | System.AttributeTargets.Struct, Inherited = false, AllowMultiple = false)]
         internal sealed class {{AttributeFullName}} : System.Attribute
         {
@@ -157,7 +157,7 @@ public static class Source
         ///     }
         /// }
         /// </example>
-        /// <seealso href="https://github.com/k94ll13nn3/AutoConstructor?tab=readme-ov-file#initializer-method"/>
+        /// <seealso href="https://github.com/k94ll13nn3/AutoConstructor#initializer-method"/>
         [System.AttributeUsage(System.AttributeTargets.Method, Inherited = false, AllowMultiple = false)]
         internal sealed class {{InitializerAttributeFullName}} : System.Attribute
         {
@@ -189,7 +189,7 @@ public static class Source
         ///     }
         /// }
         /// </example>
-        /// <seealso href="https://github.com/k94ll13nn3/AutoConstructor?tab=readme-ov-file#base-constructor-choice"/>
+        /// <seealso href="https://github.com/k94ll13nn3/AutoConstructor#base-constructor-choice"/>
         [System.AttributeUsage(System.AttributeTargets.Constructor, Inherited = false, AllowMultiple = false)]
         internal sealed class {{DefaultBaseAttributeFullName}} : System.Attribute
         {
