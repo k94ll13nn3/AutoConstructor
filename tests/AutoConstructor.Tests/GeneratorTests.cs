@@ -62,16 +62,18 @@ namespace Test
     }
 
     [Theory]
-    [InlineData(@"
+    [InlineData("""
+
 namespace Test
 {
     [AutoConstructor]
     internal partial class Test
     {
-        [AutoConstructorInject(""guid.ToString()"", ""guid"", typeof(System.Guid))]
+        [AutoConstructorInject("guid.ToString()", "guid", typeof(System.Guid))]
         private readonly string _guidString;
     }
-}", @"namespace Test
+}
+""", @"namespace Test
 {
     partial class Test
     {
@@ -82,16 +84,18 @@ namespace Test
     }
 }
 ")]
-    [InlineData(@"
+    [InlineData("""
+
 namespace Test
 {
     [AutoConstructor]
     internal partial class Test
     {
-        [AutoConstructorInject(injectedType: typeof(System.Guid), parameterName: ""guid"", initializer: ""guid.ToString()"")]
+        [AutoConstructorInject(injectedType: typeof(System.Guid), parameterName: "guid", initializer: "guid.ToString()")]
         private readonly string _guidString;
     }
-}", @"namespace Test
+}
+""", @"namespace Test
 {
     partial class Test
     {
@@ -102,16 +106,18 @@ namespace Test
     }
 }
 ")]
-    [InlineData(@"
+    [InlineData("""
+
 namespace Test
 {
     [AutoConstructor]
     internal partial class Test
     {
-        [AutoConstructorInject(null, ""guid"", typeof(string))]
+        [AutoConstructorInject(null, "guid", typeof(string))]
         private readonly string _guidString;
     }
-}", @"namespace Test
+}
+""", @"namespace Test
 {
     partial class Test
     {
@@ -122,17 +128,19 @@ namespace Test
     }
 }
 ")]
-    [InlineData(@"
+    [InlineData("""
+
 namespace Test
 {
     [AutoConstructor]
     internal partial class Test
     {
         private readonly System.Guid _guid;
-        [AutoConstructorInject(""guid.ToString()"", ""guid"", null)]
+        [AutoConstructorInject("guid.ToString()", "guid", null)]
         private readonly string _guidString;
     }
-}", @"namespace Test
+}
+""", @"namespace Test
 {
     partial class Test
     {
@@ -144,16 +152,18 @@ namespace Test
     }
 }
 ")]
-    [InlineData(@"
+    [InlineData("""
+
 namespace Test
 {
     [AutoConstructor]
     internal partial class Test
     {
-        [AutoConstructorInject(""guid.ToString()"", ""guid"", null)]
+        [AutoConstructorInject("guid.ToString()", "guid", null)]
         private readonly string _guidString;
     }
-}", @"namespace Test
+}
+""", @"namespace Test
 {
     partial class Test
     {
@@ -164,16 +174,18 @@ namespace Test
     }
 }
 ")]
-    [InlineData(@"
+    [InlineData("""
+
 namespace Test
 {
     [AutoConstructor]
     internal partial class Test
     {
-        [AutoConstructorInject(initializer: ""guid.ToString()"", injectedType: typeof(System.Guid))]
+        [AutoConstructorInject(initializer: "guid.ToString()", injectedType: typeof(System.Guid))]
         private readonly string _guid;
     }
-}", @"namespace Test
+}
+""", @"namespace Test
 {
     partial class Test
     {
@@ -184,16 +196,18 @@ namespace Test
     }
 }
 ")]
-    [InlineData(@"
+    [InlineData("""
+
 namespace Test
 {
     [AutoConstructor]
     internal partial class Test
     {
-        [AutoConstructorInject(parameterName: ""guid"")]
+        [AutoConstructorInject(parameterName: "guid")]
         private readonly string _guidString;
     }
-}", @"namespace Test
+}
+""", @"namespace Test
 {
     partial class Test
     {
@@ -204,16 +218,18 @@ namespace Test
     }
 }
 ")]
-    [InlineData(@"
+    [InlineData("""
+
 namespace Test
 {
     [AutoConstructor]
     internal partial struct Test
     {
-        [AutoConstructorInject(parameterName: ""guid"")]
+        [AutoConstructorInject(parameterName: "guid")]
         private readonly string _guidString;
     }
-}", @"namespace Test
+}
+""", @"namespace Test
 {
     partial struct Test
     {
@@ -425,15 +441,16 @@ namespace Test
 
         if (generateDocumentation)
         {
-            generated = @"namespace Test
+            generated = """
+namespace Test
 {
     partial class Test
     {
         /// <summary>
         /// Initializes a new instance of the Test class.
         /// </summary>
-        /// <param name=""t1"">Some field.</param>
-        /// <param name=""t2"">t2</param>
+        /// <param name="t1">Some field.</param>
+        /// <param name="t2">t2</param>
         public Test(string t1, string t2)
         {
             this._t1 = t1 ?? throw new System.ArgumentNullException(nameof(t1));
@@ -441,7 +458,8 @@ namespace Test
         }
     }
 }
-";
+
+""";
         }
 
         await VerifySourceGenerator.RunAsync(
@@ -477,23 +495,25 @@ namespace Test
         {
             comment = $"Initializes a new instance of the Test {(isClass ? "class" : "struct")}.";
         }
-        string generated = $@"namespace Test
-{{
-    partial {(isClass ? "class" : "struct")} Test
-    {{
+        string generated = $$"""
+namespace Test
+{
+    partial {{(isClass ? "class" : "struct")}} Test
+    {
         /// <summary>
-        /// {comment}
+        /// {{comment}}
         /// </summary>
-        /// <param name=""t1"">Some field.</param>
-        /// <param name=""t2"">t2</param>
+        /// <param name="t1">Some field.</param>
+        /// <param name="t2">t2</param>
         public Test(string t1, string t2)
-        {{
+        {
             this._t1 = t1 ?? throw new System.ArgumentNullException(nameof(t1));
             this._t2 = t2 ?? throw new System.ArgumentNullException(nameof(t2));
-        }}
-    }}
-}}
-";
+        }
+    }
+}
+
+""";
 
         string configFileContent = @"
 build_property.AutoConstructor_GenerateConstructorDocumentation = true
@@ -513,17 +533,19 @@ build_property.AutoConstructor_ConstructorDocumentationComment = {commentConfig}
     [Fact]
     public async Task Run_WithMismatchingTypes_ShouldNotGenerateClass()
     {
-        const string code = @"
+        const string code = """
+
 namespace Test
 {
     [AutoConstructor]
     internal partial class Test
     {
-        [AutoConstructorInject(""guid.ToString()"", ""guid"", typeof(System.Guid))]
+        [AutoConstructorInject("guid.ToString()", "guid", typeof(System.Guid))]
         private readonly string _i;
         private readonly string _guid;
     }
-}";
+}
+""";
 
         DiagnosticResult diagnosticResult = new DiagnosticResult(DiagnosticDescriptors.MistmatchTypesDiagnosticId, DiagnosticSeverity.Error).WithSpan(4, 5, 10, 6);
         await VerifySourceGenerator.RunAsync(code, diagnostics: [diagnosticResult]);
@@ -532,22 +554,24 @@ namespace Test
     [Fact]
     public async Task Run_WithMismatchingTypesAndFallbackTypes_ShouldNotGenerateClass()
     {
-        const string code = @"
+        const string code = """
+
 namespace Test
 {
     [AutoConstructor]
     internal partial class Test
     {
-        [AutoConstructorInject(null, ""t"", null)]
+        [AutoConstructorInject(null, "t", null)]
         private readonly int _a;
-        [AutoConstructorInject(null, ""t"", typeof(string))]
+        [AutoConstructorInject(null, "t", typeof(string))]
         private readonly int _b;
-        [AutoConstructorInject(null, ""t"", null)]
+        [AutoConstructorInject(null, "t", null)]
         private readonly int _c;
-        [AutoConstructorInject(null, ""t"", typeof(string))]
+        [AutoConstructorInject(null, "t", typeof(string))]
         private readonly int _d;
     }
-}";
+}
+""";
 
         DiagnosticResult diagnosticResult = new DiagnosticResult(DiagnosticDescriptors.MistmatchTypesDiagnosticId, DiagnosticSeverity.Error).WithSpan(4, 5, 15, 6);
         await VerifySourceGenerator.RunAsync(code, diagnostics: [diagnosticResult]);
@@ -556,19 +580,21 @@ namespace Test
     [Fact]
     public async Task Run_WithMismatchingFallbackTypes_ShouldNotGenerateClass()
     {
-        const string code = @"
+        const string code = """
+
 namespace Test
 {
     [AutoConstructor]
     internal partial class Test
     {
-        [AutoConstructorInject(null, ""guid"", null)]
+        [AutoConstructorInject(null, "guid", null)]
         private readonly string _i;
 
-        [AutoConstructorInject(null, ""guid"", null)]
+        [AutoConstructorInject(null, "guid", null)]
         private readonly System.Guid _guid;
     }
-}";
+}
+""";
 
         DiagnosticResult diagnosticResult = new DiagnosticResult(DiagnosticDescriptors.MistmatchTypesDiagnosticId, DiagnosticSeverity.Error).WithSpan(4, 5, 12, 6);
         await VerifySourceGenerator.RunAsync(code, diagnostics: [diagnosticResult]);
@@ -883,7 +909,8 @@ namespace Nested
     [Fact]
     public async Task Run_WithInjectAttributeOnProperties_ShouldGenerateClass()
     {
-        const string code = @"
+        const string code = """
+
 namespace Test
 {
     [AutoConstructor]
@@ -912,21 +939,23 @@ namespace Test
         [field: AutoConstructorIgnore]
         public int NotInjectedBecauseHasIgnoreAttribute { get; }
 
-        [field: AutoConstructorInject(initializer: ""injected.ToString()"", injectedType: typeof(int), parameterName: ""injected"")]
+        [field: AutoConstructorInject(initializer: "injected.ToString()", injectedType: typeof(int), parameterName: "injected")]
         public string InjectedWithoutCreatingAParam { get; }
     }
-}";
-        const string generated = @"namespace Test
+}
+""";
+        const string generated = """
+namespace Test
 {
     partial class Test
     {
         /// <summary>
         /// Initializes a new instance of the Test class.
         /// </summary>
-        /// <param name=""injected"">injected</param>
-        /// <param name=""injectedWithDocumentation"">Some property.</param>
-        /// <param name=""injectedBecauseExplicitInjection"">injectedBecauseExplicitInjection</param>
-        /// <param name=""alsoInjectedEvenWhenMissingAttribute"">alsoInjectedEvenWhenMissingAttribute</param>
+        /// <param name="injected">injected</param>
+        /// <param name="injectedWithDocumentation">Some property.</param>
+        /// <param name="injectedBecauseExplicitInjection">injectedBecauseExplicitInjection</param>
+        /// <param name="alsoInjectedEvenWhenMissingAttribute">alsoInjectedEvenWhenMissingAttribute</param>
         public Test(int injected, int injectedWithDocumentation, int injectedBecauseExplicitInjection, int alsoInjectedEvenWhenMissingAttribute)
         {
             this.Injected = injected;
@@ -937,7 +966,8 @@ namespace Test
         }
     }
 }
-";
+
+""";
 
         await VerifySourceGenerator.RunAsync(code, generated, configFileContent: "build_property.AutoConstructor_GenerateConstructorDocumentation = true");
     }
@@ -1075,7 +1105,8 @@ namespace Test
     [Fact]
     public async Task Run_MultiplePartialPartsAndAttributesInMultipleParts_ShouldGenerateClass()
     {
-        const string code = @"
+        const string code = """
+
 namespace Test
 {
     [AutoConstructor]
@@ -1086,10 +1117,11 @@ namespace Test
 
     internal partial class Test
     {
-        [AutoConstructorInject(parameterName: ""i1"")]
+        [AutoConstructorInject(parameterName: "i1")]
         private readonly int _i2;
     }
-}";
+}
+""";
         const string generated = @"namespace Test
 {
     partial class Test
@@ -1108,13 +1140,14 @@ namespace Test
     [Fact]
     public async Task Run_WithMismatchingTypesWithTwoPartialParts_ShouldReportDiagnosticOnFirstPart()
     {
-        const string code = @"
+        const string code = """
+
 namespace Test
 {
     [AutoConstructor]
     internal partial class Test
     {
-        [AutoConstructorInject(""guid.ToString()"", ""guid"", typeof(System.Guid))]
+        [AutoConstructorInject("guid.ToString()", "guid", typeof(System.Guid))]
         private readonly string _i;
     }
 
@@ -1122,7 +1155,8 @@ namespace Test
     {
         private readonly string _guid;
     }
-}";
+}
+""";
 
         DiagnosticResult diagnosticResultFirstPart = new DiagnosticResult(DiagnosticDescriptors.MistmatchTypesDiagnosticId, DiagnosticSeverity.Error).WithSpan(4, 5, 9, 6);
         await VerifySourceGenerator.RunAsync(code, diagnostics: [diagnosticResultFirstPart]);
@@ -1299,7 +1333,8 @@ namespace Test
     }
 
     [Theory]
-    [InlineData(@"
+    [InlineData("""
+
 namespace Test
 {
     internal class BaseClass
@@ -1315,10 +1350,11 @@ namespace Test
     [AutoConstructor]
     internal partial class Test : BaseClass
     {
-        [AutoConstructorInject(parameterName: ""guid"")]
+        [AutoConstructorInject(parameterName: "guid")]
         private readonly System.Guid _guid2;
     }
-}", @"namespace Test
+}
+""", @"namespace Test
 {
     partial class Test
     {
@@ -1621,7 +1657,8 @@ namespace Test
     [Fact]
     public async Task Run_ClassWithParameterlessConstructor_ShouldGenerateClass()
     {
-        const string code = @"
+        const string code = """
+
 namespace Test
 {
     [AutoConstructor]
@@ -1629,10 +1666,11 @@ namespace Test
     {
         private readonly int _t;
         public Test(){
-            System.Console.WriteLine(""Hello world!"");
+            System.Console.WriteLine("Hello world!");
         }
     }
-}";
+}
+""";
         const string generated = @"namespace Test
 {
     partial class Test
@@ -1724,15 +1762,17 @@ namespace Test
     [InlineData("wrong value", "public")]
     public async Task Run_WithConstructorAccessibility_ShouldGenerateClass(string? attributeAccessibility, string constructorAccessibility)
     {
-        string code = $@"
+        string code = $$"""
+
 namespace Test
-{{
-    [AutoConstructor(""{attributeAccessibility}"")]
+{
+    [AutoConstructor("{{attributeAccessibility}}")]
     internal partial class Test
-    {{
+    {
         private readonly int _t;
-    }}
-}}";
+    }
+}
+""";
         string generated = $@"namespace Test
 {{
     partial class Test
@@ -1816,7 +1856,8 @@ namespace Test
     [Fact]
     public async Task Run_WithReservedNamesAsParameters_ShouldGenerateClass()
     {
-        const string code = @"
+        const string code = """
+
 namespace Test
 {
     [AutoConstructor]
@@ -1826,7 +1867,7 @@ namespace Test
         private readonly int _if;
         private readonly int _public;
         private readonly int _true;
-        [AutoConstructorInject(parameterName: ""struct"")]
+        [AutoConstructorInject(parameterName: "struct")]
         private readonly string _myStruct;
         private readonly int @class;
     }
@@ -1839,7 +1880,8 @@ namespace Test
             this._private = @private;
         }
     }
-}";
+}
+""";
         const string generated = @"namespace Test
 {
     partial class Test
@@ -1862,22 +1904,24 @@ namespace Test
     [Fact]
     public async Task Run_WithMultipleInjectWithSameParameterName_ShouldGenerateClass()
     {
-        const string code = @"
+        const string code = """
+
 namespace Test
 {
     [AutoConstructor]
     internal partial class Test
     {
-        [AutoConstructorInject(""t.Length"", ""t"", null)]
+        [AutoConstructorInject("t.Length", "t", null)]
         private readonly int _a;
-        [AutoConstructorInject(null, ""t"", typeof(string))]
+        [AutoConstructorInject(null, "t", typeof(string))]
         private readonly string _b;
-        [AutoConstructorInject(null, ""t"", null)]
+        [AutoConstructorInject(null, "t", null)]
         private readonly string _c;
-        [AutoConstructorInject(null, ""t"", typeof(string))]
+        [AutoConstructorInject(null, "t", typeof(string))]
         private readonly string _d;
     }
-}";
+}
+""";
         const string generated = @"namespace Test
 {
     partial class Test
@@ -2049,7 +2093,8 @@ namespace Test
     [InlineData(false)]
     public async Task Run_WithMsbuildConfigGenerateThisCalls_ShouldGenerateClass(bool? generateThisCalls)
     {
-        const string code = @"
+        const string code = """
+
 namespace Test
 {
     [AutoConstructor]
@@ -2057,10 +2102,11 @@ namespace Test
     {
         private readonly int _t;
         public Test(){
-            System.Console.WriteLine(""Hello world!"");
+            System.Console.WriteLine("Hello world!");
         }
     }
-}";
+}
+""";
         string generated = $@"namespace Test
 {{
     partial class Test
@@ -2082,18 +2128,20 @@ namespace Test
     [InlineData(false)]
     public async Task Run_WithAttributeConfigGenerateThisCalls_ShouldGenerateClass(bool generateThisCall)
     {
-        string code = $@"
+        string code = $$"""
+
 namespace Test
-{{
-    [AutoConstructor(disableThisCall: {(generateThisCall ? "false" : "true")})]
+{
+    [AutoConstructor(disableThisCall: {{(generateThisCall ? "false" : "true")}})]
     internal partial class Test
-    {{
+    {
         private readonly int _t;
-        public Test(){{
-            System.Console.WriteLine(""Hello world!"");
-        }}
-    }}
-}}";
+        public Test(){
+            System.Console.WriteLine("Hello world!");
+        }
+    }
+}
+""";
         string generated = $@"namespace Test
 {{
     partial class Test
