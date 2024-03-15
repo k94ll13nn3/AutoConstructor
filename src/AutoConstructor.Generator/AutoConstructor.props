@@ -4,6 +4,7 @@
     <CompilerVisibleProperty Include="AutoConstructor_DisableNullChecking" />
     <CompilerVisibleProperty Include="AutoConstructor_GenerateConstructorDocumentation" />
     <CompilerVisibleProperty Include="AutoConstructor_ConstructorDocumentationComment" />
+    <CompilerVisibleProperty Include="AutoConstructor_GenerateThisCalls" />
   </ItemGroup>
 
 </Project>

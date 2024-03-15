@@ -53,14 +53,14 @@ public sealed class TypeWithoutFieldsToInjectAnalyzer : DiagnosticAnalyzer
 
     private static bool ParentHasFields(Compilation compilation, INamedTypeSymbol symbol)
     {
-        INamedTypeSymbol? baseType = symbol.BaseType;
-
-        if (baseType?.BaseType is not null && baseType.Constructors.Count(d => !d.IsStatic) == 1)
+        (IMethodSymbol? constructor, INamedTypeSymbol? baseType) = symbol.GetPreferedBaseConstructorOrBaseType();
+        if (constructor is not null)
         {
-            IMethodSymbol constructor = baseType.Constructors.Single(d => !d.IsStatic);
-            return (SymbolEqualityComparer.Default.Equals(baseType.ContainingAssembly, symbol.ContainingAssembly) && baseType.HasAttribute(Source.AttributeFullName))
-                ? SymbolHasFields(baseType) || ParentHasFields(compilation, baseType)
-                : constructor.Parameters.Length > 0;
+            return constructor.Parameters.Length > 0;
+        }
+        else if (baseType is not null)
+        {
+            return SymbolHasFields(baseType) || ParentHasFields(compilation, baseType);
         }
 
         return false;

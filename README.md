@@ -123,6 +123,53 @@ public Test(int t)
 }
 ```
 
+### Configuring `base` call
+
+It is possible to configure which base constructor is called when a type has a non-object base type and has its constructor generated. By default, a call to `base` is emitted only when the is only one constructor on the base type.
+This behavior can be changed by adding a `[AutoConstructorDefaultBase]` on a constructor in the base type to indicate that it must be chosen as the base call.
+
+If the base type is also generated, the `AddDefaultBaseAttribute` parameter on `AutoConstructorAttribute` can be used to generate the attribute with the generated constructor.
+
+```csharp
+internal class BaseClass
+{
+    private readonly int _t;
+
+    [AutoConstructorDefaultBase]
+    public BaseClass(int t1, int t3)
+    {
+        this._t = t1 + t3;
+    }
+
+    public BaseClass(int t)
+    {
+        this._t = t;
+    }
+
+    public BaseClass()
+    {
+    }
+}
+
+[AutoConstructor]
+internal partial class Test : BaseClass
+{
+    private readonly int _t2;
+}
+```
+
+will generate
+
+```csharp
+partial class Test
+{
+    public Test(int t2, int t1, int t3) : base(t1, t3)
+    {
+        this._t2 = t2;
+    }
+}
+```
+
 ### Properties injection
 
 Get-only properties (`public int Property { get; }`) are injected by the generator by default.
@@ -146,6 +193,18 @@ To enable this behavior, set `AutoConstructor_DisableNullChecking` to `false` in
 ``` xml
 <AutoConstructor_DisableNullChecking>false</AutoConstructor_DisableNullChecking>
 ```
+
+### Generating `this()` calls
+
+By default, if a parameterless constructor is available on the class (other than the implicit one), a call
+to `this()` is generated with the generated constructor
+To disable this behavior, set `AutoConstructor_GenerateThisCalls` to `false` in the project file:
+
+``` xml
+<AutoConstructor_GenerateThisCalls>false</AutoConstructor_GenerateThisCalls>
+```
+
+This is also configurable at the attribute level with the `DisableThisCall` parameter on `AutoConstructorAttribute` (⚠ it is not possible force the generation at the attribute level if the generation is globally disabled).
 
 ### Generating XML documentation comment
 
@@ -345,7 +404,7 @@ The accessibility defined in the `AutoConstructor` attribute is not an allowed v
 
 ### ACONS08
 
-`AutoConstructorInitializer` attribute used on multiple methods.
+`AutoConstructorInitializer` attribute used on multiple methods inside type.
 
 ### ACONS09
 
@@ -354,3 +413,7 @@ The accessibility defined in the `AutoConstructor` attribute is not an allowed v
 ### ACONS10
 
 `AutoConstructorInitializer` attribute used on a method with parameters.
+
+### ACONS11
+
+`AutoConstructorDefaultBase` attribute used on multiple constructors inside type.

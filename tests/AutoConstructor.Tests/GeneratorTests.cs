@@ -2042,4 +2042,270 @@ namespace Test
 ";
         await VerifySourceGenerator.RunAsync(code, generated, additionalProjectsSource: additionnalSource);
     }
+
+    [Theory]
+    [InlineData(null)]
+    [InlineData(true)]
+    [InlineData(false)]
+    public async Task Run_WithMsbuildConfigGenerateThisCalls_ShouldGenerateClass(bool? generateThisCalls)
+    {
+        const string code = @"
+namespace Test
+{
+    [AutoConstructor]
+    internal partial class Test
+    {
+        private readonly int _t;
+        public Test(){
+            System.Console.WriteLine(""Hello world!"");
+        }
+    }
+}";
+        string generated = $@"namespace Test
+{{
+    partial class Test
+    {{
+        public Test(int t){(generateThisCalls is null or true ? " : this()" : "")}
+        {{
+            this._t = t;
+        }}
+    }}
+}}
+";
+
+        string configFileContent = generateThisCalls is null ? "" : $"build_property.AutoConstructor_GenerateThisCalls = {generateThisCalls}";
+        await VerifySourceGenerator.RunAsync(code, generated, configFileContent: configFileContent);
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public async Task Run_WithAttributeConfigGenerateThisCalls_ShouldGenerateClass(bool generateThisCall)
+    {
+        string code = $@"
+namespace Test
+{{
+    [AutoConstructor(disableThisCall: {(generateThisCall ? "false" : "true")})]
+    internal partial class Test
+    {{
+        private readonly int _t;
+        public Test(){{
+            System.Console.WriteLine(""Hello world!"");
+        }}
+    }}
+}}";
+        string generated = $@"namespace Test
+{{
+    partial class Test
+    {{
+        public Test(int t){(generateThisCall ? " : this()" : "")}
+        {{
+            this._t = t;
+        }}
+    }}
+}}
+";
+
+        await VerifySourceGenerator.RunAsync(code, generated);
+    }
+
+    [Theory]
+    [InlineData(@"
+namespace Test
+{
+    internal class BaseClass
+    {
+        private readonly int _t;
+
+        [AutoConstructorDefaultBase]
+        public BaseClass(int t)
+        {
+            this._t = t;
+        }
+
+        public BaseClass()
+        {
+        }
+    }
+    [AutoConstructor]
+    internal partial class Test : BaseClass
+    {
+        private readonly int _t2;
+    }
+}", @"namespace Test
+{
+    partial class Test
+    {
+        public Test(int t2, int t) : base(t)
+        {
+            this._t2 = t2;
+        }
+    }
+}
+")]
+    [InlineData(@"
+namespace Test
+{
+    internal class BaseClass
+    {
+        private readonly int _t;
+
+        public BaseClass(int t)
+        {
+            this._t = t;
+        }
+
+        [AutoConstructorDefaultBase]
+        public BaseClass()
+        {
+        }
+    }
+    [AutoConstructor]
+    internal partial class Test : BaseClass
+    {
+        private readonly int _t2;
+    }
+}", @"namespace Test
+{
+    partial class Test
+    {
+        public Test(int t2)
+        {
+            this._t2 = t2;
+        }
+    }
+}
+")]
+    [InlineData(@"
+namespace Test
+{
+    internal class BaseClass
+    {
+        private readonly int _t;
+
+        public BaseClass(int t)
+        {
+            this._t = t;
+        }
+
+        [AutoConstructorDefaultBase]
+        public BaseClass()
+        {
+        }
+
+        [AutoConstructorDefaultBase]
+        public BaseClass(int a, int b)
+        {
+        }
+    }
+    [AutoConstructor]
+    internal partial class Test : BaseClass
+    {
+        private readonly int _t2;
+    }
+}", @"namespace Test
+{
+    partial class Test
+    {
+        public Test(int t2)
+        {
+            this._t2 = t2;
+        }
+    }
+}
+")]
+    [InlineData(@"
+namespace Test
+{
+    internal class BaseClass
+    {
+        private readonly int _t;
+
+        [AutoConstructorDefaultBase]
+        public BaseClass(int t1, int t3)
+        {
+            this._t = t1 + t3;
+        }
+
+        public BaseClass(int t)
+        {
+            this._t = t;
+        }
+
+        public BaseClass()
+        {
+        }
+    }
+    [AutoConstructor]
+    internal partial class Test : BaseClass
+    {
+        private readonly int _t2;
+    }
+}", @"namespace Test
+{
+    partial class Test
+    {
+        public Test(int t2, int t1, int t3) : base(t1, t3)
+        {
+            this._t2 = t2;
+        }
+    }
+}
+")]
+    public async Task Run_WithInheritanceAndDefaultBaseAttribute_ShouldGenerateClassWithGoodBaseCall(string code, string generated)
+    {
+        await VerifySourceGenerator.RunAsync(code, generated);
+    }
+
+    [Fact]
+    public async Task Run_WithInheritanceAndDefaultBaseAttributeInjectedWithGeneratedBaseConstructor_ShouldGenerateClassWithGoodBaseCall()
+    {
+        const string code = @"
+namespace Test
+{
+    [AutoConstructor(addDefaultBaseAttribute: true)]
+    internal partial class BaseClass
+    {
+        private readonly int _t;
+
+        public BaseClass()
+        {
+        }
+
+        public BaseClass(string s)
+        {
+        }
+    }
+    [AutoConstructor]
+    internal partial class Test : BaseClass
+    {
+        private readonly int _t1;
+    }
+}";
+        const string generatedTest = @"namespace Test
+{
+    partial class Test
+    {
+        public Test(int t1, int t) : base(t)
+        {
+            this._t1 = t1;
+        }
+    }
+}
+";
+
+        const string generatedBase = @"namespace Test
+{
+    partial class BaseClass
+    {
+        [AutoConstructorDefaultBase]
+        public BaseClass(int t)
+        {
+            this._t = t;
+        }
+    }
+}
+";
+        await VerifySourceGenerator.RunAsync(code, new[] { (generatedBase, "Test.BaseClass.g.cs"), (generatedTest, "Test.Test.g.cs") });
+    }
 }

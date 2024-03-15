@@ -28,6 +28,7 @@ public sealed class AutoConstructorGenerator : IIncrementalGenerator
             i.AddSource(Source.IgnoreAttributeFullName, SourceText.From(Source.IgnoreAttributeText, Encoding.UTF8));
             i.AddSource(Source.InjectAttributeFullName, SourceText.From(Source.InjectAttributeText, Encoding.UTF8));
             i.AddSource(Source.InitializerAttributeFullName, SourceText.From(Source.InitializerAttributeText, Encoding.UTF8));
+            i.AddSource(Source.DefaultBaseAttributeFullName, SourceText.From(Source.DefaultBaseAttributeText, Encoding.UTF8));
         });
 
         IncrementalValuesProvider<(GeneratorExectutionResult? result, Options options)> valueProvider = context.SyntaxProvider
@@ -79,7 +80,13 @@ public sealed class AutoConstructorGenerator : IIncrementalGenerator
             emitNullChecks = disableNullCheckingSwitch.Equals("false", StringComparison.OrdinalIgnoreCase);
         }
 
-        return new(generateConstructorDocumentation, constructorDocumentationComment, emitNullChecks);
+        bool emitThisCalls = true;
+        if (analyzerOptions.TryGetValue("build_property.AutoConstructor_GenerateThisCalls", out string? enableThisCallsSwitch))
+        {
+            emitThisCalls = !enableThisCallsSwitch.Equals("false", StringComparison.OrdinalIgnoreCase);
+        }
+
+        return new(generateConstructorDocumentation, constructorDocumentationComment, emitNullChecks, emitThisCalls);
     }
 
     private static GeneratorExectutionResult? Execute(GeneratorAttributeSyntaxContext context, TypeDeclarationSyntax typeSyntax)
@@ -133,6 +140,12 @@ public sealed class AutoConstructorGenerator : IIncrementalGenerator
             accessibility = accessibilityValue;
         }
 
+        bool generatedDefaultBaseAttribute = attributeData?.AttributeConstructor?.Parameters.Length > 0
+            && attributeData.GetBoolParameterValue("addDefaultBaseAttribute");
+
+        bool disableThisCall = attributeData?.AttributeConstructor?.Parameters.Length > 0
+            && attributeData.GetBoolParameterValue("disableThisCall");
+
         IMethodSymbol? initializerMethod = symbol.GetMembers()
             .OfType<IMethodSymbol>()
             .FirstOrDefault(x => x.HasAttribute(Source.InitializerAttributeFullName));
@@ -142,7 +155,9 @@ public sealed class AutoConstructorGenerator : IIncrementalGenerator
             hasParameterlessConstructor,
             symbol.GenerateFilename(),
             accessibility ?? "public",
-            initializerMethod is null ? null : new(initializerMethod.IsStatic, initializerMethod.Name));
+            initializerMethod is null ? null : new(initializerMethod.IsStatic, initializerMethod.Name),
+            generatedDefaultBaseAttribute,
+            disableThisCall);
         return new(mainNamedTypeSymbolInfo, fields, null);
     }
 
@@ -211,8 +226,15 @@ public sealed class AutoConstructorGenerator : IIncrementalGenerator
                 }
             }
 
-            // Write constructor signature.
+            // Write attributes.
+            if (symbol.GenerateDefaultBaseAttribute)
+            {
+                writer.WriteLine("[AutoConstructorDefaultBase]");
+            }
+
             writer.WriteLine($"""[global::System.CodeDom.Compiler.GeneratedCodeAttribute("{nameof(AutoConstructor)}", "{GeneratorVersion}")]""");
+
+            // Write constructor signature.
             writer.Write($"{symbol.Accessibility} {symbol.Name}(");
             writer.Write(string.Join(", ", constructorParameters.Select(p => $"{p.Type ?? p.FallbackType} {p.SanitizedParameterName}")));
             writer.Write(")");
@@ -225,7 +247,7 @@ public sealed class AutoConstructorGenerator : IIncrementalGenerator
                 writer.Write(")");
             }
             // Write this call if the symbol has a parameterless constructor
-            else if (symbol.HasParameterlessConstructor)
+            else if (options.EmitThisCalls && !symbol.DisableThisCall && symbol.HasParameterlessConstructor)
             {
                 writer.Write(" : this()");
             }
@@ -339,23 +361,14 @@ public sealed class AutoConstructorGenerator : IIncrementalGenerator
 
     private static void ExtractFieldsFromParent(INamedTypeSymbol symbol, List<FieldInfo> concatenatedFields)
     {
-        INamedTypeSymbol? baseType = symbol.BaseType;
-
-        // Check if base type is not object (ie. its base type is null) and that there is only one constructor.
-        if (baseType?.BaseType is not null && baseType.Constructors.Count(d => !d.IsStatic) == 1)
+        (IMethodSymbol? constructor, INamedTypeSymbol? baseType) = symbol.GetPreferedBaseConstructorOrBaseType();
+        if (constructor is not null)
         {
-            IMethodSymbol constructor = baseType.Constructors.Single(d => !d.IsStatic);
-
-            // If symbol is in same assembly, the generated constructor is not visible as it might not be yet generated.
-            // If not is the same assembly, is does not matter if the constructor was generated or not.
-            if (SymbolEqualityComparer.Default.Equals(baseType.ContainingAssembly, symbol.ContainingAssembly) && baseType.HasAttribute(Source.AttributeFullName))
-            {
-                ExtractFieldsFromGeneratedParent(concatenatedFields, baseType);
-            }
-            else
-            {
-                ExtractFieldsFromConstructedParent(concatenatedFields, constructor);
-            }
+            ExtractFieldsFromConstructedParent(concatenatedFields, constructor);
+        }
+        else if (baseType is not null)
+        {
+            ExtractFieldsFromGeneratedParent(concatenatedFields, baseType);
         }
     }
 
