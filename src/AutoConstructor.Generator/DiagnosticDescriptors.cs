@@ -24,6 +24,8 @@ public static class DiagnosticDescriptors
 
     public const string InitializerMethodMustBeParameterlessDiagnosticId = "ACONS10";
 
+    public const string MultipleDefaultBaseDiagnosticId = "ACONS11";
+
     public static readonly DiagnosticDescriptor TypeWithoutPartialRule = new(
         TypeWithoutPartialDiagnosticId,
         "Couldn't generate constructor",
@@ -132,5 +134,16 @@ public static class DiagnosticDescriptors
         true,
         null,
         $"https://github.com/k94ll13nn3/AutoConstructor#{InitializerMethodMustBeParameterlessDiagnosticId}",
+        WellKnownDiagnosticTags.Build);
+
+    public static readonly DiagnosticDescriptor MultipleDefaultBaseRule = new(
+        MultipleDefaultBaseDiagnosticId,
+        $"Multiple {Source.DefaultBaseAttributeFullName}",
+        $"Multiple {Source.DefaultBaseAttributeFullName} constructor are defined, only one can be used as default constructor",
+        "Usage",
+        DiagnosticSeverity.Error,
+        true,
+        null,
+        $"https://github.com/k94ll13nn3/AutoConstructor#{MultipleDefaultBaseDiagnosticId}",
         WellKnownDiagnosticTags.Build);
 }
