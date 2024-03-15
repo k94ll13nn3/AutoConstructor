@@ -10,15 +10,17 @@ namespace AutoConstructor.Tests.Analyzers;
 public class IgnoreOrInjectAttributeOnTypeWithoutAttributeTests
 {
     [Theory]
-    [InlineData(@"
+    [InlineData("""
+
 namespace Test
 {
     internal class Test
     {
-        [{|#0:AutoConstructorInject(""a"", ""a"", typeof(int))|}]
+        [{|#0:AutoConstructorInject("a", "a", typeof(int))|}]
         private readonly int _t = 1;
     }
-}")]
+}
+""")]
     [InlineData(@"
 namespace Test
 {
@@ -28,19 +30,21 @@ namespace Test
         private readonly int _t = 1;
     }
 }")]
-    [InlineData(@"
+    [InlineData("""
+
 namespace Test
 {
     internal struct Test
     {
-        [{|#0:AutoConstructorInject(""a"", ""a"", typeof(int))|}]
+        [{|#0:AutoConstructorInject("a", "a", typeof(int))|}]
         private readonly int _t = 1;
 
         public Test()
         {
         }
     }
-}")]
+}
+""")]
     public async Task Analyzer_IgnoreOrInjectAttributeOnTypeWithoutAttribute_ShouldReportDiagnostic(string test)
     {
         DiagnosticResult[] expected = [
@@ -50,15 +54,17 @@ namespace Test
     }
 
     [Theory]
-    [InlineData(@"
+    [InlineData("""
+
 namespace Test
 {
     internal class Test
     {
-        [{|#0:AutoConstructorInject(""a"", ""a"", typeof(int))|}]
+        [{|#0:AutoConstructorInject("a", "a", typeof(int))|}]
         private readonly int _t = 1;
     }
-}", @"
+}
+""", @"
 namespace Test
 {
     internal class Test
@@ -117,16 +123,18 @@ namespace Test
     [Fact]
     public async Task Analyzer_BothAttributesOnClassWithoutAttribute_ShouldReportDiagnosticAndFixCode()
     {
-        const string test = @"
+        const string test = """
+
 namespace Test
 {
     internal class Test
     {
         [{|#0:AutoConstructorIgnore|}]
-        [{|#1:AutoConstructorInject(""a"", ""a"", typeof(int))|}]
+        [{|#1:AutoConstructorInject("a", "a", typeof(int))|}]
         private readonly int _t = 1;
     }
-}";
+}
+""";
 
         const string fixtest = @"
 namespace Test
