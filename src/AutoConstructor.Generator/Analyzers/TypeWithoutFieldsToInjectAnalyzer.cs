@@ -53,37 +53,14 @@ public sealed class TypeWithoutFieldsToInjectAnalyzer : DiagnosticAnalyzer
 
     private static bool ParentHasFields(Compilation compilation, INamedTypeSymbol symbol)
     {
-        INamedTypeSymbol? baseType = symbol.BaseType;
-
-        // Check if base type is not object (ie. its base type is null)
-        if (baseType?.BaseType is not null)
+        (IMethodSymbol? constructor, INamedTypeSymbol? baseType) = symbol.GetPreferedBaseConstructorOrBaseType();
+        if (constructor is not null)
         {
-            // Check if there is a defined preferedBaseConstructor
-            IMethodSymbol? preferedBaseConstructor = baseType.Constructors.FirstOrDefault(d => d.HasAttribute(Source.DefaultBaseAttributeFullName));
-            if (preferedBaseConstructor is not null)
-            {
-                return preferedBaseConstructor.Parameters.Length > 0;
-            }
-            // If symbol is in same assembly, the generated constructor is not visible as it might not be yet generated.
-            // If not is the same assembly, is does not matter if the constructor was generated or not.
-            else if (SymbolEqualityComparer.Default.Equals(baseType.ContainingAssembly, symbol.ContainingAssembly) && baseType.HasAttribute(Source.AttributeFullName))
-            {
-                AttributeData? attributeData = baseType.GetAttribute(Source.AttributeFullName);
-                if (attributeData?.GetBoolParameterValue("addDefaultBaseAttribute") is true)
-                {
-                    return SymbolHasFields(baseType) || ParentHasFields(compilation, baseType);
-                }
-                else if (baseType.Constructors.Count(d => !d.IsStatic) == 1)
-                {
-                    return SymbolHasFields(baseType) || ParentHasFields(compilation, baseType);
-                }
-            }
-            // Check if there is only one constructor.
-            else if (baseType.Constructors.Count(d => !d.IsStatic) == 1)
-            {
-                IMethodSymbol constructor = baseType.Constructors.Single(d => !d.IsStatic);
-                return constructor.Parameters.Length > 0;
-            }
+            return constructor.Parameters.Length > 0;
+        }
+        else if (baseType is not null)
+        {
+            return SymbolHasFields(baseType) || ParentHasFields(compilation, baseType);
         }
 
         return false;
