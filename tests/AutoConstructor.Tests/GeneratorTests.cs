@@ -2078,6 +2078,38 @@ namespace Test
     }
 
     [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public async Task Run_WithAttributeConfigGenerateThisCalls_ShouldGenerateClass(bool generateThisCall)
+    {
+        string code = $@"
+namespace Test
+{{
+    [AutoConstructor(disableThisCall: {(generateThisCall ? "false" : "true")})]
+    internal partial class Test
+    {{
+        private readonly int _t;
+        public Test(){{
+            System.Console.WriteLine(""Hello world!"");
+        }}
+    }}
+}}";
+        string generated = $@"namespace Test
+{{
+    partial class Test
+    {{
+        public Test(int t){(generateThisCall ? " : this()" : "")}
+        {{
+            this._t = t;
+        }}
+    }}
+}}
+";
+
+        await VerifySourceGenerator.RunAsync(code, generated);
+    }
+
+    [Theory]
     [InlineData(@"
 namespace Test
 {

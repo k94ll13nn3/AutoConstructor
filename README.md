@@ -157,6 +157,8 @@ To disable this behavior, set `AutoConstructor_GenerateThisCalls` to `false` in 
 <AutoConstructor_GenerateThisCalls>false</AutoConstructor_GenerateThisCalls>
 ```
 
+This is also configurable at the attribute level with the `DisableThisCall` parameter on `AutoConstructorAttribute` (⚠ it is not possible force the generation at the attribute level if the generation is globally disabled).
+
 ### Generating XML documentation comment
 
 By default, no XML documentation comment will be generated for the constructor.

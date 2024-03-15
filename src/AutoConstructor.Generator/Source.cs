@@ -35,15 +35,19 @@ public static class Source
             /// </summary>
             /// <param name="accessibility">Configure the accessibility of the constructor, public by default</param>
             /// <param name="addDefaultBaseAttribute">Configure automatic injection of <c>AutoConstructorDefaultBaseAttribute</c></param>
-            public {{AttributeFullName}}(string accessibility = null, bool addDefaultBaseAttribute = false)
+            /// <param name="disableThisCall">Disable call to this when it would have been called</param>
+            public {{AttributeFullName}}(string accessibility = null, bool addDefaultBaseAttribute = false, bool disableThisCall = false)
             {
                 Accessibility = accessibility;
                 AddDefaultBaseAttribute = addDefaultBaseAttribute;
+                DisableThisCall = disableThisCall;
             }
 
             public string Accessibility { get; }
 
             public bool AddDefaultBaseAttribute { get; }
+
+            public bool DisableThisCall { get; }
         }
 
         """;

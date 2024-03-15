@@ -143,6 +143,9 @@ public sealed class AutoConstructorGenerator : IIncrementalGenerator
         bool generatedDefaultBaseAttribute = attributeData?.AttributeConstructor?.Parameters.Length > 0
             && attributeData.GetBoolParameterValue("addDefaultBaseAttribute");
 
+        bool disableThisCall = attributeData?.AttributeConstructor?.Parameters.Length > 0
+            && attributeData.GetBoolParameterValue("disableThisCall");
+
         IMethodSymbol? initializerMethod = symbol.GetMembers()
             .OfType<IMethodSymbol>()
             .FirstOrDefault(x => x.HasAttribute(Source.InitializerAttributeFullName));
@@ -153,7 +156,8 @@ public sealed class AutoConstructorGenerator : IIncrementalGenerator
             symbol.GenerateFilename(),
             accessibility ?? "public",
             initializerMethod is null ? null : new(initializerMethod.IsStatic, initializerMethod.Name),
-            generatedDefaultBaseAttribute);
+            generatedDefaultBaseAttribute,
+            disableThisCall);
         return new(mainNamedTypeSymbolInfo, fields, null);
     }
 
@@ -243,7 +247,7 @@ public sealed class AutoConstructorGenerator : IIncrementalGenerator
                 writer.Write(")");
             }
             // Write this call if the symbol has a parameterless constructor
-            else if (options.EmitThisCalls && symbol.HasParameterlessConstructor)
+            else if (options.EmitThisCalls && !symbol.DisableThisCall && symbol.HasParameterlessConstructor)
             {
                 writer.Write(" : this()");
             }
