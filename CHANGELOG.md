@@ -5,6 +5,26 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [5.3.0] - 2024-03-16
+
+### Changed
+
+- Add XML documentation to generated attributes
+- Replace `AutoConstructor_DisableNullChecking` with `AutoConstructor_GenerateArgumentNullException`
+- Add option to configure `base` calls behavior
+- Add option to configure `this` calls behavior
+
+### Issues
+
+- [#109](https://github.com/k94ll13nn3/AutoConstructor/issues/109): Replace AutoConstructor_DisableNullChecking with AutoConstructor_GenerateArgumentNullException
+- [#108](https://github.com/k94ll13nn3/AutoConstructor/issues/108): XML doc tags
+- [#107](https://github.com/k94ll13nn3/AutoConstructor/issues/107): Better control of Base / this constructors
+
+### Pull Requests
+
+- [#111](https://github.com/k94ll13nn3/AutoConstructor/pull/111): Fix warnings and update CI actions (by [k94ll13nn3](https://github.com/k94ll13nn3))
+- [#110](https://github.com/k94ll13nn3/AutoConstructor/pull/110): Add configurations for preferences on `this` and `base` calls (by [k94ll13nn3](https://github.com/k94ll13nn3))
+
 ## [5.2.1] - 2024-03-04
 
 ### Fixed
@@ -309,6 +329,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 Initial release
 
+[5.3.0]: https://github.com/k94ll13nn3/AutoConstructor/compare/v5.2.1...v5.3.0
 [5.2.1]: https://github.com/k94ll13nn3/AutoConstructor/compare/v5.2.0...v5.2.1
 [5.2.0]: https://github.com/k94ll13nn3/AutoConstructor/compare/v5.1.0...v5.2.0
 [5.1.0]: https://github.com/k94ll13nn3/AutoConstructor/compare/v5.0.1...v5.1.0
