@@ -174,25 +174,32 @@ partial class Test
 
 Get-only properties (`public int Property { get; }`) are injected by the generator by default.
 Non get-only properties (`public int Property { get; set;}`) are injected only if marked with (`[field: AutoConstructorInject]`) attributte.
-The behavior of the injection can be modified using [auto-implemented property field-targeted attributes](https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/proposals/csharp-7.3/auto-prop-field-attrs) on its backing field. The following code show an injected get-only property with a custom injecter:
+The behavior of the injection can be modified using auto-implemented property field-targeted attributes on its backing field. The following code show an injected get-only property with a custom injecter:
 
 ```csharp
 [field: AutoConstructorInject(initializer: "injected.ToString()", injectedType: typeof(int), parameterName: "injected")]
 public int Property { get; }
 ```
 
-⚠️ The compiler support for auto-implemented property field-targeted attributes is not perfect (as described in the link above), and Roslyn analyzers are not running on backings fields so some warnings may not be reported.
+⚠️ The compiler support for auto-implemented property field-targeted attributes is not perfect, and Roslyn analyzers are not running on backings fields so some warnings may not be reported.
 
 ## Configuration
 
 ### Generating `ArgumentNullException`
 
 By default, null checks with `ArgumentNullException` are not generated when needed.
-To enable this behavior, set `AutoConstructor_DisableNullChecking` to `false` in the project file:
+
+To enable this behavior, set `AutoConstructor_GenerateArgumentNullExceptionChecks` to `true` in the project file:
 
 ``` xml
-<AutoConstructor_DisableNullChecking>false</AutoConstructor_DisableNullChecking>
+<AutoConstructor_GenerateArgumentNullExceptionChecks>true</AutoConstructor_GenerateArgumentNullExceptionChecks>
 ```
+
+<details>
+  <summary>5.2.X and previous versions</summary>
+  
+  To enable this behavior, set `AutoConstructor_DisableNullChecking` to `false` in the project file.
+</details>
 
 ### Generating `this()` calls
 

@@ -379,9 +379,10 @@ namespace Test
     }
 
     [Theory]
+    [InlineData(null)]
     [InlineData(true)]
     [InlineData(false)]
-    public async Task Run_WithMsbuildConfigNullChecks_ShouldGenerateClass(bool disableNullChecks)
+    public async Task Run_WithMsbuildConfigNullChecks_ShouldGenerateClassAndReportDiagnostic(bool? disableNullChecks)
     {
         const string code = @"
 namespace Test
@@ -398,13 +399,78 @@ namespace Test
     {{
         public Test(string t)
         {{
-            this._t = t{(!disableNullChecks ? " ?? throw new System.ArgumentNullException(nameof(t))" : "")};
+            this._t = t{(disableNullChecks is false ? " ?? throw new System.ArgumentNullException(nameof(t))" : "")};
+        }}
+    }}
+}}
+";
+        DiagnosticResult diagnosticResult = new(DiagnosticDescriptors.DisableNullCheckingIsObsoleteDiagnosticId, DiagnosticSeverity.Warning);
+        string? configFileContent = disableNullChecks is null ? null : $"build_property.AutoConstructor_DisableNullChecking = {disableNullChecks}";
+        await VerifySourceGenerator.RunAsync(code, generated, diagnostics: disableNullChecks is null ? null : [diagnosticResult], configFileContent: configFileContent, runWithNullChecks: false);
+    }
+
+    [Theory]
+    [InlineData(null)]
+    [InlineData(true)]
+    [InlineData(false)]
+    public async Task Run_WithMsbuildConfigGenerateArgumentNullExceptionChecks_ShouldGenerateClass(bool? generateNullChecks)
+    {
+        const string code = @"
+namespace Test
+{
+    [AutoConstructor]
+    internal partial class Test
+    {
+        private readonly string _t;
+    }
+}";
+        string generated = $@"namespace Test
+{{
+    partial class Test
+    {{
+        public Test(string t)
+        {{
+            this._t = t{(generateNullChecks is true ? " ?? throw new System.ArgumentNullException(nameof(t))" : "")};
         }}
     }}
 }}
 ";
 
-        await VerifySourceGenerator.RunAsync(code, generated, configFileContent: $"build_property.AutoConstructor_DisableNullChecking = {disableNullChecks}");
+        string? configFileContent = generateNullChecks is null ? null : $"build_property.AutoConstructor_GenerateArgumentNullExceptionChecks = {generateNullChecks}";
+        await VerifySourceGenerator.RunAsync(code, generated, configFileContent: configFileContent, runWithNullChecks: false);
+    }
+
+    [Fact]
+    public async Task Run_WithBothMsbuildConfigForNullChecks_ShouldGenerateClassWithNewOneTakingPrecedenceAndReportDiagnostic()
+    {
+        const string code = @"
+namespace Test
+{
+    [AutoConstructor]
+    internal partial class Test
+    {
+        private readonly string _t;
+    }
+}";
+        const string generated = @"namespace Test
+{
+    partial class Test
+    {
+        public Test(string t)
+        {
+            this._t = t;
+        }
+    }
+}
+";
+
+        const string configFileContent = """
+build_property.AutoConstructor_DisableNullChecking = false
+build_property.AutoConstructor_GenerateArgumentNullExceptionChecks = false
+""";
+
+        DiagnosticResult diagnosticResult = new(DiagnosticDescriptors.DisableNullCheckingIsObsoleteDiagnosticId, DiagnosticSeverity.Warning);
+        await VerifySourceGenerator.RunAsync(code, generated, diagnostics: [diagnosticResult], configFileContent: configFileContent, runWithNullChecks: false);
     }
 
     [Theory]

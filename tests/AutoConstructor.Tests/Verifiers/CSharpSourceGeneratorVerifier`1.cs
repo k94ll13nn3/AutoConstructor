@@ -19,9 +19,10 @@ internal static partial class CSharpSourceGeneratorVerifier<TSourceGenerator>
         bool nullable = false,
         IEnumerable<DiagnosticResult>? diagnostics = null,
         string? configFileContent = null,
-        string? additionalProjectsSource = null)
+        string? additionalProjectsSource = null,
+        bool runWithNullChecks = true)
     {
-        return RunAsync(code, new[] { (generated, generatedName) }, nullable, diagnostics, configFileContent, additionalProjectsSource);
+        return RunAsync(code, new[] { (generated, generatedName) }, nullable, diagnostics, configFileContent, additionalProjectsSource, runWithNullChecks);
     }
 
     public static async Task RunAsync(
@@ -30,7 +31,8 @@ internal static partial class CSharpSourceGeneratorVerifier<TSourceGenerator>
         bool nullable = false,
         IEnumerable<DiagnosticResult>? diagnostics = null,
         string? configFileContent = null,
-        string? additionalProjectsSource = null)
+        string? additionalProjectsSource = null,
+        bool runWithNullChecks = true)
     {
         var test = new CSharpSourceGeneratorVerifier<TSourceGenerator>.Test()
         {
@@ -88,9 +90,16 @@ internal static partial class CSharpSourceGeneratorVerifier<TSourceGenerator>
         }
 
         // Enable null checks for the tests.
-        test.TestState.AnalyzerConfigFiles.Add(("/.editorconfig", SourceText.From($@"
+        if (runWithNullChecks)
+        {
+            configFileContent = $@"
+build_property.{BuildProperties.AutoConstructor_GenerateArgumentNullExceptionChecks} = true
+{configFileContent}
+";
+        }
+
+        test.TestState.AnalyzerConfigFiles.Add(("/.globalconfig", SourceText.From($@"
 is_global=true
-build_property.AutoConstructor_DisableNullChecking = false
 {configFileContent}")));
 
         await test.RunAsync();

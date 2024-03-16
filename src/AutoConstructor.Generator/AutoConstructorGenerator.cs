@@ -31,7 +31,17 @@ public sealed class AutoConstructorGenerator : IIncrementalGenerator
             i.AddSource(Source.DefaultBaseAttributeFullName, SourceText.From(Source.DefaultBaseAttributeText, Encoding.UTF8));
         });
 
-        IncrementalValuesProvider<(GeneratorExectutionResult? result, Options options)> valueProvider = context.SyntaxProvider
+        // TODO: remove in v6
+        IncrementalValueProvider<bool> obsoleteOptionDiagnosticProvider = context.AnalyzerConfigOptionsProvider
+            .Select((c, _) =>
+            {
+                return
+                    c.GlobalOptions.TryGetValue($"build_property.{BuildProperties.AutoConstructor_DisableNullChecking}", out string? disableNullCheckingSwitch) &&
+                    !string.IsNullOrWhiteSpace(disableNullCheckingSwitch);
+            })
+            .WithTrackingName("obsoleteOptionDiagnosticProvider");
+
+        IncrementalValuesProvider<(GeneratorExectutionResult? result, Options options)> valuesProvider = context.SyntaxProvider
             .ForAttributeWithMetadataName(
                 Source.AttributeFullName,
                 static (node, _) => IsSyntaxTargetForGeneration(node),
@@ -41,7 +51,15 @@ public sealed class AutoConstructorGenerator : IIncrementalGenerator
             .Combine(context.AnalyzerConfigOptionsProvider.Select((c, _) => ParseOptions(c.GlobalOptions)))
             .WithTrackingName("Combine");
 
-        context.RegisterSourceOutput(valueProvider, static (context, item) =>
+        context.RegisterSourceOutput(obsoleteOptionDiagnosticProvider, static (context, item) =>
+        {
+            if (item)
+            {
+                context.ReportDiagnostic(Diagnostic.Create(DiagnosticDescriptors.DisableNullCheckingIsObsoleteRule, null));
+            }
+        });
+
+        context.RegisterSourceOutput(valuesProvider, static (context, item) =>
         {
             if (item.result is not null)
             {
@@ -67,21 +85,27 @@ public sealed class AutoConstructorGenerator : IIncrementalGenerator
     private static Options ParseOptions(AnalyzerConfigOptions analyzerOptions)
     {
         bool generateConstructorDocumentation = false;
-        if (analyzerOptions.TryGetValue("build_property.AutoConstructor_GenerateConstructorDocumentation", out string? generateConstructorDocumentationSwitch))
+        if (analyzerOptions.TryGetValue($"build_property.{BuildProperties.AutoConstructor_GenerateConstructorDocumentation}", out string? generateConstructorDocumentationSwitch))
         {
             generateConstructorDocumentation = generateConstructorDocumentationSwitch.Equals("true", StringComparison.OrdinalIgnoreCase);
         }
 
-        analyzerOptions.TryGetValue("build_property.AutoConstructor_ConstructorDocumentationComment", out string? constructorDocumentationComment);
+        analyzerOptions.TryGetValue($"build_property.{BuildProperties.AutoConstructor_ConstructorDocumentationComment}", out string? constructorDocumentationComment);
 
+        // TODO: remove in v6
         bool emitNullChecks = false;
-        if (analyzerOptions.TryGetValue("build_property.AutoConstructor_DisableNullChecking", out string? disableNullCheckingSwitch))
+        if (analyzerOptions.TryGetValue($"build_property.{BuildProperties.AutoConstructor_DisableNullChecking}", out string? disableNullCheckingSwitch))
         {
             emitNullChecks = disableNullCheckingSwitch.Equals("false", StringComparison.OrdinalIgnoreCase);
         }
 
+        if (analyzerOptions.TryGetValue($"build_property.{BuildProperties.AutoConstructor_GenerateArgumentNullExceptionChecks}", out string? generateArgumentNullExceptionChecksSwitch))
+        {
+            emitNullChecks = generateArgumentNullExceptionChecksSwitch.Equals("true", StringComparison.OrdinalIgnoreCase);
+        }
+
         bool emitThisCalls = true;
-        if (analyzerOptions.TryGetValue("build_property.AutoConstructor_GenerateThisCalls", out string? enableThisCallsSwitch))
+        if (analyzerOptions.TryGetValue($"build_property.{BuildProperties.AutoConstructor_GenerateThisCalls}", out string? enableThisCallsSwitch))
         {
             emitThisCalls = !enableThisCallsSwitch.Equals("false", StringComparison.OrdinalIgnoreCase);
         }

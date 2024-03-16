@@ -5,6 +5,7 @@
     <CompilerVisibleProperty Include="AutoConstructor_GenerateConstructorDocumentation" />
     <CompilerVisibleProperty Include="AutoConstructor_ConstructorDocumentationComment" />
     <CompilerVisibleProperty Include="AutoConstructor_GenerateThisCalls" />
+    <CompilerVisibleProperty Include="AutoConstructor_GenerateArgumentNullExceptionChecks" />
   </ItemGroup>
 
 </Project>

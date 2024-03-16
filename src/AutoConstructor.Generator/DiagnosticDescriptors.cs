@@ -26,6 +26,9 @@ public static class DiagnosticDescriptors
 
     public const string MultipleDefaultBaseDiagnosticId = "ACONS11";
 
+    // TODO: remove in v6
+    public const string DisableNullCheckingIsObsoleteDiagnosticId = "ACONS99";
+
     public static readonly DiagnosticDescriptor TypeWithoutPartialRule = new(
         TypeWithoutPartialDiagnosticId,
         "Couldn't generate constructor",
@@ -146,4 +149,15 @@ public static class DiagnosticDescriptors
         null,
         $"https://github.com/k94ll13nn3/AutoConstructor#{MultipleDefaultBaseDiagnosticId}",
         WellKnownDiagnosticTags.Build);
+
+    public static readonly DiagnosticDescriptor DisableNullCheckingIsObsoleteRule = new(
+        DisableNullCheckingIsObsoleteDiagnosticId,
+        "Replace AutoConstructor_DisableNullChecking with AutoConstructor_GenerateArgumentNullExceptionChecks",
+        "AutoConstructor_DisableNullChecking is obsolete and will be removed in a future version, use AutoConstructor_GenerateArgumentNullExceptionChecks instead",
+        "Usage",
+        DiagnosticSeverity.Warning,
+        true,
+        null,
+        $"https://github.com/k94ll13nn3/AutoConstructor#{DisableNullCheckingIsObsoleteDiagnosticId}",
+        WellKnownDiagnosticTags.Unnecessary);
 }

@@ -128,7 +128,8 @@ namespace Test
         IEnumerable<(object Value, IncrementalStepRunReason Reason)> sourceOuputs =
             result.TrackedOutputSteps.SelectMany(outputStep => outputStep.Value).SelectMany(output => output.Outputs);
 
-        (_, IncrementalStepRunReason Reason) = Assert.Single(sourceOuputs);
+        // TODO: remove skip in v6
+        (_, IncrementalStepRunReason Reason) = Assert.Single(sourceOuputs.Skip(1));
         Assert.Equal(sourceStepReason, Reason);
         Assert.Equal(executeStepReason, result.TrackedSteps["Execute"].Single().Outputs[0].Reason);
         Assert.Equal(combineStepReason, result.TrackedSteps["Combine"].Single().Outputs[0].Reason);
