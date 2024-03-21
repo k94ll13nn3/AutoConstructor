@@ -424,3 +424,7 @@ The accessibility defined in the `AutoConstructor` attribute is not an allowed v
 ### ACONS11
 
 `AutoConstructorDefaultBase` attribute used on multiple constructors inside type.
+
+### ACONS99
+
+`AutoConstructor_DisableNullChecking` is obsolete.
