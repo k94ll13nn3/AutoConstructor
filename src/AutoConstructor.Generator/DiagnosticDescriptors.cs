@@ -14,7 +14,7 @@ public static class DiagnosticDescriptors
 
     public const string IgnoreOrInjectAttributeOnTypeWithoutAttributeDiagnosticId = "ACONS05";
 
-    public const string MistmatchTypesDiagnosticId = "ACONS06";
+    public const string MismatchTypesDiagnosticId = "ACONS06";
 
     public const string TypeWithWrongConstructorAccessibilityDiagnosticId = "ACONS07";
 
@@ -25,6 +25,8 @@ public static class DiagnosticDescriptors
     public const string InitializerMethodMustBeParameterlessDiagnosticId = "ACONS10";
 
     public const string MultipleDefaultBaseDiagnosticId = "ACONS11";
+
+    public const string TypeWithoutBaseParameterlessConstructorDiagnosticId = "ACONS12";
 
     // TODO: remove in v6
     public const string DisableNullCheckingIsObsoleteDiagnosticId = "ACONS99";
@@ -85,20 +87,20 @@ public static class DiagnosticDescriptors
         WellKnownDiagnosticTags.Unnecessary);
 
     public static readonly DiagnosticDescriptor MistmatchTypesRule = new(
-        MistmatchTypesDiagnosticId,
+        MismatchTypesDiagnosticId,
         "Couldn't generate constructor",
         "One or more parameter have mismatching types",
         "Usage",
         DiagnosticSeverity.Error,
         true,
         null,
-        $"https://github.com/k94ll13nn3/AutoConstructor#{MistmatchTypesDiagnosticId}",
+        $"https://github.com/k94ll13nn3/AutoConstructor#{MismatchTypesDiagnosticId}",
         WellKnownDiagnosticTags.Build);
 
     public static readonly DiagnosticDescriptor TypeWithWrongConstructorAccessibilityRule = new(
         TypeWithWrongConstructorAccessibilityDiagnosticId,
-        "Wrong constuctor accessibility",
-        "Unknown constuctor accessibility, allowed values are public, private, protected, internal, protected internal or private protected",
+        "Wrong constructor accessibility",
+        "Unknown constructor accessibility, allowed values are public, private, protected, internal, protected internal or private protected",
         "Usage",
         DiagnosticSeverity.Warning,
         true,
@@ -149,6 +151,17 @@ public static class DiagnosticDescriptors
         null,
         $"https://github.com/k94ll13nn3/AutoConstructor#{MultipleDefaultBaseDiagnosticId}",
         WellKnownDiagnosticTags.Build);
+
+    public static readonly DiagnosticDescriptor TypeWithoutBaseParameterlessConstructorRule = new(
+     TypeWithoutBaseParameterlessConstructorDiagnosticId,
+    "Base type of target type must have non-private parameterless constructor",
+     "Base type of target type must have non-private parameterless constructor when using addParameterless option",
+     "Usage",
+     DiagnosticSeverity.Error,
+     true,
+     null,
+     $"https://github.com/k94ll13nn3/AutoConstructor#{TypeWithoutBaseParameterlessConstructorDiagnosticId}",
+     WellKnownDiagnosticTags.Unnecessary);
 
     public static readonly DiagnosticDescriptor DisableNullCheckingIsObsoleteRule = new(
         DisableNullCheckingIsObsoleteDiagnosticId,

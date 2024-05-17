@@ -125,11 +125,11 @@ namespace Test
         driver = driver.RunGenerators(compilation);
 
         GeneratorRunResult result = driver.GetRunResult().Results.Single();
-        IEnumerable<(object Value, IncrementalStepRunReason Reason)> sourceOuputs =
+        IEnumerable<(object Value, IncrementalStepRunReason Reason)> sourceOutputs =
             result.TrackedOutputSteps.SelectMany(outputStep => outputStep.Value).SelectMany(output => output.Outputs);
 
         // TODO: remove skip in v6
-        (_, IncrementalStepRunReason Reason) = Assert.Single(sourceOuputs.Skip(1));
+        (_, IncrementalStepRunReason Reason) = Assert.Single(sourceOutputs.Skip(1));
         Assert.Equal(sourceStepReason, Reason);
         Assert.Equal(executeStepReason, result.TrackedSteps["Execute"].Single().Outputs[0].Reason);
         Assert.Equal(combineStepReason, result.TrackedSteps["Combine"].Single().Outputs[0].Reason);

@@ -6,6 +6,8 @@
     <CompilerVisibleProperty Include="AutoConstructor_ConstructorDocumentationComment" />
     <CompilerVisibleProperty Include="AutoConstructor_GenerateThisCalls" />
     <CompilerVisibleProperty Include="AutoConstructor_GenerateArgumentNullExceptionChecks" />
+    <CompilerVisibleProperty Include="AutoConstructor_MarkParameterlessConstructorAsObsolete" />
+    <CompilerVisibleProperty Include="AutoConstructor_ParameterlessConstructorObsoleteMessage" />
   </ItemGroup>
 
 </Project>

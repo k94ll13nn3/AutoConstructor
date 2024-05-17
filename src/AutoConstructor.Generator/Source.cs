@@ -36,11 +36,13 @@ public static class Source
             /// <param name="accessibility">Configure the accessibility of the constructor, public by default</param>
             /// <param name="addDefaultBaseAttribute">Configure automatic injection of <c>AutoConstructorDefaultBaseAttribute</c></param>
             /// <param name="disableThisCall">Disable call to this when it would have been called</param>
-            public {{AttributeFullName}}(string accessibility = null, bool addDefaultBaseAttribute = false, bool disableThisCall = false)
+            /// <param name="addParameterless">Generate parameterless constructor for serialization purposes too.</param>
+            public {{AttributeFullName}}(string accessibility = null, bool addDefaultBaseAttribute = false, bool disableThisCall = false, bool addParameterless = false)
             {
                 Accessibility = accessibility;
                 AddDefaultBaseAttribute = addDefaultBaseAttribute;
                 DisableThisCall = disableThisCall;
+                AddParameterless = addParameterless;
             }
 
             public string Accessibility { get; }
@@ -48,6 +50,8 @@ public static class Source
             public bool AddDefaultBaseAttribute { get; }
 
             public bool DisableThisCall { get; }
+
+            public bool AddParameterless { get; }
         }
 
         """;

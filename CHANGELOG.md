@@ -61,7 +61,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 - Fix call to static initializer method
 - Fix generation when a reserved keyword is used (directly or indirectly)
-- Fix edge cases on MistmatchTypesRule diagnostic
+- Fix edge cases on MismatchTypesRule diagnostic
 
 ## [5.0.0] - 2023-11-07
 
@@ -283,7 +283,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Changed
 
-- Change parameters of `AutoConstructorInjectAttribute` to be optionals
+- Change parameters of `AutoConstructorInjectAttribute` to be optional
 - Change ACONS05 to be reported on each attribute
 
 ### Fixed
