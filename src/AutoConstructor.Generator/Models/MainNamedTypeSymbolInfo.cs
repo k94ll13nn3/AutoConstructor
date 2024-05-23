@@ -17,7 +17,8 @@ internal sealed record MainNamedTypeSymbolInfo(
     string Accessibility,
     InitializerMethodInfo? InitializerMethod,
     bool GenerateDefaultBaseAttribute,
-    bool DisableThisCall)
+    bool DisableThisCall,
+    bool AddParameterless)
     : NamedTypeSymbolInfo(Kind, Name, IsStatic, TypeParameters)
 {
     public MainNamedTypeSymbolInfo(
@@ -27,7 +28,8 @@ internal sealed record MainNamedTypeSymbolInfo(
         string accessibility,
         InitializerMethodInfo? initializerMethod,
         bool generateDefaultBaseAttribute,
-        bool disableThisCall)
+        bool disableThisCall,
+        bool addParameterless)
         : this(
             namedTypeSymbol.TypeKind,
             namedTypeSymbol.Name,
@@ -40,7 +42,8 @@ internal sealed record MainNamedTypeSymbolInfo(
             accessibility,
             initializerMethod,
             generateDefaultBaseAttribute,
-            disableThisCall)
+            disableThisCall,
+            addParameterless)
     {
     }
 }

@@ -85,7 +85,7 @@ and even use a parameter from another field not annotated with `AutoConstructorI
 
 ### Constructor accessibility
 
-Constructor accessibility can be changed using the optionnal parameter `accessibility` on `AutoConstructorAttribute` (like `[AutoConstructor("internal")]`).
+Constructor accessibility can be changed using the optional parameter `accessibility` on `AutoConstructorAttribute` (like `[AutoConstructor("internal")]`).
 The default is `public` and it can be set to one of the following values:
 - `public`
 - `private`
@@ -173,7 +173,7 @@ partial class Test
 ### Properties injection
 
 Get-only properties (`public int Property { get; }`) are injected by the generator by default.
-Non get-only properties (`public int Property { get; set;}`) are injected only if marked with (`[field: AutoConstructorInject]`) attributte.
+Non get-only properties (`public int Property { get; set;}`) are injected only if marked with (`[field: AutoConstructorInject]`) attribute.
 The behavior of the injection can be modified using auto-implemented property field-targeted attributes on its backing field. The following code show an injected get-only property with a custom injecter:
 
 ```csharp
@@ -203,8 +203,8 @@ To enable this behavior, set `AutoConstructor_GenerateArgumentNullExceptionCheck
 
 ### Generating `this()` calls
 
-By default, if a parameterless constructor is available on the class (other than the implicit one), a call
-to `this()` is generated with the generated constructor
+By default, if a non-generated parameterless constructor is available on the class (other than the implicit one), a call
+to `this()` is generated with the generated constructor.
 To disable this behavior, set `AutoConstructor_GenerateThisCalls` to `false` in the project file:
 
 ``` xml
@@ -367,6 +367,44 @@ will generate
     }
 ```
 
+## Parameterless constructor for serialization use
+
+Consider the scenario when you want to expose constructor with parameters for DTO, but serializer requires type to have an empty constructor.
+You can generate such constructor with  `addParameterless` attribute option.
+
+``` csharp
+[AutoConstructor(addParameterless:true)]
+public partial class Test
+{
+    public int Id { get; set; }
+    public string Name {get; set;}
+}
+```
+
+will generate
+
+```csharp
+ partial class Test
+    {
+        #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor.
+        [global::System.ObsoleteAttribute("For serialization only", true)]
+        public Test()
+        {
+        }
+    }
+```
+
+If you type has any fields/properties to inject, two constructors will be generated: one with arguments and one parameterless.
+In any case, to generate parameterless constructor, base type of the target type must have parameterless constructor itself.
+
+Whether this constructor is marked with `[Obsolete]` attribute and obsolete message can be customized by properties in project file:
+
+``` xml
+<AutoConstructor_MarkParameterlessConstructorAsObsolete>false</AutoConstructor_MarkParameterlessConstructorAsObsolete>
+<AutoConstructor_ParameterlessConstructorObsoleteMessage>Custom obsolete message</AutoConstructor_ParameterlessConstructorObsoleteMessage>
+```
+
+
 ## Diagnostics
 
 ### ACONS01
@@ -375,7 +413,7 @@ The `AutoConstructor` attribute is used on a class that is not partial.
 
 ### ACONS02
 
-The `AutoConstructor` attribute is used on a class without fields to inject.
+The `AutoConstructor` attribute is used on a class without fields to inject without `addParameterless` option.
 
 ### ACONS03
 
@@ -424,6 +462,10 @@ The accessibility defined in the `AutoConstructor` attribute is not an allowed v
 ### ACONS11
 
 `AutoConstructorDefaultBase` attribute used on multiple constructors inside type.
+
+### ACONS12
+
+ `addParameterless` option used on type whose base type does not have a parameterless constructor.
 
 ### ACONS99
 

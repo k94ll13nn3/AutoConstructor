@@ -613,7 +613,7 @@ namespace Test
 }
 """;
 
-        DiagnosticResult diagnosticResult = new DiagnosticResult(DiagnosticDescriptors.MistmatchTypesDiagnosticId, DiagnosticSeverity.Error).WithSpan(4, 5, 10, 6);
+        DiagnosticResult diagnosticResult = new DiagnosticResult(DiagnosticDescriptors.MismatchTypesDiagnosticId, DiagnosticSeverity.Error).WithSpan(4, 5, 10, 6);
         await VerifySourceGenerator.RunAsync(code, diagnostics: [diagnosticResult]);
     }
 
@@ -639,7 +639,7 @@ namespace Test
 }
 """;
 
-        DiagnosticResult diagnosticResult = new DiagnosticResult(DiagnosticDescriptors.MistmatchTypesDiagnosticId, DiagnosticSeverity.Error).WithSpan(4, 5, 15, 6);
+        DiagnosticResult diagnosticResult = new DiagnosticResult(DiagnosticDescriptors.MismatchTypesDiagnosticId, DiagnosticSeverity.Error).WithSpan(4, 5, 15, 6);
         await VerifySourceGenerator.RunAsync(code, diagnostics: [diagnosticResult]);
     }
 
@@ -662,7 +662,7 @@ namespace Test
 }
 """;
 
-        DiagnosticResult diagnosticResult = new DiagnosticResult(DiagnosticDescriptors.MistmatchTypesDiagnosticId, DiagnosticSeverity.Error).WithSpan(4, 5, 12, 6);
+        DiagnosticResult diagnosticResult = new DiagnosticResult(DiagnosticDescriptors.MismatchTypesDiagnosticId, DiagnosticSeverity.Error).WithSpan(4, 5, 12, 6);
         await VerifySourceGenerator.RunAsync(code, diagnostics: [diagnosticResult]);
     }
 
@@ -1224,7 +1224,7 @@ namespace Test
 }
 """;
 
-        DiagnosticResult diagnosticResultFirstPart = new DiagnosticResult(DiagnosticDescriptors.MistmatchTypesDiagnosticId, DiagnosticSeverity.Error).WithSpan(4, 5, 9, 6);
+        DiagnosticResult diagnosticResultFirstPart = new DiagnosticResult(DiagnosticDescriptors.MismatchTypesDiagnosticId, DiagnosticSeverity.Error).WithSpan(4, 5, 9, 6);
         await VerifySourceGenerator.RunAsync(code, diagnostics: [diagnosticResultFirstPart]);
     }
 
@@ -2079,7 +2079,7 @@ namespace Test
     [Fact]
     public async Task Fix_Issue106_WorkingCase()
     {
-        const string additionnalSource = @"
+        const string additionalSource = @"
 namespace Test2
 {
     public partial class ParentClass
@@ -2111,13 +2111,13 @@ namespace Test
     }
 }
 ";
-        await VerifySourceGenerator.RunAsync(code, generated, additionalProjectsSource: additionnalSource);
+        await VerifySourceGenerator.RunAsync(code, generated, additionalProjectsSource: additionalSource);
     }
 
     [Fact]
     public async Task Fix_Issue106_NotWorkingCase()
     {
-        const string additionnalSource = $@"
+        const string additionalSource = $@"
 namespace Test2
 {{
     {Source.AttributeText}
@@ -2150,7 +2150,7 @@ namespace Test
     }
 }
 ";
-        await VerifySourceGenerator.RunAsync(code, generated, additionalProjectsSource: additionnalSource);
+        await VerifySourceGenerator.RunAsync(code, generated, additionalProjectsSource: additionalSource);
     }
 
     [Theory]

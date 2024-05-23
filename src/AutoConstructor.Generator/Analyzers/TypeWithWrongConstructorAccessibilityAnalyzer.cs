@@ -29,7 +29,7 @@ public sealed class TypeWithWrongConstructorAccessibilityAnalyzer : DiagnosticAn
             && symbol.GetAttribute(Source.AttributeFullName) is AttributeData attribute
             && attribute.AttributeConstructor?.Parameters.Length > 0
             && attribute.GetParameterValue<string>("accessibility") is string { Length: > 0 } accessibilityValue
-            && !AutoConstructorGenerator.ConstuctorAccessibilities.Contains(accessibilityValue))
+            && !AutoConstructorGenerator.ConstructorAccessibilities.Contains(accessibilityValue))
         {
             var diagnostic = Diagnostic.Create(DiagnosticDescriptors.TypeWithWrongConstructorAccessibilityRule, typeDeclarationSyntax.Identifier.GetLocation());
             context.ReportDiagnostic(diagnostic);

@@ -1,6 +1,7 @@
 using System.Collections.Immutable;
 using AutoConstructor.Generator.Extensions;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
 
 namespace AutoConstructor.Generator.Analyzers;
@@ -24,17 +25,23 @@ public sealed class TypeWithoutFieldsToInjectAnalyzer : DiagnosticAnalyzer
     {
         var symbol = (INamedTypeSymbol)context.Symbol;
 
-        if (symbol.GetAttribute(Source.AttributeFullName) is AttributeData attr)
+        if (symbol.GetAttribute(Source.AttributeFullName) is AttributeData attribute)
         {
-            bool hasFields = SymbolHasFields(symbol) || ParentHasFields(context.Compilation, symbol);
-            if (!hasFields)
+            bool addParameterLess = symbol.DeclaringSyntaxReferences[0].GetSyntax() is TypeDeclarationSyntax
+                                    && attribute.AttributeConstructor?.Parameters.Length > 0
+                                    && attribute.GetBoolParameterValue("addParameterless");
+            if (!addParameterLess)
             {
-                SyntaxReference? propertyTypeIdentifier = attr.ApplicationSyntaxReference;
-                if (propertyTypeIdentifier is not null)
+                bool hasFields = SymbolHasFields(symbol) || ParentHasFields(context.Compilation, symbol);
+                if (!hasFields)
                 {
-                    var location = Location.Create(propertyTypeIdentifier.SyntaxTree, propertyTypeIdentifier.Span);
-                    var diagnostic = Diagnostic.Create(DiagnosticDescriptors.TypeWithoutFieldsToInjectRule, location);
-                    context.ReportDiagnostic(diagnostic);
+                    SyntaxReference? propertyTypeIdentifier = attribute.ApplicationSyntaxReference;
+                    if (propertyTypeIdentifier is not null)
+                    {
+                        var location = Location.Create(propertyTypeIdentifier.SyntaxTree, propertyTypeIdentifier.Span);
+                        var diagnostic = Diagnostic.Create(DiagnosticDescriptors.TypeWithoutFieldsToInjectRule, location);
+                        context.ReportDiagnostic(diagnostic);
+                    }
                 }
             }
         }

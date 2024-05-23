@@ -27,6 +27,38 @@ namespace Test
         await VerifyClassWithoutFieldsToInject.VerifyAnalyzerAsync(test, expected);
     }
 
+    [Fact]
+    public async Task Analyzer_ClassWithoutFieldsToInject_WithAddParameterlessFalse_ShouldReportDiagnostics()
+    {
+        const string test = @"
+namespace Test
+{
+    [{|#0:AutoConstructor(addParameterless:false)|}]
+    internal partial class Test
+    {
+    }
+}";
+
+        DiagnosticResult[] expected = [
+                VerifyClassWithoutFieldsToInject.Diagnostic(DiagnosticDescriptors.TypeWithoutFieldsToInjectDiagnosticId).WithLocation(0),
+        ];
+        await VerifyClassWithoutFieldsToInject.VerifyAnalyzerAsync(test, expected);
+    }
+
+    [Fact]
+    public async Task Analyzer_ClassWithoutFieldsToInject_WithAddParameterless_ShouldNotReportDiagnostics()
+    {
+        const string test = @"
+namespace Test
+{
+    [{|#0:AutoConstructor(addParameterless:true)|}]
+    internal partial class Test
+    {
+    }
+}";
+        await VerifyClassWithoutFieldsToInject.VerifyAnalyzerAsync(test, []);
+    }
+
     [Theory]
     [InlineData(@"
 namespace Test
