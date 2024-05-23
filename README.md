@@ -267,7 +267,7 @@ will generate
 partial class Test
 {
     #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor.
-    [global::System.ObsoleteAttribute("For serialization only", true)]
+    [global::System.ObsoleteAttribute("Not intended for direct usage.", true)]
     public Test()
     {
     }
