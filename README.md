@@ -128,7 +128,7 @@ public Test(int t)
 It is possible to configure which base constructor is called when a type has a non-object base type and has its constructor generated. By default, a call to `base` is emitted only when the is only one constructor on the base type.
 This behavior can be changed by adding a `[AutoConstructorDefaultBase]` on a constructor in the base type to indicate that it must be chosen as the base call.
 
-If the base type is also generated, the `AddDefaultBaseAttribute` parameter on `AutoConstructorAttribute` can be used to generate the attribute with the generated constructor.
+If the base type is also generated, the `addDefaultBaseAttribute` parameter on `AutoConstructorAttribute` can be used to generate the attribute with the generated constructor.
 
 ```csharp
 internal class BaseClass
@@ -246,6 +246,43 @@ This will generate the following code:
 /// </summary>
 /// <param name=""t1"">Some field.</param>
 /// <param name=""t2"">t2</param>
+```
+
+### Generating a parameterless constructor
+
+If needed, a parameterless constructor can also be generated alongside the generated constructor using the `addParameterless` option on `AutoConstructor`.
+
+``` csharp
+[AutoConstructor(addParameterless: true)]
+public partial class Test
+{
+    public int Id { get; set; }
+    public string Name { get; set; }
+}
+```
+
+will generate
+
+```csharp
+partial class Test
+{
+    #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor.
+    [global::System.ObsoleteAttribute("For serialization only", true)]
+    public Test()
+    {
+    }
+}
+```
+
+This option can also be used without any fields or properties to inject, this will disable the warning that will normally be reported and generate a parameterless constructor.
+
+:warning: With inheritance, to be able to generate a parameterless constructor, the base type of the target type must have parameterless constructor itself.
+
+By default, this constructor is marked as `[Obsolete]` with a default message. This is configurable with :
+
+``` xml
+<AutoConstructor_MarkParameterlessConstructorAsObsolete>false</AutoConstructor_MarkParameterlessConstructorAsObsolete>
+<AutoConstructor_ParameterlessConstructorObsoleteMessage>Custom obsolete message</AutoConstructor_ParameterlessConstructorObsoleteMessage>
 ```
 
 ## Samples describing some cases
@@ -367,43 +404,6 @@ will generate
     }
 ```
 
-## Parameterless constructor for serialization use
-
-Consider the scenario when you want to expose constructor with parameters for DTO, but serializer requires type to have an empty constructor.
-You can generate such constructor with  `addParameterless` attribute option.
-
-``` csharp
-[AutoConstructor(addParameterless:true)]
-public partial class Test
-{
-    public int Id { get; set; }
-    public string Name {get; set;}
-}
-```
-
-will generate
-
-```csharp
- partial class Test
-    {
-        #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor.
-        [global::System.ObsoleteAttribute("For serialization only", true)]
-        public Test()
-        {
-        }
-    }
-```
-
-If you type has any fields/properties to inject, two constructors will be generated: one with arguments and one parameterless.
-In any case, to generate parameterless constructor, base type of the target type must have parameterless constructor itself.
-
-Whether this constructor is marked with `[Obsolete]` attribute and obsolete message can be customized by properties in project file:
-
-``` xml
-<AutoConstructor_MarkParameterlessConstructorAsObsolete>false</AutoConstructor_MarkParameterlessConstructorAsObsolete>
-<AutoConstructor_ParameterlessConstructorObsoleteMessage>Custom obsolete message</AutoConstructor_ParameterlessConstructorObsoleteMessage>
-```
-
 
 ## Diagnostics
 
@@ -413,7 +413,7 @@ The `AutoConstructor` attribute is used on a class that is not partial.
 
 ### ACONS02
 
-The `AutoConstructor` attribute is used on a class without fields to inject without `addParameterless` option.
+The `AutoConstructor` attribute is used on a class without fields to inject (without specifying `addParameterless` as true).
 
 ### ACONS03
 
@@ -465,7 +465,7 @@ The accessibility defined in the `AutoConstructor` attribute is not an allowed v
 
 ### ACONS12
 
- `addParameterless` option used on type whose base type does not have a parameterless constructor.
+The `addParameterless` option is used on a type whose base type does not have a parameterless constructor.
 
 ### ACONS99
 

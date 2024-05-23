@@ -1,4 +1,3 @@
-using System.Globalization;
 using Xunit;
 using VerifySourceGenerator = AutoConstructor.Tests.Verifiers.CSharpSourceGeneratorVerifier<AutoConstructor.Generator.AutoConstructorGenerator>;
 
@@ -11,34 +10,36 @@ public class AddParameterlessGeneratorTests
 
 namespace Test
 {
-    [AutoConstructor (accessibility:"internal",addParameterless:true)]
+    [AutoConstructor (accessibility: "internal", addParameterless: true)]
     internal partial class Test
     {
-        public int X {get;set;}
+        public int X { get; set; }
     }
 }
-"""),
-        //no base ctor call generated
-        InlineData("""
+""")]
+    [InlineData("""
 
 namespace Test
 {
-    internal class TestBase {
+    internal class TestBase
+    {
         private readonly int _t;
 
-        public TestBase (int t){
-            t= _t;
+        public TestBase (int t)
+        {
+            t = _t;
         }
 
-        public TestBase(){
+        public TestBase()
+        {
         }
 
     }
 
-    [AutoConstructor (accessibility:"internal",addParameterless:true)]
+    [AutoConstructor (accessibility: "internal", addParameterless: true)]
     internal partial class Test: TestBase
     {
-        public int X {get;set;}
+        public int X { get; set; }
     }
 }
 """)]
@@ -49,13 +50,15 @@ namespace Test
 {
     partial class Test
     {
+        #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor.
+        [global::System.ObsoleteAttribute("Not intended for direct usage.", true)]
         internal Test()
         {
         }
     }
 }
 """;
-        await VerifySourceGenerator.RunAsync(code, generated, expectedConstructors: Verifiers.ConstructorType.ParameterlessOnly);
+        await VerifySourceGenerator.RunAsync(code, generated);
     }
 
     [Fact]
@@ -78,16 +81,17 @@ namespace Test
     partial class Test
     {
         /// <summary>
-        /// For serialization only.
+        /// Not intended for direct usage.
         /// </summary>
+        #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor.
+        [global::System.ObsoleteAttribute("Not intended for direct usage.", true)]
         public Test()
         {
         }
     }
 }
 """;
-        await VerifySourceGenerator.RunAsync(code, generated, configFileContent: "build_property.AutoConstructor_GenerateConstructorDocumentation = true",
-        expectedConstructors: Verifiers.ConstructorType.ParameterlessOnly);
+        await VerifySourceGenerator.RunAsync(code, generated, configFileContent: "build_property.AutoConstructor_GenerateConstructorDocumentation = true");
     }
 
     [Fact]
@@ -112,13 +116,16 @@ namespace Test
         {
             this._t = t;
         }
+
+        #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor.
+        [global::System.ObsoleteAttribute("Not intended for direct usage.", true)]
         public Test()
         {
         }
     }
 }
 """;
-        await VerifySourceGenerator.RunAsync(code, generated, expectedConstructors: Verifiers.ConstructorType.Both);
+        await VerifySourceGenerator.RunAsync(code, generated);
     }
 
     [Fact]
@@ -144,13 +151,16 @@ namespace Test
         {
             this._t = t;
         }
+
+        #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor.
+        [global::System.ObsoleteAttribute("Not intended for direct usage.", true)]
         public Test()
         {
         }
     }
 }
 """;
-        await VerifySourceGenerator.RunAsync(code, generated, expectedConstructors: Verifiers.ConstructorType.Both);
+        await VerifySourceGenerator.RunAsync(code, generated);
     }
 
     /// <summary>
@@ -177,21 +187,27 @@ namespace Test
     {
     }
 }";
-        const string generatedTest = @"namespace Test
+        const string generatedTest = """
+namespace Test
 {
     partial class Test
     {
         public Test(int t, string s) : base(t, s)
         {
         }
+
+        #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor.
+        [global::System.ObsoleteAttribute("Not intended for direct usage.", true)]
         public Test()
         {
         }
     }
 }
-";
 
-        const string generatedBase = @"namespace Test
+""";
+
+        const string generatedBase = """
+namespace Test
 {
     partial class BaseClass
     {
@@ -199,14 +215,19 @@ namespace Test
         {
             this._t = t;
         }
+
+        #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor.
+        [global::System.ObsoleteAttribute("Not intended for direct usage.", true)]
         public BaseClass()
         {
         }
     }
 }
-";
 
-        const string generatedMother = @"namespace Test
+""";
+
+        const string generatedMother = """
+namespace Test
 {
     partial class MotherClass
     {
@@ -214,32 +235,35 @@ namespace Test
         {
             this._s = s ?? throw new System.ArgumentNullException(nameof(s));
         }
+
+        #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor.
+        [global::System.ObsoleteAttribute("Not intended for direct usage.", true)]
         public MotherClass()
         {
         }
     }
 }
-";
+
+""";
         await VerifySourceGenerator.RunAsync(code,
         [
             (generatedMother, "Test.MotherClass.g.cs"),
             (generatedBase, "Test.BaseClass.g.cs"),
             (generatedTest, "Test.Test.g.cs")
-        ], expectedConstructors: Verifiers.ConstructorType.Both);
+        ]);
     }
 
     [Theory]
-    [InlineData(false, "", "", true)]
-    [InlineData(true, "Class {0} comment", "Class Test comment", true)]
-    [InlineData(true, "Don't use", "Don't use", true)]
-    [InlineData(true, "", "", true)]
-    [InlineData(false, "", "", false)]
-    public async Task Run_WithConfigForObsoleteMessage_ShouldGenerateType(bool hasCustomComment, string commentConfig, string expectedComment, bool isClass)
+    [InlineData(false, "", true)]
+    [InlineData(true, "Don't use", true)]
+    [InlineData(true, "", true)]
+    [InlineData(false, "", false)]
+    public async Task Run_WithConfigForObsoleteMessage_ShouldGenerateType(bool hasCustomComment, string comment, bool isClass)
     {
         string code = $$"""
 namespace Test
 {
-     [AutoConstructor(addParameterless: true)]
+    [AutoConstructor(addParameterless: true)]
     internal partial {{(isClass ? "class" : "struct")}} Test
     {
         public int X { get; set; }
@@ -247,11 +271,11 @@ namespace Test
 }
 """;
 
-        string comment = string.Format(CultureInfo.InvariantCulture, commentConfig, "Test");
         if (string.IsNullOrWhiteSpace(comment))
         {
-            comment = "For serialization only.";
+            comment = "Not intended for direct usage.";
         }
+
         string generated = $$"""
 namespace Test
 {
@@ -260,6 +284,8 @@ namespace Test
         /// <summary>
         /// {{comment}}
         /// </summary>
+        #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor.
+        [global::System.ObsoleteAttribute("{{comment}}", true)]
         public Test()
         {
         }
@@ -273,11 +299,11 @@ build_property.AutoConstructor_GenerateConstructorDocumentation=true";
         if (hasCustomComment)
         {
             configFileContent += $@"
-build_property.AutoConstructor_ParameterlessConstructorObsoleteMessage = {commentConfig}
+build_property.AutoConstructor_ParameterlessConstructorObsoleteMessage = {comment}
 ";
         }
 
-        await VerifySourceGenerator.RunAsync(code, generated, configFileContent: configFileContent, expectedConstructors: Verifiers.ConstructorType.ParameterlessOnly, expectedObsoleteMessage: expectedComment);
+        await VerifySourceGenerator.RunAsync(code, generated, configFileContent: configFileContent);
     }
 
     [Fact]
@@ -286,7 +312,7 @@ build_property.AutoConstructor_ParameterlessConstructorObsoleteMessage = {commen
         const string code = """
 namespace Test
 {
-     [AutoConstructor(addParameterless: true)]
+    [AutoConstructor(addParameterless: true)]
     internal partial class Test
     {
         public int X { get; set; }
@@ -299,6 +325,7 @@ namespace Test
 {
     partial class Test
     {
+        #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor.
         public Test()
         {
         }
@@ -309,6 +336,6 @@ namespace Test
 
         const string configFileContent = @"
 build_property.AutoConstructor_MarkParameterlessConstructorAsObsolete=false";
-        await VerifySourceGenerator.RunAsync(code, generated, configFileContent: configFileContent, expectedConstructors: Verifiers.ConstructorType.ParameterlessOnly, expectedObsoleteMessage: null);
+        await VerifySourceGenerator.RunAsync(code, generated, configFileContent: configFileContent);
     }
 }

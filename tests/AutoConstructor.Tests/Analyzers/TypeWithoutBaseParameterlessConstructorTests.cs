@@ -14,7 +14,7 @@ public class TypeWithoutBaseParameterlessConstructorTests
         const string test = @"
 namespace Test
 {
-    [{|#0:AutoConstructor(addParameterless:true)|}]
+    [{|#0:AutoConstructor(addParameterless: true)|}]
     internal partial class Test
     {
     }
@@ -24,32 +24,32 @@ namespace Test
     }
 
     [Fact]
-    public async Task Analyzer_ClassWithCorrectImplicitBaseConstructor__ShouldNotReportDiagnostic()
+    public async Task Analyzer_ClassWithCorrectImplicitBaseConstructor_ShouldNotReportDiagnostic()
     {
         const string test = @"
 namespace Test
 {
-    [{|#0:AutoConstructor(addParameterless:true)|}]
+    [{|#0:AutoConstructor(addParameterless: true)|}]
     internal partial class Test : TestBase { }
 
-     internal partial class TestBase { }
+    internal partial class TestBase { }
 }";
 
         await VerifyClassWithoutFieldsToInject.VerifyAnalyzerAsync(test);
     }
 
     [Fact]
-    public async Task Analyzer_ClassWithCorrectExplicitBaseConstructor__ShouldNotReportDiagnostic()
+    public async Task Analyzer_ClassWithCorrectExplicitBaseConstructor_ShouldNotReportDiagnostic()
     {
         const string test = @"
 namespace Test
 {
-    [{|#0:AutoConstructor(addParameterless:true)|}]
+    [{|#0:AutoConstructor(addParameterless: true)|}]
     internal partial class Test : TestBase { }
 
-     internal partial class TestBase {
-        internal TestBase(){}
-     }
+    internal partial class TestBase {
+        internal TestBase() {}
+    }
 }";
 
         await VerifyClassWithoutFieldsToInject.VerifyAnalyzerAsync(test);
@@ -64,14 +64,16 @@ namespace Test
     [{|#0:AutoConstructor(addParameterless:false)|}]
     internal partial class Test : TestBase
     {
-        public Test(int id): base(id){}
+        public Test(int id) : base(id){}
     }
 
     internal partial class TestBase{
-        public int Id {get;}
-        public TestBase(int id){
-            Id =id;
+        public TestBase(int id)
+        {
+            Id = id;
         }
+
+        public int Id { get; }
     }
 
 }";
@@ -84,17 +86,19 @@ namespace Test
         const string test = @"
 namespace Test
 {
-    [{|#0:AutoConstructor(addParameterless:true)|}]
+    [{|#0:AutoConstructor(addParameterless: true)|}]
     internal partial class Test : TestBase
     {
         public Test(int id): base(id){}
     }
 
     internal partial class TestBase{
-        public int Id {get;}
-        public TestBase(int id){
-            Id =id;
+        public TestBase(int id)
+        {
+            Id = id;
         }
+
+        public int Id { get; }
     }
 
 }";

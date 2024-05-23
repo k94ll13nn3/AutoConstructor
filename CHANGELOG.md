@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## Unreleased
+
+### Issues
+
+- [#119](https://github.com/k94ll13nn3/AutoConstructor/issues/119): Parameterless constructor for serialization use when using nested types
+
+### Pull Requests
+
+- [#120](https://github.com/k94ll13nn3/AutoConstructor/pull/120): Add addParameterless option, fix spelling (by [DomasM](https://github.com/DomasM))
+
 ## [5.3.0] - 2024-03-16
 
 ### Changed

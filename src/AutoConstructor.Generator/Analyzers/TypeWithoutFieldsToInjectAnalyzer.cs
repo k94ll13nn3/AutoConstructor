@@ -25,17 +25,17 @@ public sealed class TypeWithoutFieldsToInjectAnalyzer : DiagnosticAnalyzer
     {
         var symbol = (INamedTypeSymbol)context.Symbol;
 
-        if (symbol.GetAttribute(Source.AttributeFullName) is AttributeData attribute)
+        if (symbol.GetAttribute(Source.AttributeFullName) is AttributeData attr)
         {
-            bool addParameterLess = symbol.DeclaringSyntaxReferences[0].GetSyntax() is TypeDeclarationSyntax
-                                    && attribute.AttributeConstructor?.Parameters.Length > 0
-                                    && attribute.GetBoolParameterValue("addParameterless");
-            if (!addParameterLess)
+            bool addParameterless = symbol.DeclaringSyntaxReferences[0].GetSyntax() is TypeDeclarationSyntax
+                                    && attr.AttributeConstructor?.Parameters.Length > 0
+                                    && attr.GetBoolParameterValue("addParameterless");
+            if (!addParameterless)
             {
                 bool hasFields = SymbolHasFields(symbol) || ParentHasFields(context.Compilation, symbol);
                 if (!hasFields)
                 {
-                    SyntaxReference? propertyTypeIdentifier = attribute.ApplicationSyntaxReference;
+                    SyntaxReference? propertyTypeIdentifier = attr.ApplicationSyntaxReference;
                     if (propertyTypeIdentifier is not null)
                     {
                         var location = Location.Create(propertyTypeIdentifier.SyntaxTree, propertyTypeIdentifier.Span);

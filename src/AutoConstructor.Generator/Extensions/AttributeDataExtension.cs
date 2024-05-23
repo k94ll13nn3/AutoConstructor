@@ -31,4 +31,9 @@ internal static class AttributeDataExtension
 
         return attributeData.ConstructorArguments[index].Value is true;
     }
+
+    public static bool GetOptionalBoolParameterValue(this AttributeData? attributeData, string parameterName)
+    {
+        return attributeData?.AttributeConstructor?.Parameters.Length > 0 && attributeData.GetBoolParameterValue(parameterName);
+    }
 }

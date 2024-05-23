@@ -153,15 +153,15 @@ public static class DiagnosticDescriptors
         WellKnownDiagnosticTags.Build);
 
     public static readonly DiagnosticDescriptor TypeWithoutBaseParameterlessConstructorRule = new(
-     TypeWithoutBaseParameterlessConstructorDiagnosticId,
-    "Base type of target type must have non-private parameterless constructor",
-     "Base type of target type must have non-private parameterless constructor when using addParameterless option",
-     "Usage",
-     DiagnosticSeverity.Error,
-     true,
-     null,
-     $"https://github.com/k94ll13nn3/AutoConstructor#{TypeWithoutBaseParameterlessConstructorDiagnosticId}",
-     WellKnownDiagnosticTags.Unnecessary);
+        TypeWithoutBaseParameterlessConstructorDiagnosticId,
+        "Base type of target type must have a non-private parameterless constructor",
+        "Base type of target type must have a non-private parameterless constructor when using addParameterless option",
+        "Usage",
+        DiagnosticSeverity.Error,
+        true,
+        null,
+        $"https://github.com/k94ll13nn3/AutoConstructor#{TypeWithoutBaseParameterlessConstructorDiagnosticId}",
+        WellKnownDiagnosticTags.Unnecessary);
 
     public static readonly DiagnosticDescriptor DisableNullCheckingIsObsoleteRule = new(
         DisableNullCheckingIsObsoleteDiagnosticId,

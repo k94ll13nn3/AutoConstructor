@@ -118,7 +118,13 @@ public sealed class AutoConstructorGenerator : IIncrementalGenerator
 
         analyzerOptions.TryGetValue($"build_property.{BuildProperties.AutoConstructor_ParameterlessConstructorObsoleteMessage}", out string? parameterlessConstructorObsoleteMessage);
 
-        return new(generateConstructorDocumentation, constructorDocumentationComment, emitNullChecks, emitThisCalls, markParameterlessConstructorAsObsolete, parameterlessConstructorObsoleteMessage);
+        return new(
+            generateConstructorDocumentation,
+            constructorDocumentationComment,
+            emitNullChecks,
+            emitThisCalls,
+            markParameterlessConstructorAsObsolete,
+            parameterlessConstructorObsoleteMessage);
     }
 
     private static GeneratorExecutionResult? Execute(GeneratorAttributeSyntaxContext context, TypeDeclarationSyntax typeSyntax)
@@ -133,20 +139,6 @@ public sealed class AutoConstructorGenerator : IIncrementalGenerator
         ExtractFieldsFromParent(symbol, concatenatedFields);
 
         EquatableArray<FieldInfo> fields = concatenatedFields.ToImmutableArray();
-
-        AttributeData? attributeData = symbol.GetAttribute(Source.AttributeFullName);
-
-        string? accessibility = ExtractAccessibility(attributeData);
-        bool generatedDefaultBaseAttribute = ExtractBoolParameterValue(attributeData, "addDefaultBaseAttribute");
-        bool disableThisCall = ExtractBoolParameterValue(attributeData, "disableThisCall");
-        bool wantToAddParameterless = ExtractBoolParameterValue(attributeData, "addParameterless");
-        bool addParameterless = wantToAddParameterless && BaseHasAccessibleParameterlessConstructor(symbol);
-
-        if (fields.IsEmpty && !wantToAddParameterless)
-        {
-            // No need to report diagnostic, taken care by the analyzers.
-            return null;
-        }
 
         foreach (IGrouping<string, FieldInfo> fieldGroup in fields.GroupBy(x => x.ParameterName))
         {
@@ -171,6 +163,25 @@ public sealed class AutoConstructorGenerator : IIncrementalGenerator
             .Count(n => n is ConstructorDeclarationSyntax constructor && !constructor.Modifiers.Any(m => m.IsKind(SyntaxKind.StaticKeyword))) == 1
             && symbol.Constructors.Any(d => !d.IsStatic && d.Parameters.Length == 0);
 
+        string? accessibility = null;
+        AttributeData? attributeData = symbol.GetAttribute(Source.AttributeFullName);
+        if (attributeData?.AttributeConstructor?.Parameters.Length > 0
+            && attributeData.GetParameterValue<string>("accessibility") is string { Length: > 0 } accessibilityValue
+            && ConstructorAccessibilities.Contains(accessibilityValue))
+        {
+            accessibility = accessibilityValue;
+        }
+
+        bool generatedDefaultBaseAttribute = attributeData.GetOptionalBoolParameterValue("addDefaultBaseAttribute");
+        bool disableThisCall = attributeData.GetOptionalBoolParameterValue("disableThisCall");
+        bool addParameterless = attributeData.GetOptionalBoolParameterValue("addParameterless");
+
+        if (fields.IsEmpty && !addParameterless)
+        {
+            // No need to report diagnostic, taken care by the analyzers.
+            return null;
+        }
+
         IMethodSymbol? initializerMethod = symbol.GetMembers()
             .OfType<IMethodSymbol>()
             .FirstOrDefault(x => x.HasAttribute(Source.InitializerAttributeFullName));
@@ -187,36 +198,24 @@ public sealed class AutoConstructorGenerator : IIncrementalGenerator
         return new(mainNamedTypeSymbolInfo, fields, null);
     }
 
-    private static bool ExtractBoolParameterValue(AttributeData? attributeData, string propertyName)
-    {
-        return attributeData?.AttributeConstructor?.Parameters.Length > 0
-            && attributeData.GetBoolParameterValue(propertyName);
-    }
-
-    private static string? ExtractAccessibility(AttributeData? attributeData)
-    {
-        if (attributeData?.AttributeConstructor?.Parameters.Length > 0
-            && attributeData.GetParameterValue<string>("accessibility") is string { Length: > 0 } accessibilityValue
-            && ConstructorAccessibilities.Contains(accessibilityValue))
-        {
-            return accessibilityValue;
-        }
-        return null;
-    }
-
     private static string GenerateAutoConstructor(MainNamedTypeSymbolInfo symbol, EquatableArray<FieldInfo> fields, Options options)
     {
+        string? constructorDocumentationComment = options.ConstructorDocumentationComment;
+        if (string.IsNullOrWhiteSpace(constructorDocumentationComment))
+        {
+            constructorDocumentationComment = $"Initializes a new instance of the {{0}} {(symbol.Kind is TypeKind.Struct ? "struct" : "class")}.";
+        }
+
+        string? parameterlessConstructorObsoleteMessage = options.ParameterlessConstructorObsoleteMessage;
+        if (string.IsNullOrWhiteSpace(parameterlessConstructorObsoleteMessage))
+        {
+            parameterlessConstructorObsoleteMessage = "Not intended for direct usage.";
+        }
+
         var writer = new IndentedTextWriter();
 
         // Add file header.
-        writer.WriteLine("//------------------------------------------------------------------------------");
-        writer.WriteLine("// <auto-generated>");
-        writer.WriteLine($"//     This code was generated by the {nameof(AutoConstructor)} source generator.");
-        writer.WriteLine("//");
-        writer.WriteLine("//     Changes to this file may cause incorrect behavior and will be lost if");
-        writer.WriteLine("//     the code is regenerated.");
-        writer.WriteLine("// </auto-generated>");
-        writer.WriteLine("//------------------------------------------------------------------------------");
+        writer.WriteFileHeader();
 
         // Add nullable annotation.
         if (fields.Any(f => f.Nullable))
@@ -240,23 +239,18 @@ public sealed class AutoConstructorGenerator : IIncrementalGenerator
 
         // Write type name line.
         writer.WriteNamedTypeSymbolInfoLine(symbol);
-        bool generateCtorWithParameters = fields.Any();
 
+        // Write type content.
         using (writer.WriteBlock())
         {
-            // Write constructor(s) themselves
-            if (generateCtorWithParameters)
+            if (!fields.IsEmpty)
             {
-                WriteParametrizedConstructor(symbol, fields, options, writer);
+                WriteMainConstructor(symbol, fields, options, constructorDocumentationComment, writer);
             }
+
             if (symbol.AddParameterless)
             {
-                //add separation line between constructors
-                if (generateCtorWithParameters)
-                {
-                    writer.WriteLine("");
-                }
-                WriteParameterlessConstructor(symbol, options, writer);
+                WriteParameterlessConstructor(symbol, fields.IsEmpty, options, parameterlessConstructorObsoleteMessage, writer);
             }
         }
 
@@ -275,7 +269,12 @@ public sealed class AutoConstructorGenerator : IIncrementalGenerator
         return writer.ToString();
     }
 
-    private static void WriteParametrizedConstructor(MainNamedTypeSymbolInfo symbol, EquatableArray<FieldInfo> fields, Options options, IndentedTextWriter writer)
+    private static void WriteMainConstructor(
+        MainNamedTypeSymbolInfo symbol,
+        EquatableArray<FieldInfo> fields,
+        Options options,
+        string? constructorDocumentationComment,
+        IndentedTextWriter writer)
     {
         // Get all constructor parameters from fields. 
         FieldInfo[] constructorParameters = fields
@@ -283,12 +282,10 @@ public sealed class AutoConstructorGenerator : IIncrementalGenerator
             .Select(x => x.Any(c => c.Type is not null) ? x.First(c => c.Type is not null) : x.First())
             .ToArray();
 
-        bool generateConstructorDocumentation = options.GenerateConstructorDocumentation;
-
-        // Write constructor documentation if enable.
-        if (generateConstructorDocumentation)
+        // Write constructor documentation if enabled.
+        if (options.GenerateConstructorDocumentation)
         {
-            AddConstructorDocComment(writer, GetParametrizedConstructorDocComment(symbol, options));
+            writer.WriteSummary(string.Format(CultureInfo.InvariantCulture, constructorDocumentationComment, symbol.Name));
             foreach (FieldInfo parameter in constructorParameters)
             {
                 writer.WriteLine($"/// <param name=\"{parameter.ParameterName}\">{parameter.Comment ?? parameter.ParameterName}</param>");
@@ -300,7 +297,9 @@ public sealed class AutoConstructorGenerator : IIncrementalGenerator
         {
             writer.WriteLine("[AutoConstructorDefaultBase]");
         }
-        WriteGeneratedCodeAttribute(writer);
+
+        // Write generated code attribute.
+        writer.WriteGeneratedCodeAttribute();
 
         // Write constructor signature.
         writer.Write($"{symbol.Accessibility} {symbol.Name}(");
@@ -335,71 +334,49 @@ public sealed class AutoConstructorGenerator : IIncrementalGenerator
                 }
                 writer.WriteLine(";");
             }
-            AddInitializerMethodCall(symbol, writer);
+
+            if (symbol.InitializerMethod is not null)
+            {
+                writer.WriteLine();
+                writer.WriteLine($"{(!symbol.InitializerMethod.IsStatic ? "this." : "")}{symbol.InitializerMethod.Name}();");
+            }
         }
     }
 
-    private static void WriteParameterlessConstructor(MainNamedTypeSymbolInfo symbol, Options options, IndentedTextWriter writer)
+    private static void WriteParameterlessConstructor(
+        MainNamedTypeSymbolInfo symbol,
+        bool fieldsEmpty,
+        Options options,
+        string? parameterlessConstructorObsoleteMessage,
+        IndentedTextWriter writer)
     {
-        string docComment = GetParameterLessConstructorDocComment(symbol, options);
-        // Write constructor documentation if enabled.
-        if (options.GenerateConstructorDocumentation)
+        // Insert new line if there was a previous constructor.
+        if (!fieldsEmpty)
         {
-            AddConstructorDocComment(writer, docComment);
+            writer.WriteLine();
         }
-        WriteGeneratedCodeAttribute(writer);
+
+        // Write constructor documentation if enabled.
+        if (options.GenerateConstructorDocumentation && parameterlessConstructorObsoleteMessage is string { Length: > 0 })
+        {
+            writer.WriteSummary(parameterlessConstructorObsoleteMessage);
+        }
+
         writer.WriteLine("#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor.");
         if (options.MarkParameterlessConstructorAsObsolete)
         {
-            writer.WriteLine($"""[global::System.ObsoleteAttribute("{docComment}", true)]""");
+            writer.WriteLine($"""[global::System.ObsoleteAttribute("{parameterlessConstructorObsoleteMessage}", true)]""");
         }
+
+        // Write generated code attribute.
+        writer.WriteGeneratedCodeAttribute();
+
         // Write constructor signature.
-        writer.Write($"{symbol.Accessibility} {symbol.Name}()");
-        writer.WriteLine();
+        writer.WriteLine($"{symbol.Accessibility} {symbol.Name}()");
+
         // Write constructor body.
-        using (writer.WriteBlock())
-        {
-            AddInitializerMethodCall(symbol, writer);
-        }
-    }
-
-    private static void AddConstructorDocComment(IndentedTextWriter writer, string docComment)
-    {
-        writer.WriteLine("/// <summary>");
-        writer.WriteLine($"/// {docComment}");
-        writer.WriteLine("/// </summary>");
-    }
-
-    private static string GetParameterLessConstructorDocComment(MainNamedTypeSymbolInfo symbol, Options options)
-    {
-        if (string.IsNullOrWhiteSpace(options.ParameterlessConstructorObsoleteMessage))
-        {
-            return "For serialization only.";
-        }
-        return string.Format(options.ParameterlessConstructorObsoleteMessage!, symbol.Name, CultureInfo.InvariantCulture);
-    }
-
-    private static string GetParametrizedConstructorDocComment(MainNamedTypeSymbolInfo symbol, Options options)
-    {
-        if (string.IsNullOrWhiteSpace(options.ConstructorDocumentationComment))
-        {
-            return string.Format($"Initializes a new instance of the {{0}} {(symbol.Kind is TypeKind.Struct ? "struct" : "class")}.", symbol.Name, CultureInfo.InvariantCulture);
-        }
-        return string.Format(options.ConstructorDocumentationComment!, symbol.Name, CultureInfo.InvariantCulture);
-    }
-
-    private static void WriteGeneratedCodeAttribute(IndentedTextWriter writer)
-    {
-        writer.WriteLine($"""[global::System.CodeDom.Compiler.GeneratedCodeAttribute("{nameof(AutoConstructor)}", "{GeneratorVersion}")]""");
-    }
-
-    private static void AddInitializerMethodCall(MainNamedTypeSymbolInfo symbol, IndentedTextWriter writer)
-    {
-        if (symbol.InitializerMethod is not null)
-        {
-            writer.WriteLine();
-            writer.WriteLine($"{(!symbol.InitializerMethod.IsStatic ? "this." : "")}{symbol.InitializerMethod.Name}();");
-        }
+        writer.StartBlock();
+        writer.EndBlock();
     }
 
     private static List<FieldInfo> GetFieldsFromSymbol(INamedTypeSymbol symbol)
@@ -533,18 +510,6 @@ public sealed class AutoConstructorGenerator : IIncrementalGenerator
         }
 
         ExtractFieldsFromParent(symbol, concatenatedFields);
-    }
-
-    private static bool BaseHasAccessibleParameterlessConstructor(INamedTypeSymbol symbol)
-    {
-        INamedTypeSymbol? baseType = symbol.BaseType;
-        if (baseType?.BaseType is null)
-        {
-            return true;
-        }
-        IMethodSymbol? acceptableConstructor = baseType.Constructors.FirstOrDefault(d =>
-            !d.IsStatic && d.DeclaredAccessibility != Accessibility.Private && d.Parameters.Length == 0);
-        return acceptableConstructor != null;
     }
 
     private static bool IsNullable(ITypeSymbol typeSymbol)

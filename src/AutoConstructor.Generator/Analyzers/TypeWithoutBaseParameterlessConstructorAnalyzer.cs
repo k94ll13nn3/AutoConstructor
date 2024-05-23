@@ -27,14 +27,13 @@ public sealed class TypeWithoutBaseParameterlessConstructorAnalyzer : Diagnostic
 
         if (symbol.GetAttribute(Source.AttributeFullName) is AttributeData attr)
         {
-            bool addParameterLess = symbol.DeclaringSyntaxReferences[0].GetSyntax() is TypeDeclarationSyntax
-                                    && symbol.GetAttribute(Source.AttributeFullName) is AttributeData attribute
-                                    && attribute.AttributeConstructor?.Parameters.Length > 0
-                                    && attribute.GetBoolParameterValue("addParameterless");
-            if (addParameterLess)
+            bool addParameterless = symbol.DeclaringSyntaxReferences[0].GetSyntax() is TypeDeclarationSyntax
+                                    && attr.AttributeConstructor?.Parameters.Length > 0
+                                    && attr.GetBoolParameterValue("addParameterless");
+            if (addParameterless)
             {
-                bool baseHasAccessibleParameterlessConstructor = BaseHasAccessibleParameterlessConstructor(symbol);
-                if (!baseHasAccessibleParameterlessConstructor)
+                (IMethodSymbol? constructor, _) = symbol.GetPreferedBaseConstructorOrBaseType();
+                if (constructor?.Parameters.Length > 0)
                 {
                     SyntaxReference? propertyTypeIdentifier = attr.ApplicationSyntaxReference;
                     if (propertyTypeIdentifier is not null)
@@ -46,17 +45,5 @@ public sealed class TypeWithoutBaseParameterlessConstructorAnalyzer : Diagnostic
                 }
             }
         }
-    }
-
-    private static bool BaseHasAccessibleParameterlessConstructor(INamedTypeSymbol symbol)
-    {
-        INamedTypeSymbol? baseType = symbol.BaseType;
-        if (baseType?.BaseType is null)
-        {
-            return true;
-        }
-        IMethodSymbol? acceptableConstructor = baseType.Constructors.FirstOrDefault(d =>
-            !d.IsStatic && d.DeclaredAccessibility != Accessibility.Private && d.Parameters.Length == 0);
-        return acceptableConstructor != null;
     }
 }
