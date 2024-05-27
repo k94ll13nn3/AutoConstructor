@@ -32,7 +32,7 @@ public sealed class TypeWithoutBaseParameterlessConstructorAnalyzer : Diagnostic
                                     && attr.GetBoolParameterValue("addParameterless");
             if (addParameterless)
             {
-                (IMethodSymbol? constructor, _) = symbol.GetPreferedBaseConstructorOrBaseType();
+                (IMethodSymbol? constructor, _) = symbol.GetPreferredBaseConstructorOrBaseType();
                 if (constructor?.Parameters.Length > 0)
                 {
                     SyntaxReference? propertyTypeIdentifier = attr.ApplicationSyntaxReference;

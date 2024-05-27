@@ -60,7 +60,7 @@ public sealed class TypeWithoutFieldsToInjectAnalyzer : DiagnosticAnalyzer
 
     private static bool ParentHasFields(Compilation compilation, INamedTypeSymbol symbol)
     {
-        (IMethodSymbol? constructor, INamedTypeSymbol? baseType) = symbol.GetPreferedBaseConstructorOrBaseType();
+        (IMethodSymbol? constructor, INamedTypeSymbol? baseType) = symbol.GetPreferredBaseConstructorOrBaseType();
         if (constructor is not null)
         {
             return constructor.Parameters.Length > 0;

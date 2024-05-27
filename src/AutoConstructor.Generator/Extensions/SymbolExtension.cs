@@ -79,18 +79,18 @@ internal static class SymbolExtension
         return filename;
     }
 
-    public static (IMethodSymbol? constructor, INamedTypeSymbol? baseType) GetPreferedBaseConstructorOrBaseType(this INamedTypeSymbol symbol)
+    public static (IMethodSymbol? constructor, INamedTypeSymbol? baseType) GetPreferredBaseConstructorOrBaseType(this INamedTypeSymbol symbol)
     {
         INamedTypeSymbol? baseType = symbol.BaseType;
 
         // Check if base type is not object (ie. its base type is null)
         if (baseType?.BaseType is not null)
         {
-            // Check if there is a defined preferedBaseConstructor
-            IMethodSymbol? preferedBaseConstructor = baseType.Constructors.FirstOrDefault(d => d.HasAttribute(Source.DefaultBaseAttributeFullName));
-            if (preferedBaseConstructor is not null)
+            // Check if there is a defined preferredBaseConstructor
+            IMethodSymbol? preferredBaseConstructor = baseType.Constructors.FirstOrDefault(d => d.HasAttribute(Source.DefaultBaseAttributeFullName));
+            if (preferredBaseConstructor is not null)
             {
-                return (preferedBaseConstructor, null);
+                return (preferredBaseConstructor, null);
             }
             // If symbol is in same assembly, the generated constructor is not visible as it might not be yet generated.
             // If not is the same assembly, is does not matter if the constructor was generated or not.

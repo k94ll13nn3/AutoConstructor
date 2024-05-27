@@ -86,7 +86,7 @@ public static class DiagnosticDescriptors
         $"https://github.com/k94ll13nn3/AutoConstructor#{IgnoreOrInjectAttributeOnTypeWithoutAttributeDiagnosticId}",
         WellKnownDiagnosticTags.Unnecessary);
 
-    public static readonly DiagnosticDescriptor MistmatchTypesRule = new(
+    public static readonly DiagnosticDescriptor MismatchTypesRule = new(
         MismatchTypesDiagnosticId,
         "Couldn't generate constructor",
         "One or more parameter have mismatching types",

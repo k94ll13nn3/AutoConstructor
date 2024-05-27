@@ -66,7 +66,7 @@ public sealed class AutoConstructorGenerator : IIncrementalGenerator
             {
                 if (item.result.ReportedDiagnostic is ReportedDiagnostic diagnostic)
                 {
-                    context.ReportDiagnostic(Diagnostic.Create(DiagnosticDescriptors.MistmatchTypesRule, Location.Create(diagnostic.FilePath, diagnostic.TextSpan, diagnostic.LineSpan)));
+                    context.ReportDiagnostic(Diagnostic.Create(DiagnosticDescriptors.MismatchTypesRule, Location.Create(diagnostic.FilePath, diagnostic.TextSpan, diagnostic.LineSpan)));
                 }
                 else if (item.result.Symbol is not null)
                 {
@@ -437,7 +437,7 @@ public sealed class AutoConstructorGenerator : IIncrementalGenerator
 
     private static void ExtractFieldsFromParent(INamedTypeSymbol symbol, List<FieldInfo> concatenatedFields)
     {
-        (IMethodSymbol? constructor, INamedTypeSymbol? baseType) = symbol.GetPreferedBaseConstructorOrBaseType();
+        (IMethodSymbol? constructor, INamedTypeSymbol? baseType) = symbol.GetPreferredBaseConstructorOrBaseType();
         if (constructor is not null)
         {
             ExtractFieldsFromConstructedParent(concatenatedFields, constructor);
