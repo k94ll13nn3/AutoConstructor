@@ -6,7 +6,7 @@ using Microsoft.CodeAnalysis;
 
 namespace AutoConstructor.Generator.Extensions;
 
-internal static class IndentedTextWriterExtension
+internal static class IndentedTextWriterExtensions
 {
     public static void WriteNamedTypeSymbolInfoLine(this IndentedTextWriter writer, NamedTypeSymbolInfo symbol)
     {

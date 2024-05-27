@@ -51,6 +51,7 @@ public sealed class AutoConstructorGenerator : IIncrementalGenerator
             .Combine(context.AnalyzerConfigOptionsProvider.Select((c, _) => ParseOptions(c.GlobalOptions)))
             .WithTrackingName("Combine");
 
+        // TODO: remove in v6
         context.RegisterSourceOutput(obsoleteOptionDiagnosticProvider, static (context, item) =>
         {
             if (item)
@@ -78,19 +79,14 @@ public sealed class AutoConstructorGenerator : IIncrementalGenerator
 
     private static bool IsSyntaxTargetForGeneration(SyntaxNode node)
     {
-        // We don't need to filter for class/struct here, as FAWMN is already doing that extra work for us
+        // We don't need to filter for class/struct here, as ForAttributeWithMetadataName is already doing that extra work for us
         return node is TypeDeclarationSyntax { AttributeLists.Count: > 0 } typeDeclarationSyntax && typeDeclarationSyntax.Modifiers.Any(SyntaxKind.PartialKeyword);
     }
 
     private static Options ParseOptions(AnalyzerConfigOptions analyzerOptions)
     {
-        bool generateConstructorDocumentation = false;
-        if (analyzerOptions.TryGetValue($"build_property.{BuildProperties.AutoConstructor_GenerateConstructorDocumentation}", out string? generateConstructorDocumentationSwitch))
-        {
-            generateConstructorDocumentation = generateConstructorDocumentationSwitch.Equals("true", StringComparison.OrdinalIgnoreCase);
-        }
-
-        analyzerOptions.TryGetValue($"build_property.{BuildProperties.AutoConstructor_ConstructorDocumentationComment}", out string? constructorDocumentationComment);
+        bool generateConstructorDocumentation = analyzerOptions.GetBoolValue(BuildProperties.AutoConstructor_GenerateConstructorDocumentation, false);
+        string? constructorDocumentationComment = analyzerOptions.GetStringValue(BuildProperties.AutoConstructor_ConstructorDocumentationComment);
 
         // TODO: remove in v6
         bool emitNullChecks = false;
@@ -99,24 +95,16 @@ public sealed class AutoConstructorGenerator : IIncrementalGenerator
             emitNullChecks = disableNullCheckingSwitch.Equals("false", StringComparison.OrdinalIgnoreCase);
         }
 
+        // TODO: use GetBoolValue in v6
         if (analyzerOptions.TryGetValue($"build_property.{BuildProperties.AutoConstructor_GenerateArgumentNullExceptionChecks}", out string? generateArgumentNullExceptionChecksSwitch))
         {
             emitNullChecks = generateArgumentNullExceptionChecksSwitch.Equals("true", StringComparison.OrdinalIgnoreCase);
         }
 
-        bool emitThisCalls = true;
-        if (analyzerOptions.TryGetValue($"build_property.{BuildProperties.AutoConstructor_GenerateThisCalls}", out string? enableThisCallsSwitch))
-        {
-            emitThisCalls = !enableThisCallsSwitch.Equals("false", StringComparison.OrdinalIgnoreCase);
-        }
+        bool emitThisCalls = analyzerOptions.GetBoolValue(BuildProperties.AutoConstructor_GenerateThisCalls, true);
 
-        bool markParameterlessConstructorAsObsolete = true;
-        if (analyzerOptions.TryGetValue($"build_property.{BuildProperties.AutoConstructor_MarkParameterlessConstructorAsObsolete}", out string? markParameterlessConstructorAsObsoleteSwitch))
-        {
-            markParameterlessConstructorAsObsolete = !markParameterlessConstructorAsObsoleteSwitch.Equals("false", StringComparison.OrdinalIgnoreCase);
-        }
-
-        analyzerOptions.TryGetValue($"build_property.{BuildProperties.AutoConstructor_ParameterlessConstructorObsoleteMessage}", out string? parameterlessConstructorObsoleteMessage);
+        bool markParameterlessConstructorAsObsolete = analyzerOptions.GetBoolValue(BuildProperties.AutoConstructor_MarkParameterlessConstructorAsObsolete, true);
+        string? parameterlessConstructorObsoleteMessage = analyzerOptions.GetStringValue(BuildProperties.AutoConstructor_ParameterlessConstructorObsoleteMessage);
 
         return new(
             generateConstructorDocumentation,

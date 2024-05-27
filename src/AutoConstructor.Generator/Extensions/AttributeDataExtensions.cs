@@ -2,7 +2,7 @@ using Microsoft.CodeAnalysis;
 
 namespace AutoConstructor.Generator.Extensions;
 
-internal static class AttributeDataExtension
+internal static class AttributeDataExtensions
 {
     public static T? GetParameterValue<T>(this AttributeData attributeData, string parameterName)
         where T : class
