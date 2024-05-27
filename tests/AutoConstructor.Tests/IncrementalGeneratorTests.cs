@@ -139,7 +139,7 @@ namespace Test
     {
         return CSharpCompilation.Create("compilation",
                 [syntaxTree],
-                new[] { MetadataReference.CreateFromFile(typeof(Binder).GetTypeInfo().Assembly.Location) },
+                [MetadataReference.CreateFromFile(typeof(Binder).GetTypeInfo().Assembly.Location)],
                 new CSharpCompilationOptions(OutputKind.ConsoleApplication));
     }
 

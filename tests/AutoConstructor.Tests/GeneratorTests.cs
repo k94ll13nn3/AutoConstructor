@@ -1536,7 +1536,7 @@ namespace Test
     }
 }
 ";
-        await VerifySourceGenerator.RunAsync(code, new[] { (generatedBase, "Test.BaseClass.g.cs"), (generatedTest, "Test.Test.g.cs") });
+        await VerifySourceGenerator.RunAsync(code, [(generatedBase, "Test.BaseClass.g.cs"), (generatedTest, "Test.Test.g.cs")]);
     }
 
     [Fact]
@@ -1579,7 +1579,7 @@ namespace Test
     }
 }
 ";
-        await VerifySourceGenerator.RunAsync(code, new[] { (generatedBase, "Test.BaseClass.g.cs"), (generatedTest, "Test.Test.g.cs") }, nullable: true);
+        await VerifySourceGenerator.RunAsync(code, [(generatedBase, "Test.BaseClass.g.cs"), (generatedTest, "Test.Test.g.cs")], nullable: true);
     }
 
     [Fact]
@@ -1637,12 +1637,12 @@ namespace Test
     }
 }
 ";
-        await VerifySourceGenerator.RunAsync(code, new[]
-        {
+        await VerifySourceGenerator.RunAsync(code,
+        [
             (generatedMother, "Test.MotherClass.g.cs"),
             (generatedBase, "Test.BaseClass.g.cs"),
             (generatedTest, "Test.Test.g.cs")
-        });
+        ]);
     }
 
     [Fact]
@@ -1712,12 +1712,12 @@ namespace Test
     }
 }
 ";
-        await VerifySourceGenerator.RunAsync(code, new[]
-        {
+        await VerifySourceGenerator.RunAsync(code,
+        [
             (generatedClass2, "Test.Class2.g.cs"),
             (generatedClass3, "Test.Class3.g.cs"),
             (generatedClass5, "Test.Class5.g.cs")
-        });
+        ]);
     }
 
     [Fact]
@@ -2420,6 +2420,6 @@ namespace Test
     }
 }
 ";
-        await VerifySourceGenerator.RunAsync(code, new[] { (generatedBase, "Test.BaseClass.g.cs"), (generatedTest, "Test.Test.g.cs") });
+        await VerifySourceGenerator.RunAsync(code, [(generatedBase, "Test.BaseClass.g.cs"), (generatedTest, "Test.Test.g.cs")]);
     }
 }
