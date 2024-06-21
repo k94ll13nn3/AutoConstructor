@@ -105,16 +105,11 @@ is_global=true
         await test.RunAsync();
     }
 
-    private sealed class Test : CSharpSourceGeneratorTest<EmptySourceGeneratorProvider, DefaultVerifier>
+    private sealed class Test : CSharpSourceGeneratorTest<TSourceGenerator, DefaultVerifier>
     {
         public bool EnableNullable { get; set; }
 
         public LanguageVersion LanguageVersion { get; set; }
-
-        protected override IEnumerable<ISourceGenerator> GetSourceGenerators()
-        {
-            yield return new TSourceGenerator().AsSourceGenerator();
-        }
 
         protected override CompilationOptions CreateCompilationOptions()
         {
