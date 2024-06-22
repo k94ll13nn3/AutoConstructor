@@ -1,5 +1,6 @@
 using System.Collections.Immutable;
 using System.Composition;
+using AutoConstructor.Generator;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CodeActions;
 using Microsoft.CodeAnalysis.CodeFixes;
@@ -7,7 +8,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
 
-namespace AutoConstructor.Generator.CodeFixes;
+namespace AutoConstructor.CodeFixes;
 
 [ExportCodeFixProvider(LanguageNames.CSharp, Name = nameof(TypeWithoutPartialCodeFixProvider)), Shared]
 public sealed class TypeWithoutPartialCodeFixProvider : CodeFixProvider
