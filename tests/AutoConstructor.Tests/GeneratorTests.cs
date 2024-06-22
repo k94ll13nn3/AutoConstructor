@@ -2422,4 +2422,95 @@ namespace Test
 ";
         await VerifySourceGenerator.RunAsync(code, [(generatedBase, "Test.BaseClass.g.cs"), (generatedTest, "Test.Test.g.cs")]);
     }
+
+    [Fact]
+    public async Task Run_WhenBaseAndChildHaveSameParametersInDifferentOrder_ShouldGenerateClass()
+    {
+        const string code = @"
+namespace Test
+{
+    public class ParentClass
+    {
+        private readonly int a;
+        private readonly string b;
+
+        public ParentClass(int a, string b)
+        {
+            this.a = a;
+            this.b = b;
+        }
+    }
+
+    [AutoConstructor]
+    public partial class Test : ParentClass
+    {
+        private readonly string b;
+        private readonly int a;
+    }
+}";
+
+        const string generatedTest = @"namespace Test
+{
+    partial class Test
+    {
+        public Test(string b, int a) : base(a, b)
+        {
+            this.b = b ?? throw new System.ArgumentNullException(nameof(b));
+            this.a = a;
+        }
+    }
+}
+";
+
+        await VerifySourceGenerator.RunAsync(code, generatedTest);
+    }
+
+    [Fact]
+    public async Task Run_WhenBaseAndChildHaveSameParametersInDifferentOrderWhenParentIsGenerated_ShouldGenerateClass()
+    {
+        const string code = @"
+namespace Test
+{
+    [AutoConstructor]
+    public partial class ParentClass
+    {
+        private readonly int a;
+        private readonly string b;
+    }
+
+    [AutoConstructor]
+    public partial class Test : ParentClass
+    {
+        private readonly string b;
+        private readonly int a;
+    }
+}";
+
+        const string generatedTest = @"namespace Test
+{
+    partial class Test
+    {
+        public Test(string b, int a) : base(a, b)
+        {
+            this.b = b ?? throw new System.ArgumentNullException(nameof(b));
+            this.a = a;
+        }
+    }
+}
+";
+
+        const string generatedBase = @"namespace Test
+{
+    partial class ParentClass
+    {
+        public ParentClass(int a, string b)
+        {
+            this.a = a;
+            this.b = b ?? throw new System.ArgumentNullException(nameof(b));
+        }
+    }
+}
+";
+        await VerifySourceGenerator.RunAsync(code, [(generatedBase, "Test.ParentClass.g.cs"), (generatedTest, "Test.Test.g.cs")]);
+    }
 }

@@ -11,7 +11,8 @@ internal sealed record FieldInfo(
     bool Nullable,
     string? Comment,
     bool EmitArgumentNullException,
-    FieldType FieldType)
+    FieldType FieldType,
+    int? BaseOrder)
 {
     public string SanitizedParameterName => ParameterName.SanitizeReservedKeyword();
 }

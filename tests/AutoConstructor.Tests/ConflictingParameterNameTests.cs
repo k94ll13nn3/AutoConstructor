@@ -179,7 +179,7 @@ namespace Test
 {
     partial class Test
     {
-        public Test(string service, System.DateTime b0__service) : base(service, b0__service)
+        public Test(string service, System.DateTime b0__service) : base(b0__service, service)
         {
             this.service = service ?? throw new System.ArgumentNullException(nameof(service));
         }

@@ -298,7 +298,7 @@ public sealed class AutoConstructorGenerator : IIncrementalGenerator
         if (Array.Exists(constructorParameters, p => p.FieldType.HasFlag(FieldType.PassedToBase)))
         {
             writer.Write(" : base(");
-            writer.Write(string.Join(", ", constructorParameters.Where(p => p.FieldType.HasFlag(FieldType.PassedToBase)).Select(p => p.SanitizedParameterName)));
+            writer.Write(string.Join(", ", constructorParameters.Where(p => p.FieldType.HasFlag(FieldType.PassedToBase)).OrderBy(f => f.BaseOrder).Select(p => p.SanitizedParameterName)));
             writer.Write(")");
         }
         // Write this call if the symbol has a parameterless constructor
@@ -432,7 +432,8 @@ public sealed class AutoConstructorGenerator : IIncrementalGenerator
             IsNullable(type),
             summaryText,
             type.IsReferenceType && type.NullableAnnotation != NullableAnnotation.Annotated,
-            FieldType.Initialized);
+            FieldType.Initialized,
+            null);
     }
 
     private static void ExtractFieldsFromParent(INamedTypeSymbol symbol, List<FieldInfo> concatenatedFields, int depth = 0)
@@ -450,12 +451,14 @@ public sealed class AutoConstructorGenerator : IIncrementalGenerator
 
     private static void ExtractFieldsFromConstructedParent(List<FieldInfo> concatenatedFields, IMethodSymbol constructor, int depth)
     {
+        // Base order is function of the depth, it theoretically can conflict with an order already chosen, but this would mean that a parent has more than 1000 parameters
+        int order = depth * 1000;
         foreach (IParameterSymbol parameter in constructor.Parameters)
         {
             int index = concatenatedFields.FindIndex(p => p.ParameterName == parameter.Name && (p.Type ?? p.FallbackType) == parameter.Type.ToDisplayString());
             if (index != -1)
             {
-                concatenatedFields[index] = concatenatedFields[index] with { FieldType = concatenatedFields[index].FieldType | FieldType.PassedToBase };
+                concatenatedFields[index] = concatenatedFields[index] with { FieldType = concatenatedFields[index].FieldType | FieldType.PassedToBase, BaseOrder = order };
             }
             else
             {
@@ -470,19 +473,24 @@ public sealed class AutoConstructorGenerator : IIncrementalGenerator
                     IsNullable(parameter.Type),
                     null,
                     false,
-                    FieldType.PassedToBase));
+                    FieldType.PassedToBase,
+                    order));
             }
+
+            order++;
         }
     }
 
     private static void ExtractFieldsFromGeneratedParent(List<FieldInfo> concatenatedFields, INamedTypeSymbol symbol, int depth)
     {
+        // Base order is function of the depth, it theoretically can conflict with an order already chosen, but this would mean that a parent has more than 1000 parameters
+        int order = depth * 1000;
         foreach (FieldInfo parameter in GetFieldsFromSymbol(symbol))
         {
             int index = concatenatedFields.FindIndex(p => p.ParameterName == parameter.ParameterName && (p.Type ?? p.FallbackType) == (parameter.Type ?? parameter.FallbackType));
             if (index != -1)
             {
-                concatenatedFields[index] = concatenatedFields[index] with { FieldType = concatenatedFields[index].FieldType | FieldType.PassedToBase };
+                concatenatedFields[index] = concatenatedFields[index] with { FieldType = concatenatedFields[index].FieldType | FieldType.PassedToBase, BaseOrder = order };
             }
             else
             {
@@ -497,8 +505,11 @@ public sealed class AutoConstructorGenerator : IIncrementalGenerator
                     parameter.Nullable,
                     null,
                     false,
-                    FieldType.PassedToBase));
+                    FieldType.PassedToBase,
+                    order));
             }
+
+            order++;
         }
 
         ExtractFieldsFromParent(symbol, concatenatedFields, depth + 1);
