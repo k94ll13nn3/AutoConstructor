@@ -1,0 +1,41 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <IncludeBuildOutput>false</IncludeBuildOutput>
+    <!-- Do not include the generator as a lib dependency -->
+    <SuppressDependenciesWhenPacking>true</SuppressDependenciesWhenPacking>
+    <DevelopmentDependency>true</DevelopmentDependency>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <EnablePackageValidation>true</EnablePackageValidation>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <Authors>k94ll13nn3</Authors>
+    <NeutralLanguage>en-US</NeutralLanguage>
+    <Copyright>Copyright © k94ll13nn3</Copyright>
+    <Description>Source generator for automatic constructor generation.</Description>
+    <PackageTags>source-generator;constructor</PackageTags>
+    <PackageId>AutoConstructor</PackageId>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageIcon>logo_128x128.png</PackageIcon>
+    <PackageProjectUrl>https://github.com/k94ll13nn3/AutoConstructor</PackageProjectUrl>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageOutputPath>..\..\artifacts\</PackageOutputPath>
+    <RepositoryType>git</RepositoryType>
+    <RepositoryUrl>https://github.com/k94ll13nn3/AutoConstructor</RepositoryUrl>
+    <PackageReleaseNotes>https://github.com/k94ll13nn3/AutoConstructor/blob/main/CHANGELOG.md</PackageReleaseNotes>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\AutoConstructor.Generator\AutoConstructor.props" Pack="true" PackagePath="build\" />
+    <None Include="..\..\logo_128x128.png" Pack="true" PackagePath="" Visible="false" />
+    <None Include="..\..\README.md" Pack="true" PackagePath="" Visible="false" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Package the generator and the code fixes in the analyzer directory of the nuget package -->
+    <None Include="$(MSBuildThisFileDirectory)\..\AutoConstructor.Generator\bin\$(Configuration)\netstandard2.0\AutoConstructor.Generator.dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
+    <None Include="$(MSBuildThisFileDirectory)\..\AutoConstructor.CodeFixes\bin\$(Configuration)\netstandard2.0\AutoConstructor.CodeFixes.dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
+  </ItemGroup>
+</Project>

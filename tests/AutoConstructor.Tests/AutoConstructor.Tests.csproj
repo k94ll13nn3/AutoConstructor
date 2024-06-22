@@ -23,6 +23,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\src\AutoConstructor.CodeFixes\AutoConstructor.CodeFixes.csproj" />
     <ProjectReference Include="..\..\src\AutoConstructor.Generator\AutoConstructor.Generator.csproj" />
   </ItemGroup>
 

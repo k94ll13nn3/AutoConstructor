@@ -3,7 +3,7 @@ using Microsoft.CodeAnalysis.Testing;
 using Xunit;
 using VerifyClassWithInitializerMethod = AutoConstructor.Tests.Verifiers.CSharpCodeFixVerifier<
     AutoConstructor.Generator.Analyzers.InitializerMethodAnalyzer,
-    AutoConstructor.Generator.CodeFixes.RemoveAttributeCodeFixProvider>;
+    AutoConstructor.CodeFixes.RemoveAttributeCodeFixProvider>;
 
 namespace AutoConstructor.Tests.Analyzers;
 

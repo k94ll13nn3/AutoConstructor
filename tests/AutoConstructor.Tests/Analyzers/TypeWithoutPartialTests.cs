@@ -3,7 +3,7 @@ using Microsoft.CodeAnalysis.Testing;
 using Xunit;
 using VerifyClassWithoutPartial = AutoConstructor.Tests.Verifiers.CSharpCodeFixVerifier<
     AutoConstructor.Generator.Analyzers.TypeWithoutPartialAnalyzer,
-    AutoConstructor.Generator.CodeFixes.TypeWithoutPartialCodeFixProvider>;
+    AutoConstructor.CodeFixes.TypeWithoutPartialCodeFixProvider>;
 
 namespace AutoConstructor.Tests.Analyzers;
 
