@@ -435,33 +435,35 @@ public sealed class AutoConstructorGenerator : IIncrementalGenerator
             FieldType.Initialized);
     }
 
-    private static void ExtractFieldsFromParent(INamedTypeSymbol symbol, List<FieldInfo> concatenatedFields)
+    private static void ExtractFieldsFromParent(INamedTypeSymbol symbol, List<FieldInfo> concatenatedFields, int depth = 0)
     {
         (IMethodSymbol? constructor, INamedTypeSymbol? baseType) = symbol.GetPreferredBaseConstructorOrBaseType();
         if (constructor is not null)
         {
-            ExtractFieldsFromConstructedParent(concatenatedFields, constructor);
+            ExtractFieldsFromConstructedParent(concatenatedFields, constructor, depth);
         }
         else if (baseType is not null)
         {
-            ExtractFieldsFromGeneratedParent(concatenatedFields, baseType);
+            ExtractFieldsFromGeneratedParent(concatenatedFields, baseType, depth);
         }
     }
 
-    private static void ExtractFieldsFromConstructedParent(List<FieldInfo> concatenatedFields, IMethodSymbol constructor)
+    private static void ExtractFieldsFromConstructedParent(List<FieldInfo> concatenatedFields, IMethodSymbol constructor, int depth)
     {
         foreach (IParameterSymbol parameter in constructor.Parameters)
         {
-            int index = concatenatedFields.FindIndex(p => p.ParameterName == parameter.Name);
+            int index = concatenatedFields.FindIndex(p => p.ParameterName == parameter.Name && (p.Type ?? p.FallbackType) == parameter.Type.ToDisplayString());
             if (index != -1)
             {
                 concatenatedFields[index] = concatenatedFields[index] with { FieldType = concatenatedFields[index].FieldType | FieldType.PassedToBase };
             }
             else
             {
+                // Check if the parameter name is already taken, if so, append a string before the name
+                index = concatenatedFields.FindIndex(p => p.ParameterName == parameter.Name);
                 concatenatedFields.Add(new FieldInfo(
                     parameter.Type.ToDisplayString(),
-                    parameter.Name,
+                    (index != -1 ? $"b{depth}__" : "") + parameter.Name,
                     string.Empty,
                     string.Empty,
                     parameter.Type.ToDisplayString(),
@@ -473,20 +475,22 @@ public sealed class AutoConstructorGenerator : IIncrementalGenerator
         }
     }
 
-    private static void ExtractFieldsFromGeneratedParent(List<FieldInfo> concatenatedFields, INamedTypeSymbol symbol)
+    private static void ExtractFieldsFromGeneratedParent(List<FieldInfo> concatenatedFields, INamedTypeSymbol symbol, int depth)
     {
         foreach (FieldInfo parameter in GetFieldsFromSymbol(symbol))
         {
-            int index = concatenatedFields.FindIndex(p => p.ParameterName == parameter.ParameterName);
+            int index = concatenatedFields.FindIndex(p => p.ParameterName == parameter.ParameterName && (p.Type ?? p.FallbackType) == (parameter.Type ?? parameter.FallbackType));
             if (index != -1)
             {
                 concatenatedFields[index] = concatenatedFields[index] with { FieldType = concatenatedFields[index].FieldType | FieldType.PassedToBase };
             }
             else
             {
+                // Check if the parameter name is already taken, if so, append a string before the name
+                index = concatenatedFields.FindIndex(p => p.ParameterName == parameter.ParameterName);
                 concatenatedFields.Add(new FieldInfo(
                     parameter.Type,
-                    parameter.ParameterName,
+                    (index != -1 ? $"b{depth}__" : "") + parameter.ParameterName,
                     string.Empty,
                     string.Empty,
                     parameter.FallbackType,
@@ -497,7 +501,7 @@ public sealed class AutoConstructorGenerator : IIncrementalGenerator
             }
         }
 
-        ExtractFieldsFromParent(symbol, concatenatedFields);
+        ExtractFieldsFromParent(symbol, concatenatedFields, depth + 1);
     }
 
     private static bool IsNullable(ITypeSymbol typeSymbol)
