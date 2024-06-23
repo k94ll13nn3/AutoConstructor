@@ -233,7 +233,7 @@ namespace Test
     {
         public MotherClass(string s)
         {
-            this._s = s ?? throw new System.ArgumentNullException(nameof(s));
+            this._s = s ?? throw new global::System.ArgumentNullException(nameof(s));
         }
 
         #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor.

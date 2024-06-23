@@ -34,7 +34,7 @@ namespace Test
     {
         public Test(string service, int b0__service) : base(b0__service)
         {
-            this.service = service ?? throw new System.ArgumentNullException(nameof(service));
+            this.service = service ?? throw new global::System.ArgumentNullException(nameof(service));
         }
     }
 }
@@ -67,7 +67,7 @@ namespace Test
     {
         public Test(string service, int b0__service) : base(b0__service)
         {
-            this.service = service ?? throw new System.ArgumentNullException(nameof(service));
+            this.service = service ?? throw new global::System.ArgumentNullException(nameof(service));
         }
     }
 }
@@ -102,7 +102,7 @@ namespace Test
     [AutoConstructor]
     public partial class MiddleClass : ParentClass
     {
-        private readonly System.DateTime service;
+        private readonly global::System.DateTime service;
     }
 
     [AutoConstructor]
@@ -116,9 +116,9 @@ namespace Test
 {
     partial class Test
     {
-        public Test(string service, System.DateTime b0__service, int b1__service) : base(b0__service, b1__service)
+        public Test(string service, global::System.DateTime b0__service, int b1__service) : base(b0__service, b1__service)
         {
-            this.service = service ?? throw new System.ArgumentNullException(nameof(service));
+            this.service = service ?? throw new global::System.ArgumentNullException(nameof(service));
         }
     }
 }
@@ -128,7 +128,7 @@ namespace Test
 {
     partial class MiddleClass
     {
-        public MiddleClass(System.DateTime service, int b0__service) : base(b0__service)
+        public MiddleClass(global::System.DateTime service, int b0__service) : base(b0__service)
         {
             this.service = service;
         }
@@ -179,9 +179,9 @@ namespace Test
 {
     partial class Test
     {
-        public Test(string service, System.DateTime b0__service) : base(b0__service, service)
+        public Test(string service, global::System.DateTime b0__service) : base(b0__service, service)
         {
-            this.service = service ?? throw new System.ArgumentNullException(nameof(service));
+            this.service = service ?? throw new global::System.ArgumentNullException(nameof(service));
         }
     }
 }
@@ -191,7 +191,7 @@ namespace Test
 {
     partial class MiddleClass
     {
-        public MiddleClass(System.DateTime service, string b0__service) : base(b0__service)
+        public MiddleClass(global::System.DateTime service, string b0__service) : base(b0__service)
         {
             this.service = service;
         }
@@ -205,7 +205,7 @@ namespace Test
     {
         public ParentClass(string service)
         {
-            this.service = service ?? throw new System.ArgumentNullException(nameof(service));
+            this.service = service ?? throw new global::System.ArgumentNullException(nameof(service));
         }
     }
 }

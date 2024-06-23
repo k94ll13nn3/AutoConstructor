@@ -16,6 +16,8 @@ namespace AutoConstructor.Generator;
 [Generator(LanguageNames.CSharp)]
 public sealed class AutoConstructorGenerator : IIncrementalGenerator
 {
+    private static readonly SymbolDisplayFormat DisplayFormat = SymbolDisplayFormat.FullyQualifiedFormat
+        .WithMiscellaneousOptions(SymbolDisplayFormat.FullyQualifiedFormat.MiscellaneousOptions | SymbolDisplayMiscellaneousOptions.IncludeNullableReferenceTypeModifier);
     internal static readonly string[] ConstructorAccessibilities = ["public", "private", "internal", "protected", "protected internal", "private protected"];
     internal static readonly string GeneratorVersion = typeof(AutoConstructorGenerator).Assembly.GetName().Version!.ToString();
 
@@ -318,7 +320,7 @@ public sealed class AutoConstructorGenerator : IIncrementalGenerator
                 writer.Write($"this.{field.FieldName.SanitizeReservedKeyword()} = {field.Initializer.SanitizeReservedKeyword()}");
                 if (options.EmitNullChecks && field.EmitArgumentNullException)
                 {
-                    writer.Write($" ?? throw new System.ArgumentNullException(nameof({field.SanitizedParameterName}))");
+                    writer.Write($" ?? throw new global::System.ArgumentNullException(nameof({field.SanitizedParameterName}))");
                 }
                 writer.WriteLine(";");
             }
@@ -424,11 +426,11 @@ public sealed class AutoConstructorGenerator : IIncrementalGenerator
         }
 
         return new FieldInfo(
-            injectedType?.ToDisplayString(),
+            injectedType?.ToDisplayString(DisplayFormat),
             parameterName,
             fieldSymbol.AssociatedSymbol?.Name ?? fieldSymbol.Name,
             initializer,
-            type.ToDisplayString(),
+            type.ToDisplayString(DisplayFormat),
             IsNullable(type),
             summaryText,
             type.IsReferenceType && type.NullableAnnotation != NullableAnnotation.Annotated,
@@ -455,7 +457,8 @@ public sealed class AutoConstructorGenerator : IIncrementalGenerator
         int order = depth * 1000;
         foreach (IParameterSymbol parameter in constructor.Parameters)
         {
-            int index = concatenatedFields.FindIndex(p => p.ParameterName == parameter.Name && (p.Type ?? p.FallbackType) == parameter.Type.ToDisplayString());
+            string formatedType = parameter.Type.ToDisplayString(DisplayFormat);
+            int index = concatenatedFields.FindIndex(p => p.ParameterName == parameter.Name && (p.Type ?? p.FallbackType) == formatedType);
             if (index != -1)
             {
                 concatenatedFields[index] = concatenatedFields[index] with { FieldType = concatenatedFields[index].FieldType | FieldType.PassedToBase, BaseOrder = order };
@@ -465,11 +468,11 @@ public sealed class AutoConstructorGenerator : IIncrementalGenerator
                 // Check if the parameter name is already taken, if so, append a string before the name
                 index = concatenatedFields.FindIndex(p => p.ParameterName == parameter.Name);
                 concatenatedFields.Add(new FieldInfo(
-                    parameter.Type.ToDisplayString(),
+                    formatedType,
                     (index != -1 ? $"b{depth}__" : "") + parameter.Name,
                     string.Empty,
                     string.Empty,
-                    parameter.Type.ToDisplayString(),
+                    formatedType,
                     IsNullable(parameter.Type),
                     null,
                     false,

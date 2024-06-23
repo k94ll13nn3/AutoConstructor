@@ -77,9 +77,9 @@ namespace Test
 {
     partial class Test
     {
-        public Test(System.Guid guid)
+        public Test(global::System.Guid guid)
         {
-            this._guidString = guid.ToString() ?? throw new System.ArgumentNullException(nameof(guid));
+            this._guidString = guid.ToString() ?? throw new global::System.ArgumentNullException(nameof(guid));
         }
     }
 }
@@ -99,9 +99,9 @@ namespace Test
 {
     partial class Test
     {
-        public Test(System.Guid guid)
+        public Test(global::System.Guid guid)
         {
-            this._guidString = guid.ToString() ?? throw new System.ArgumentNullException(nameof(guid));
+            this._guidString = guid.ToString() ?? throw new global::System.ArgumentNullException(nameof(guid));
         }
     }
 }
@@ -123,7 +123,7 @@ namespace Test
     {
         public Test(string guid)
         {
-            this._guidString = guid ?? throw new System.ArgumentNullException(nameof(guid));
+            this._guidString = guid ?? throw new global::System.ArgumentNullException(nameof(guid));
         }
     }
 }
@@ -144,10 +144,10 @@ namespace Test
 {
     partial class Test
     {
-        public Test(System.Guid guid)
+        public Test(global::System.Guid guid)
         {
             this._guid = guid;
-            this._guidString = guid.ToString() ?? throw new System.ArgumentNullException(nameof(guid));
+            this._guidString = guid.ToString() ?? throw new global::System.ArgumentNullException(nameof(guid));
         }
     }
 }
@@ -169,7 +169,7 @@ namespace Test
     {
         public Test(string guid)
         {
-            this._guidString = guid.ToString() ?? throw new System.ArgumentNullException(nameof(guid));
+            this._guidString = guid.ToString() ?? throw new global::System.ArgumentNullException(nameof(guid));
         }
     }
 }
@@ -189,9 +189,9 @@ namespace Test
 {
     partial class Test
     {
-        public Test(System.Guid guid)
+        public Test(global::System.Guid guid)
         {
-            this._guid = guid.ToString() ?? throw new System.ArgumentNullException(nameof(guid));
+            this._guid = guid.ToString() ?? throw new global::System.ArgumentNullException(nameof(guid));
         }
     }
 }
@@ -213,7 +213,7 @@ namespace Test
     {
         public Test(string guid)
         {
-            this._guidString = guid ?? throw new System.ArgumentNullException(nameof(guid));
+            this._guidString = guid ?? throw new global::System.ArgumentNullException(nameof(guid));
         }
     }
 }
@@ -235,7 +235,7 @@ namespace Test
     {
         public Test(string guid)
         {
-            this._guidString = guid ?? throw new System.ArgumentNullException(nameof(guid));
+            this._guidString = guid ?? throw new global::System.ArgumentNullException(nameof(guid));
         }
     }
 }
@@ -399,7 +399,7 @@ namespace Test
     {{
         public Test(string t)
         {{
-            this._t = t{(disableNullChecks is false ? " ?? throw new System.ArgumentNullException(nameof(t))" : "")};
+            this._t = t{(disableNullChecks is false ? " ?? throw new global::System.ArgumentNullException(nameof(t))" : "")};
         }}
     }}
 }}
@@ -430,7 +430,7 @@ namespace Test
     {{
         public Test(string t)
         {{
-            this._t = t{(generateNullChecks is true ? " ?? throw new System.ArgumentNullException(nameof(t))" : "")};
+            this._t = t{(generateNullChecks is true ? " ?? throw new global::System.ArgumentNullException(nameof(t))" : "")};
         }}
     }}
 }}
@@ -498,8 +498,8 @@ namespace Test
     {
         public Test(string t1, string t2)
         {
-            this._t1 = t1 ?? throw new System.ArgumentNullException(nameof(t1));
-            this._t2 = t2 ?? throw new System.ArgumentNullException(nameof(t2));
+            this._t1 = t1 ?? throw new global::System.ArgumentNullException(nameof(t1));
+            this._t2 = t2 ?? throw new global::System.ArgumentNullException(nameof(t2));
         }
     }
 }
@@ -519,8 +519,8 @@ namespace Test
         /// <param name="t2">t2</param>
         public Test(string t1, string t2)
         {
-            this._t1 = t1 ?? throw new System.ArgumentNullException(nameof(t1));
-            this._t2 = t2 ?? throw new System.ArgumentNullException(nameof(t2));
+            this._t1 = t1 ?? throw new global::System.ArgumentNullException(nameof(t1));
+            this._t2 = t2 ?? throw new global::System.ArgumentNullException(nameof(t2));
         }
     }
 }
@@ -573,8 +573,8 @@ namespace Test
         /// <param name="t2">t2</param>
         public Test(string t1, string t2)
         {
-            this._t1 = t1 ?? throw new System.ArgumentNullException(nameof(t1));
-            this._t2 = t2 ?? throw new System.ArgumentNullException(nameof(t2));
+            this._t1 = t1 ?? throw new global::System.ArgumentNullException(nameof(t1));
+            this._t2 = t2 ?? throw new global::System.ArgumentNullException(nameof(t2));
         }
     }
 }
@@ -711,14 +711,14 @@ namespace Test
         public Test(string? t1, string t2, int d1, int? d2)
         {
             this._t1 = t1;
-            this._t2 = t2 ?? throw new System.ArgumentNullException(nameof(t2));
+            this._t2 = t2 ?? throw new global::System.ArgumentNullException(nameof(t2));
             this._d1 = d1;
             this._d2 = d2;
         }
     }
 }
 ")]
-    [InlineData(@"using System.Threading.Tasks;namespace Test
+    [InlineData(@"using global::System.Threading.Tasks;namespace Test
 {
     [AutoConstructor]
     internal partial class Test
@@ -730,14 +730,14 @@ namespace Test
 {
     partial class Test
     {
-        public Test(System.Threading.Tasks.Task<object?> t1)
+        public Test(global::System.Threading.Tasks.Task<object?> t1)
         {
-            this._t1 = t1 ?? throw new System.ArgumentNullException(nameof(t1));
+            this._t1 = t1 ?? throw new global::System.ArgumentNullException(nameof(t1));
         }
     }
 }
 ")]
-    [InlineData(@"using System.Threading.Tasks;namespace Test
+    [InlineData(@"using global::System.Threading.Tasks;namespace Test
 {
     [AutoConstructor]
     internal partial class Test
@@ -749,14 +749,14 @@ namespace Test
 {
     partial class Test
     {
-        public Test(System.Threading.Tasks.Task<System.Threading.Tasks.Task<object?>> t1)
+        public Test(global::System.Threading.Tasks.Task<global::System.Threading.Tasks.Task<object?>> t1)
         {
-            this._t1 = t1 ?? throw new System.ArgumentNullException(nameof(t1));
+            this._t1 = t1 ?? throw new global::System.ArgumentNullException(nameof(t1));
         }
     }
 }
 ")]
-    [InlineData(@"using System.Threading.Tasks;namespace Test
+    [InlineData(@"using global::System.Threading.Tasks;namespace Test
 {
     [AutoConstructor]
     internal partial class Test : TestBase
@@ -768,9 +768,9 @@ namespace Test
     {
         public readonly Task<Task<object?>> _t1;
 
-        public TestBase(System.Threading.Tasks.Task<System.Threading.Tasks.Task<object?>> t1)
+        public TestBase(global::System.Threading.Tasks.Task<global::System.Threading.Tasks.Task<object?>> t1)
         {
-            this._t1 = t1 ?? throw new System.ArgumentNullException(nameof(t1));
+            this._t1 = t1 ?? throw new global::System.ArgumentNullException(nameof(t1));
         }
     }
 }", @"#nullable enable
@@ -778,7 +778,7 @@ namespace Test
 {
     partial class Test
     {
-        public Test(System.Threading.Tasks.Task<System.Threading.Tasks.Task<object?>> t1) : base(t1)
+        public Test(global::System.Threading.Tasks.Task<global::System.Threading.Tasks.Task<object?>> t1) : base(t1)
         {
         }
     }
@@ -808,7 +808,7 @@ namespace Test
     {
         public Test(string t)
         {
-            this._t = t ?? throw new System.ArgumentNullException(nameof(t));
+            this._t = t ?? throw new global::System.ArgumentNullException(nameof(t));
         }
     }
 }
@@ -1028,7 +1028,7 @@ namespace Test
             this.InjectedWithDocumentation = injectedWithDocumentation;
             this.InjectedBecauseExplicitInjection = injectedBecauseExplicitInjection;
             this.AlsoInjectedEvenWhenMissingAttribute = alsoInjectedEvenWhenMissingAttribute;
-            this.InjectedWithoutCreatingAParam = injected.ToString() ?? throw new System.ArgumentNullException(nameof(injected));
+            this.InjectedWithoutCreatingAParam = injected.ToString() ?? throw new global::System.ArgumentNullException(nameof(injected));
         }
     }
 }
@@ -1057,8 +1057,8 @@ namespace Test
     {
         public Test(string name, string lastName)
         {
-            this.Name = name ?? throw new System.ArgumentNullException(nameof(name));
-            this.LastName = lastName ?? throw new System.ArgumentNullException(nameof(lastName));
+            this.Name = name ?? throw new global::System.ArgumentNullException(nameof(name));
+            this.LastName = lastName ?? throw new global::System.ArgumentNullException(nameof(lastName));
         }
     }
 }
@@ -1283,7 +1283,7 @@ namespace Test
     {
         public Test(T generic)
         {
-            this._generic = generic ?? throw new System.ArgumentNullException(nameof(generic));
+            this._generic = generic ?? throw new global::System.ArgumentNullException(nameof(generic));
         }
     }
 }
@@ -1354,9 +1354,9 @@ namespace Test
 {
     partial class Test<T>
     {
-        public Test(Test.IThing<T> generic)
+        public Test(global::Test.IThing<T> generic)
         {
-            this._generic = generic ?? throw new System.ArgumentNullException(nameof(generic));
+            this._generic = generic ?? throw new global::System.ArgumentNullException(nameof(generic));
         }
     }
 }
@@ -1424,7 +1424,7 @@ namespace Test
 {
     partial class Test
     {
-        public Test(System.Guid guid, int t) : base(guid, t)
+        public Test(global::System.Guid guid, int t) : base(guid, t)
         {
             this._guid2 = guid;
         }
@@ -1451,7 +1451,7 @@ namespace Test
 {
     partial class Test
     {
-        public Test(System.Guid guid, int t) : base(t)
+        public Test(global::System.Guid guid, int t) : base(t)
         {
             this._guid = guid;
         }
@@ -1486,7 +1486,7 @@ namespace Test
 {
     partial class Test
     {
-        public Test(System.Guid guid, System.DateTime date, int t) : base(date, t)
+        public Test(global::System.Guid guid, global::System.DateTime date, int t) : base(date, t)
         {
             this._guid = guid;
         }
@@ -1632,7 +1632,7 @@ namespace Test
     {
         public MotherClass(string s)
         {
-            this._s = s ?? throw new System.ArgumentNullException(nameof(s));
+            this._s = s ?? throw new global::System.ArgumentNullException(nameof(s));
         }
     }
 }
@@ -1656,7 +1656,7 @@ namespace Test
         private readonly string _s;
         public Class1(string s)
         {
-            this._s = s ?? throw new System.ArgumentNullException(nameof(s));
+            this._s = s ?? throw new global::System.ArgumentNullException(nameof(s));
         }
     }
     [AutoConstructor]
@@ -1808,7 +1808,7 @@ namespace Test
     {
         public Test(object someDependency)
         {
-            this._someDependency = someDependency ?? throw new System.ArgumentNullException(nameof(someDependency));
+            this._someDependency = someDependency ?? throw new global::System.ArgumentNullException(nameof(someDependency));
         }
     }
 }
@@ -1958,7 +1958,7 @@ namespace Test
             this._if = @if;
             this._public = @public;
             this._true = @true;
-            this._myStruct = @struct ?? throw new System.ArgumentNullException(nameof(@struct));
+            this._myStruct = @struct ?? throw new global::System.ArgumentNullException(nameof(@struct));
             this.@class = @class;
         }
     }
@@ -1995,9 +1995,9 @@ namespace Test
         public Test(string t)
         {
             this._a = t.Length;
-            this._b = t ?? throw new System.ArgumentNullException(nameof(t));
-            this._c = t ?? throw new System.ArgumentNullException(nameof(t));
-            this._d = t ?? throw new System.ArgumentNullException(nameof(t));
+            this._b = t ?? throw new global::System.ArgumentNullException(nameof(t));
+            this._c = t ?? throw new global::System.ArgumentNullException(nameof(t));
+            this._d = t ?? throw new global::System.ArgumentNullException(nameof(t));
         }
     }
 }
@@ -2455,7 +2455,7 @@ namespace Test
     {
         public Test(string b, int a) : base(a, b)
         {
-            this.b = b ?? throw new System.ArgumentNullException(nameof(b));
+            this.b = b ?? throw new global::System.ArgumentNullException(nameof(b));
             this.a = a;
         }
     }
@@ -2492,7 +2492,7 @@ namespace Test
     {
         public Test(string b, int a) : base(a, b)
         {
-            this.b = b ?? throw new System.ArgumentNullException(nameof(b));
+            this.b = b ?? throw new global::System.ArgumentNullException(nameof(b));
             this.a = a;
         }
     }
@@ -2506,7 +2506,7 @@ namespace Test
         public ParentClass(int a, string b)
         {
             this.a = a;
-            this.b = b ?? throw new System.ArgumentNullException(nameof(b));
+            this.b = b ?? throw new global::System.ArgumentNullException(nameof(b));
         }
     }
 }
