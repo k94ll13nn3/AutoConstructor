@@ -124,9 +124,11 @@ public sealed class AutoConstructorGenerator : IIncrementalGenerator
             return null;
         }
 
+        AttributeData? attributeData = symbol.GetAttribute(Source.AttributeFullName);
         List<FieldInfo> concatenatedFields = GetFieldsFromSymbol(symbol);
 
-        ExtractFieldsFromParent(symbol, concatenatedFields);
+        bool matchBaseParameterOnName = attributeData.GetOptionalBoolParameterValue("matchBaseParameterOnName");
+        ExtractFieldsFromParent(symbol, concatenatedFields, matchBaseParameterOnName);
 
         EquatableArray<FieldInfo> fields = concatenatedFields.ToImmutableArray();
 
@@ -154,7 +156,6 @@ public sealed class AutoConstructorGenerator : IIncrementalGenerator
             && symbol.Constructors.Any(d => !d.IsStatic && d.Parameters.Length == 0);
 
         string? accessibility = null;
-        AttributeData? attributeData = symbol.GetAttribute(Source.AttributeFullName);
         if (attributeData?.AttributeConstructor?.Parameters.Length > 0
             && attributeData.GetParameterValue<string>("accessibility") is string { Length: > 0 } accessibilityValue
             && ConstructorAccessibilities.Contains(accessibilityValue))
@@ -438,30 +439,35 @@ public sealed class AutoConstructorGenerator : IIncrementalGenerator
             null);
     }
 
-    private static void ExtractFieldsFromParent(INamedTypeSymbol symbol, List<FieldInfo> concatenatedFields, int depth = 0)
+    private static void ExtractFieldsFromParent(INamedTypeSymbol symbol, List<FieldInfo> concatenatedFields, bool matchBaseParameterOnName, int depth = 0)
     {
         (IMethodSymbol? constructor, INamedTypeSymbol? baseType) = symbol.GetPreferredBaseConstructorOrBaseType();
         if (constructor is not null)
         {
-            ExtractFieldsFromConstructedParent(concatenatedFields, constructor, depth);
+            ExtractFieldsFromConstructedParent(concatenatedFields, constructor, matchBaseParameterOnName, depth);
         }
         else if (baseType is not null)
         {
-            ExtractFieldsFromGeneratedParent(concatenatedFields, baseType, depth);
+            ExtractFieldsFromGeneratedParent(concatenatedFields, baseType, matchBaseParameterOnName, depth);
         }
     }
 
-    private static void ExtractFieldsFromConstructedParent(List<FieldInfo> concatenatedFields, IMethodSymbol constructor, int depth)
+    private static void ExtractFieldsFromConstructedParent(List<FieldInfo> concatenatedFields, IMethodSymbol constructor, bool matchBaseParameterOnName, int depth)
     {
         // Base order is function of the depth, it theoretically can conflict with an order already chosen, but this would mean that a parent has more than 1000 parameters
         int order = depth * 1000;
         foreach (IParameterSymbol parameter in constructor.Parameters)
         {
             string formatedType = parameter.Type.ToDisplayString(DisplayFormat);
-            int index = concatenatedFields.FindIndex(p => p.ParameterName == parameter.Name && (p.Type ?? p.FallbackType) == formatedType);
+            int index = concatenatedFields.FindIndex(p => p.ParameterName == parameter.Name
+                && (matchBaseParameterOnName || (p.Type ?? p.FallbackType) == formatedType));
             if (index != -1)
             {
-                concatenatedFields[index] = concatenatedFields[index] with { FieldType = concatenatedFields[index].FieldType | FieldType.PassedToBase, BaseOrder = order };
+                concatenatedFields[index] = concatenatedFields[index] with
+                {
+                    FieldType = concatenatedFields[index].FieldType | FieldType.PassedToBase,
+                    BaseOrder = order
+                };
             }
             else
             {
@@ -484,16 +490,21 @@ public sealed class AutoConstructorGenerator : IIncrementalGenerator
         }
     }
 
-    private static void ExtractFieldsFromGeneratedParent(List<FieldInfo> concatenatedFields, INamedTypeSymbol symbol, int depth)
+    private static void ExtractFieldsFromGeneratedParent(List<FieldInfo> concatenatedFields, INamedTypeSymbol symbol, bool matchBaseParameterOnName, int depth)
     {
         // Base order is function of the depth, it theoretically can conflict with an order already chosen, but this would mean that a parent has more than 1000 parameters
         int order = depth * 1000;
         foreach (FieldInfo parameter in GetFieldsFromSymbol(symbol))
         {
-            int index = concatenatedFields.FindIndex(p => p.ParameterName == parameter.ParameterName && (p.Type ?? p.FallbackType) == (parameter.Type ?? parameter.FallbackType));
+            int index = concatenatedFields.FindIndex(p => p.ParameterName == parameter.ParameterName
+                && (matchBaseParameterOnName || (p.Type ?? p.FallbackType) == (parameter.Type ?? parameter.FallbackType)));
             if (index != -1)
             {
-                concatenatedFields[index] = concatenatedFields[index] with { FieldType = concatenatedFields[index].FieldType | FieldType.PassedToBase, BaseOrder = order };
+                concatenatedFields[index] = concatenatedFields[index] with
+                {
+                    FieldType = concatenatedFields[index].FieldType | FieldType.PassedToBase,
+                    BaseOrder = order
+                };
             }
             else
             {
@@ -515,7 +526,7 @@ public sealed class AutoConstructorGenerator : IIncrementalGenerator
             order++;
         }
 
-        ExtractFieldsFromParent(symbol, concatenatedFields, depth + 1);
+        ExtractFieldsFromParent(symbol, concatenatedFields, matchBaseParameterOnName, depth + 1);
     }
 
     private static bool IsNullable(ITypeSymbol typeSymbol)

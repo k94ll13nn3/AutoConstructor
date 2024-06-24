@@ -175,6 +175,96 @@ partial class Test
 }
 ```
 
+### Base constructor parameter matching
+
+When inheriting a class, a call to the base constructor will be generated. By default, any parameter with the same name and the same type in both the parent and the
+child class will be matched together.
+
+```csharp
+// This (same name and type)
+public class ParentClass
+{
+    private readonly int value;
+
+    public ParentClass(int value)
+    {
+        this.value = value;
+    }
+}
+
+[AutoConstructor]
+public partial class Test : ParentClass
+{
+    private readonly int value;
+}
+
+// Generates
+partial class Test
+{
+    public Test(int service) : base(service)
+    {
+        this.service = service;
+    }
+}
+
+// This (same name but not same type)
+public class ParentClass
+{
+    private readonly long value;
+
+    public ParentClass(long value)
+    {
+        this.value = value;
+    }
+}
+
+[AutoConstructor]
+public partial class Test : ParentClass
+{
+    private readonly int value;
+}
+
+// Generates
+partial class Test
+{
+    public Test(int service, long b0__service) : base(b0__service)
+    {
+        this.service = service;
+    }
+}
+```
+
+If wanted, the matching on the type can be disable by setting the parameter `matchBaseParameterOnName` on `AutoConstructorAttribute` as `true`.
+⚠️ This can lead to invalid code, since the type is no longer checked, anything can be used as a parameter with the same name. Use this only when necessary.
+
+```csharp
+// This (same name but not same type with matchBaseParameterOnName true)
+public class ParentClass
+{
+    private readonly long value;
+
+    public ParentClass(long value)
+    {
+        this.value = value;
+    }
+}
+
+[AutoConstructor(matchBaseParameterOnName: true)]
+public partial class Test : ParentClass
+{
+    private readonly int value;
+}
+
+// Generates
+partial class Test
+{
+    public Test(int service) : base(service)
+    {
+        this.service = service;
+    }
+}
+```
+
 ### Properties injection
 
 Get-only properties (`public int Property { get; }`) are injected by the generator by default.

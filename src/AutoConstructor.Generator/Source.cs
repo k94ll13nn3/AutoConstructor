@@ -37,12 +37,14 @@ public static class Source
             /// <param name="addDefaultBaseAttribute">Configure automatic injection of <c>AutoConstructorDefaultBaseAttribute</c></param>
             /// <param name="disableThisCall">Disable call to this when it would have been called</param>
             /// <param name="addParameterless">Generate a parameterless constructor too.</param>
-            public {{AttributeFullName}}(string accessibility = null, bool addDefaultBaseAttribute = false, bool disableThisCall = false, bool addParameterless = false)
+            /// <param name="matchBaseParameterOnName">If true, parameters that have the same name in base and child constructors will be matched together (when false, type must also match)</param>
+            public {{AttributeFullName}}(string accessibility = null, bool addDefaultBaseAttribute = false, bool disableThisCall = false, bool addParameterless = false, bool matchBaseParameterOnName = false)
             {
                 Accessibility = accessibility;
                 AddDefaultBaseAttribute = addDefaultBaseAttribute;
                 DisableThisCall = disableThisCall;
                 AddParameterless = addParameterless;
+                MatchBaseParameterOnName = matchBaseParameterOnName;
             }
 
             public string Accessibility { get; }
@@ -52,6 +54,8 @@ public static class Source
             public bool DisableThisCall { get; }
 
             public bool AddParameterless { get; }
+
+            public bool MatchBaseParameterOnName { get; }
         }
 
         """;

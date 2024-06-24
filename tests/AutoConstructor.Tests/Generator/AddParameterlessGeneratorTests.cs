@@ -1,7 +1,7 @@
 using Xunit;
 using VerifySourceGenerator = AutoConstructor.Tests.Verifiers.CSharpSourceGeneratorVerifier<AutoConstructor.Generator.AutoConstructorGenerator>;
 
-namespace AutoConstructor.Tests;
+namespace AutoConstructor.Tests.Generator;
 
 public class AddParameterlessGeneratorTests
 {
