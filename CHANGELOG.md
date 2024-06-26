@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [5.5.0] - 2024-06-26
+
+### Added
+
+- Add new argument to `AutoConstructorAttribute` (`matchBaseParameterOnName`) that controls whether constructor parameters from base class are matched on type and name or only name
+
+### Changed
+
+- Generated code now include full qualifier for types
+
+### Issues
+
+- [#123](https://github.com/k94ll13nn3/AutoConstructor/issues/123): Bug: base and child class with the same parameter name
+
 ## [5.4.1] - 2024-06-22
 
 ### Changed
@@ -96,7 +110,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Added
 
-- Add new argument to `AutoConstructorAttribute` for specifiying constructor accessibility
+- Add new argument to `AutoConstructorAttribute` for specifying constructor accessibility
 - Add `AutoConstructorInitializer` used to add a call to a method at the end of the constructor
 
 ### Changed
@@ -138,7 +152,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Changed
 
-- Add call to parameterless constructor if one is defined
+- Add call to parameterless constructor if one is defined 
 
 ### Issues
 
@@ -358,6 +372,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 Initial release
 
+[5.5.0]: https://github.com/k94ll13nn3/AutoConstructor/compare/v5.4.1...v5.5.0
 [5.4.1]: https://github.com/k94ll13nn3/AutoConstructor/compare/v5.4.0...v5.4.1
 [5.4.0]: https://github.com/k94ll13nn3/AutoConstructor/compare/v5.3.0...v5.4.0
 [5.3.0]: https://github.com/k94ll13nn3/AutoConstructor/compare/v5.2.1...v5.3.0
