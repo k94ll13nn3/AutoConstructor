@@ -5,7 +5,7 @@
   </PropertyGroup>
   <ItemGroup>
     <GlobalPackageReference Include="Roslynator.Analyzers" Version="4.12.4" />
-    <GlobalPackageReference Include="SonarAnalyzer.CSharp" Version="9.28.0.94264" />
+    <GlobalPackageReference Include="SonarAnalyzer.CSharp" Version="9.30.0.95878" />
     <GlobalPackageReference Include="MinVer" Version="5.0.0" />
   </ItemGroup>
   <ItemGroup>
