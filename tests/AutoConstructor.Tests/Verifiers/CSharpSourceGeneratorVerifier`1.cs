@@ -12,6 +12,30 @@ namespace AutoConstructor.Tests.Verifiers;
 internal static partial class CSharpSourceGeneratorVerifier<TSourceGenerator>
     where TSourceGenerator : IIncrementalGenerator, new()
 {
+    private const string DefaultCompilerAttributes = """
+using System.ComponentModel;
+
+namespace System.Diagnostics.CodeAnalysis
+{
+    [System.AttributeUsage(System.AttributeTargets.Constructor, AllowMultiple = false, Inherited = false)]
+    public sealed class SetsRequiredMembersAttribute : Attribute
+    {
+    }
+}
+
+namespace System.Runtime.CompilerServices
+{
+    public class RequiredMemberAttribute : Attribute { }
+    public class CompilerFeatureRequiredAttribute : Attribute
+    {
+        public CompilerFeatureRequiredAttribute(string name) { }
+    }
+
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    internal class IsExternalInit { }
+}
+""";
+
     public static Task RunAsync(
         string code,
         string generated = "",
@@ -38,7 +62,7 @@ internal static partial class CSharpSourceGeneratorVerifier<TSourceGenerator>
         {
             TestState =
                 {
-                    Sources = { code },
+                    Sources = { code, DefaultCompilerAttributes },
                     GeneratedSources =
                     {
                         (typeof(AutoConstructorGenerator), $"{Source.AttributeFullName}.cs", SourceText.From(Source.AttributeText, Encoding.UTF8)),

@@ -1007,6 +1007,12 @@ namespace Test
 
         [field: AutoConstructorInject(initializer: "injected.ToString()", injectedType: typeof(int), parameterName: "injected")]
         public string InjectedWithoutCreatingAParam { get; }
+
+        public required string InjectedBecauseRequired { get; set; }
+
+        public string NotInjectedBecauseBasicProperty { get; set; }
+
+        public string InjectedBecauseInit { get; init; }
     }
 }
 """;
@@ -1022,13 +1028,17 @@ namespace Test
         /// <param name="injectedWithDocumentation">Some property.</param>
         /// <param name="injectedBecauseExplicitInjection">injectedBecauseExplicitInjection</param>
         /// <param name="alsoInjectedEvenWhenMissingAttribute">alsoInjectedEvenWhenMissingAttribute</param>
-        public Test(int injected, int injectedWithDocumentation, int injectedBecauseExplicitInjection, int alsoInjectedEvenWhenMissingAttribute)
+        /// <param name="injectedBecauseRequired">injectedBecauseRequired</param>
+        /// <param name="injectedBecauseInit">injectedBecauseInit</param>
+        public Test(int injected, int injectedWithDocumentation, int injectedBecauseExplicitInjection, int alsoInjectedEvenWhenMissingAttribute, string injectedBecauseRequired, string injectedBecauseInit)
         {
             this.Injected = injected;
             this.InjectedWithDocumentation = injectedWithDocumentation;
             this.InjectedBecauseExplicitInjection = injectedBecauseExplicitInjection;
             this.AlsoInjectedEvenWhenMissingAttribute = alsoInjectedEvenWhenMissingAttribute;
             this.InjectedWithoutCreatingAParam = injected.ToString() ?? throw new global::System.ArgumentNullException(nameof(injected));
+            this.InjectedBecauseRequired = injectedBecauseRequired ?? throw new global::System.ArgumentNullException(nameof(injectedBecauseRequired));
+            this.InjectedBecauseInit = injectedBecauseInit ?? throw new global::System.ArgumentNullException(nameof(injectedBecauseInit));    
         }
     }
 }

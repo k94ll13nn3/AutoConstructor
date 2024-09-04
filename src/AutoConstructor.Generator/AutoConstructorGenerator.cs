@@ -375,7 +375,7 @@ public sealed class AutoConstructorGenerator : IIncrementalGenerator
         return symbol.GetMembers().OfType<IFieldSymbol>()
             .Where(x => x.CanBeInjected()
                 && !x.IsStatic
-                && (x.IsReadOnly || IsPropertyWithExplicitInjection(x))
+                && (x.IsReadOnly || IsPropertyWithExplicitInjection(x) || IsRequiredProperty(x))
                 && !x.IsInitialized()
                 && !x.HasAttribute(Source.IgnoreAttributeFullName))
             .Select(GetFieldInfo)
@@ -384,6 +384,11 @@ public sealed class AutoConstructorGenerator : IIncrementalGenerator
         static bool IsPropertyWithExplicitInjection(IFieldSymbol x)
         {
             return x.AssociatedSymbol is not null && x.HasAttribute(Source.InjectAttributeFullName);
+        }
+
+        static bool IsRequiredProperty(IFieldSymbol x)
+        {
+            return x.AssociatedSymbol is IPropertySymbol { IsRequired: true };
         }
     }
 
@@ -458,9 +463,9 @@ public sealed class AutoConstructorGenerator : IIncrementalGenerator
         int order = depth * 1000;
         foreach (IParameterSymbol parameter in constructor.Parameters)
         {
-            string formatedType = parameter.Type.ToDisplayString(DisplayFormat);
+            string formattedType = parameter.Type.ToDisplayString(DisplayFormat);
             int index = concatenatedFields.FindIndex(p => p.ParameterName == parameter.Name
-                && (matchBaseParameterOnName || (p.Type ?? p.FallbackType) == formatedType));
+                && (matchBaseParameterOnName || (p.Type ?? p.FallbackType) == formattedType));
             if (index != -1)
             {
                 concatenatedFields[index] = concatenatedFields[index] with
@@ -474,11 +479,11 @@ public sealed class AutoConstructorGenerator : IIncrementalGenerator
                 // Check if the parameter name is already taken, if so, append a string before the name
                 index = concatenatedFields.FindIndex(p => p.ParameterName == parameter.Name);
                 concatenatedFields.Add(new FieldInfo(
-                    formatedType,
+                    formattedType,
                     (index != -1 ? $"b{depth}__" : "") + parameter.Name,
                     string.Empty,
                     string.Empty,
-                    formatedType,
+                    formattedType,
                     IsNullable(parameter.Type),
                     null,
                     false,
