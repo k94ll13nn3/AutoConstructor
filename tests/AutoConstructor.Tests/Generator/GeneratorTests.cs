@@ -1038,7 +1038,7 @@ namespace Test
             this.AlsoInjectedEvenWhenMissingAttribute = alsoInjectedEvenWhenMissingAttribute;
             this.InjectedWithoutCreatingAParam = injected.ToString() ?? throw new global::System.ArgumentNullException(nameof(injected));
             this.InjectedBecauseRequired = injectedBecauseRequired ?? throw new global::System.ArgumentNullException(nameof(injectedBecauseRequired));
-            this.InjectedBecauseInit = injectedBecauseInit ?? throw new global::System.ArgumentNullException(nameof(injectedBecauseInit));    
+            this.InjectedBecauseInit = injectedBecauseInit ?? throw new global::System.ArgumentNullException(nameof(injectedBecauseInit));
         }
     }
 }
