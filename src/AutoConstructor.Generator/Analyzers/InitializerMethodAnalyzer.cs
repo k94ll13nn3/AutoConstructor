@@ -55,7 +55,7 @@ public sealed class InitializerMethodAnalyzer : DiagnosticAnalyzer
         }
     }
 
-    private void AnalyzeInitializerMethod(SymbolAnalysisContext context)
+    private static void AnalyzeInitializerMethod(SymbolAnalysisContext context)
     {
         var symbol = (IMethodSymbol)context.Symbol;
 
