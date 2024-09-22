@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [5.6.0] - 2024-09-22
+
+### Changed
+
+- Add support for required and init properties
+
 ## [5.5.0] - 2024-06-26
 
 ### Added
@@ -372,6 +378,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 Initial release
 
+[5.6.0]: https://github.com/k94ll13nn3/AutoConstructor/compare/v5.5.0...v5.6.0
 [5.5.0]: https://github.com/k94ll13nn3/AutoConstructor/compare/v5.4.1...v5.5.0
 [5.4.1]: https://github.com/k94ll13nn3/AutoConstructor/compare/v5.4.0...v5.4.1
 [5.4.0]: https://github.com/k94ll13nn3/AutoConstructor/compare/v5.3.0...v5.4.0
