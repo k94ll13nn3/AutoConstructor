@@ -46,7 +46,7 @@ namespace System.Runtime.CompilerServices
         string? additionalProjectsSource = null,
         bool runWithNullChecks = true)
     {
-        return RunAsync(code, new[] { (generated, generatedName) }, nullable, diagnostics, configFileContent, additionalProjectsSource, runWithNullChecks);
+        return RunAsync(code, [(generated, generatedName)], nullable, diagnostics, configFileContent, additionalProjectsSource, runWithNullChecks);
     }
 
     public static async Task RunAsync(
