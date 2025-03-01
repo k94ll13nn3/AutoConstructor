@@ -4,7 +4,7 @@
     <CentralPackageTransitivePinningEnabled>false</CentralPackageTransitivePinningEnabled>
   </PropertyGroup>
   <ItemGroup>
-    <GlobalPackageReference Include="Roslynator.Analyzers" Version="4.12.11" />
+    <GlobalPackageReference Include="Roslynator.Analyzers" Version="4.13.1" />
     <GlobalPackageReference Include="SonarAnalyzer.CSharp" Version="10.7.0.110445" />
     <GlobalPackageReference Include="MinVer" Version="6.0.0" />
   </ItemGroup>
