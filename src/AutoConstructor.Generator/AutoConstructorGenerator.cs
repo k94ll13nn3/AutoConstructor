@@ -134,11 +134,11 @@ public sealed class AutoConstructorGenerator : IIncrementalGenerator
 
         foreach (IGrouping<string, FieldInfo> fieldGroup in fields.GroupBy(x => x.ParameterName))
         {
-            string?[] types = fieldGroup.Where(c => c.Type is not null).Select(c => c.Type).Distinct().ToArray();
+            string?[] types = [.. fieldGroup.Where(c => c.Type is not null).Select(c => c.Type).Distinct()];
 
             // Get all fields defined with AutoConstructorInject, without a type specified and without an initializer (or just the parameter name as Initializer).
             // It's because those fields have a type depending on the initializer, and it cannot be computed.
-            string[] fallbackTypesOfFieldsWithoutInitializer = fieldGroup.Where(c => c.Type is null && c.Initializer == c.ParameterName).Select(c => c.FallbackType).Distinct().ToArray();
+            string[] fallbackTypesOfFieldsWithoutInitializer = [.. fieldGroup.Where(c => c.Type is null && c.Initializer == c.ParameterName).Select(c => c.FallbackType).Distinct()];
 
             if (types.Length > 1
                 || fallbackTypesOfFieldsWithoutInitializer.Length > 1
@@ -268,10 +268,9 @@ public sealed class AutoConstructorGenerator : IIncrementalGenerator
         IndentedTextWriter writer)
     {
         // Get all constructor parameters from fields. 
-        FieldInfo[] constructorParameters = fields
+        FieldInfo[] constructorParameters = [.. fields
             .GroupBy(x => x.ParameterName)
-            .Select(x => x.Any(c => c.Type is not null) ? x.First(c => c.Type is not null) : x.First())
-            .ToArray();
+            .Select(x => x.Any(c => c.Type is not null) ? x.First(c => c.Type is not null) : x.First())];
 
         // Write constructor documentation if enabled.
         if (options.GenerateConstructorDocumentation)
@@ -372,14 +371,13 @@ public sealed class AutoConstructorGenerator : IIncrementalGenerator
 
     private static List<FieldInfo> GetFieldsFromSymbol(INamedTypeSymbol symbol)
     {
-        return symbol.GetMembers().OfType<IFieldSymbol>()
+        return [.. symbol.GetMembers().OfType<IFieldSymbol>()
             .Where(x => x.CanBeInjected()
                 && !x.IsStatic
                 && (x.IsReadOnly || IsPropertyWithExplicitInjection(x) || IsRequiredProperty(x))
                 && !x.IsInitialized()
                 && !x.HasAttribute(Source.IgnoreAttributeFullName))
-            .Select(GetFieldInfo)
-            .ToList();
+            .Select(GetFieldInfo)];
 
         static bool IsPropertyWithExplicitInjection(IFieldSymbol x)
         {

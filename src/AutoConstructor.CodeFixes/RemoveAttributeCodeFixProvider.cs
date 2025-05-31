@@ -66,10 +66,9 @@ public sealed class RemoveAttributeCodeFixProvider : CodeFixProvider
         foreach (AttributeListSyntax attributeList in node.AttributeLists)
         {
             List<AttributeSyntax> nodesToRemove =
-                attributeList
+                [.. attributeList
                 .Attributes
-                .Where(attribute => attribute.Span == location)
-                .ToList();
+                .Where(attribute => attribute.Span == location)];
 
             if (nodesToRemove.Count != attributeList.Attributes.Count)
             {
