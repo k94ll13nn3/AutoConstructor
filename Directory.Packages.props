@@ -5,7 +5,7 @@
   </PropertyGroup>
   <ItemGroup>
     <GlobalPackageReference Include="Roslynator.Analyzers" Version="4.13.1" />
-    <GlobalPackageReference Include="SonarAnalyzer.CSharp" Version="10.10.0.116381" />
+    <GlobalPackageReference Include="SonarAnalyzer.CSharp" Version="10.12.0.118525" />
     <GlobalPackageReference Include="MinVer" Version="6.0.0" />
   </ItemGroup>
   <ItemGroup>
@@ -17,9 +17,9 @@
     <PackageVersion Include="Microsoft.CodeAnalysis" Version="[4.6.0]" />
     <PackageVersion Include="Microsoft.CodeAnalysis.CSharp" Version="[4.6.0]" />
     <PackageVersion Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="[4.6.0]" />
-    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.14.0" />
+    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
     <PackageVersion Include="PolySharp" Version="1.15.0" />
     <PackageVersion Include="xunit" Version="2.9.3" />
-    <PackageVersion Include="xunit.runner.visualstudio" Version="3.1.0" />
+    <PackageVersion Include="xunit.runner.visualstudio" Version="3.1.1" />
   </ItemGroup>
 </Project>

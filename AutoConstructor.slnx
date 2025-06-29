@@ -1,0 +1,27 @@
+<Solution>
+  <Configurations>
+    <Platform Name="Any CPU" />
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Folder Name="/Solution Items/">
+    <File Path=".editorconfig" />
+    <File Path=".github/workflows/ci.yml" />
+    <File Path=".globalconfig" />
+    <File Path="Directory.Build.props" />
+    <File Path="Directory.Packages.props" />
+    <File Path="global.json" />
+    <File Path="README.md" />
+  </Folder>
+  <Folder Name="/src/">
+    <Project Path="src/AutoConstructor.CodeFixes/AutoConstructor.CodeFixes.csproj" />
+    <Project Path="src/AutoConstructor.Generator/AutoConstructor.Generator.csproj" />
+    <Project Path="src/AutoConstructor/AutoConstructor.csproj">
+      <BuildDependency Project="src/AutoConstructor.CodeFixes/AutoConstructor.CodeFixes.csproj" />
+      <BuildDependency Project="src/AutoConstructor.Generator/AutoConstructor.Generator.csproj" />
+    </Project>
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/AutoConstructor.Tests/AutoConstructor.Tests.csproj" />
+  </Folder>
+</Solution>
