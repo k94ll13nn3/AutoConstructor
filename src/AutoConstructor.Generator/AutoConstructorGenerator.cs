@@ -19,7 +19,7 @@ public sealed class AutoConstructorGenerator : IIncrementalGenerator
     private static readonly SymbolDisplayFormat DisplayFormat = SymbolDisplayFormat.FullyQualifiedFormat
         .WithMiscellaneousOptions(SymbolDisplayFormat.FullyQualifiedFormat.MiscellaneousOptions | SymbolDisplayMiscellaneousOptions.IncludeNullableReferenceTypeModifier);
     internal static readonly string[] ConstructorAccessibilities = ["public", "private", "internal", "protected", "protected internal", "private protected"];
-    internal static readonly string GeneratorVersion = typeof(AutoConstructorGenerator).Assembly.GetName().Version!.ToString();
+    internal static readonly string GeneratorVersion = typeof(AutoConstructorGenerator).Assembly.GetName().Version.ToString();
 
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
