@@ -86,7 +86,12 @@ namespace System.Runtime.CompilerServices
             test.TestState.AdditionalProjects["DependencyProject"].Sources.Add(additionalProjectsSource);
         }
 
-        string generatedCodeAttribute = @$"[global::System.CodeDom.Compiler.GeneratedCodeAttribute(""{nameof(AutoConstructor)}"", ""{AutoConstructorGenerator.GeneratorVersion}"")]";
+        string[] atributesToInject =
+        [
+            @$"[global::System.CodeDom.Compiler.GeneratedCodeAttribute(""{nameof(AutoConstructor)}"", ""{AutoConstructorGenerator.GeneratorVersion}"")]",
+            "[global::System.Diagnostics.DebuggerNonUserCode]",
+            "[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]",
+        ];
         foreach ((string? generated, string generatedName) in generatedSources)
         {
             if (generated is string { Length: > 0 })
@@ -100,10 +105,14 @@ namespace System.Runtime.CompilerServices
 // </auto-generated>
 //------------------------------------------------------------------------------
 {generated}";
-                generatedWithHeader = BeforeConstructorRegex()
-                    .Replace(generatedWithHeader, $"$1{generatedCodeAttribute}$1$2 $3(")
-                    .Replace("\r\n", "\n", StringComparison.OrdinalIgnoreCase)
-                    .Trim();
+
+                foreach (string atribute in atributesToInject)
+                {
+                    generatedWithHeader = BeforeConstructorRegex()
+                        .Replace(generatedWithHeader, $"$1{atribute}$1$2 $3(")
+                        .Replace("\r\n", "\n", StringComparison.OrdinalIgnoreCase)
+                        .Trim();
+                }
                 test.TestState.GeneratedSources.Add((typeof(AutoConstructorGenerator), generatedName, SourceText.From(generatedWithHeader, Encoding.UTF8)));
             }
         }

@@ -54,9 +54,11 @@ internal static class IndentedTextWriterExtensions
         writer.WriteLine("/// </summary>");
     }
 
-    public static void WriteGeneratedCodeAttribute(this IndentedTextWriter writer)
+    public static void WriteGeneratedCodeAttributes(this IndentedTextWriter writer)
     {
         writer.WriteLine($"""[global::System.CodeDom.Compiler.GeneratedCodeAttribute("{nameof(AutoConstructor)}", "{AutoConstructorGenerator.GeneratorVersion}")]""");
+        writer.WriteLine("[global::System.Diagnostics.DebuggerNonUserCode]");
+        writer.WriteLine("[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]");
     }
 
     public static void WriteFileHeader(this IndentedTextWriter writer)

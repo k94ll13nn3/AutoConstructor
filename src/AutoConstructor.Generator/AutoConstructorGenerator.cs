@@ -289,7 +289,7 @@ public sealed class AutoConstructorGenerator : IIncrementalGenerator
         }
 
         // Write generated code attribute.
-        writer.WriteGeneratedCodeAttribute();
+        writer.WriteGeneratedCodeAttributes();
 
         // Write constructor signature.
         writer.Write($"{symbol.Accessibility} {symbol.Name}(");
@@ -359,7 +359,7 @@ public sealed class AutoConstructorGenerator : IIncrementalGenerator
         }
 
         // Write generated code attribute.
-        writer.WriteGeneratedCodeAttribute();
+        writer.WriteGeneratedCodeAttributes();
 
         // Write constructor signature.
         writer.WriteLine($"{symbol.Accessibility} {symbol.Name}()");
